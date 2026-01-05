@@ -15,6 +15,6 @@
 	import { useTarotStore } from '~/stores/tarot'
 	const store = useTarotStore();
 	// 데이터 가져오기 (GET)
-	const { data: birthData } = await useFetch('/api/data?type=birth');
-	const { data: yearData } = await useFetch('/api/data?type=year');
+	const { data: birthData } = await useFetch('/data/birth.json');
+	const { data: yearData } = await useFetch('/data/year.json');
 </script>

@@ -1,6 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-	compatibilityDate: '2025-07-15',
+	compatibilityDate: '2026-01-06',
 	modules: [
     '@pinia/nuxt',
 	// '@nuxtjs/tailwindcss', // 예시 모듈
@@ -43,8 +43,8 @@ export default defineNuxtConfig({
 	},
 
   // 5. 서버 측 렌더링 (SSR) 및 환경 변수 설정
-  ssr: true, // 서버 측 렌더링 활성화 (기본값)
 
+	ssr: false,// 서버 측 렌더링 비활성화
 	runtimeConfig: {
 	// 서버에서만 접근 가능한 변수 (외부 노출 X)
 	apiSecret: 'my-secret', 
@@ -63,16 +63,21 @@ export default defineNuxtConfig({
 		},
 		title: '타로카드 - 생일 & 해운 ',
 		meta: [
-		{ charset: 'utf-8' },
-		{ name: 'viewport', content: 'width=device-width, initial-scale=1' },
-		// { hid: 'description', name: 'description', content: 'Nuxt 3 프로젝트 기본 템플릿입니다.' }
-		],
-		link: [
-		// { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
-		]
-		}
+			{ charset: 'utf-8' },
+			{ name: 'viewport', content: 'width=device-width, initial-scale=1' },
+			// { hid: 'description', name: 'description', content: 'Nuxt 3 프로젝트 기본 템플릿입니다.' }
+			],
+			link: [
+			// { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+			]
+		},
+    	// 본인의 깃허브 저장소 이름이 'Tarot'이라면 아래와 같이 설정
+		baseURL: '/tarot/', 
+		buildAssetsDir: 'assets',
 	},
-
+	nitro: {
+		preset: 'github-pages'
+	}
   // 7. 기타 설정
   // typescript: {
   //   typeCheck: true // 타입 체크 활성화
