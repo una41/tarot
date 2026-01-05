@@ -68,7 +68,7 @@ export default defineNuxtConfig({
 			// { hid: 'description', name: 'description', content: 'Nuxt 3 프로젝트 기본 템플릿입니다.' }
 			],
 			link: [
-			// { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+			{ rel: 'icon', type: 'image/x-icon', href: '/tarot/favicon.ico' }
 			]
 		},
     	// 본인의 깃허브 저장소 이름이 'Tarot'이라면 아래와 같이 설정

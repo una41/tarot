@@ -11,7 +11,7 @@
 					<h3>{{ store.result }}번 - <div class="tit" v-html="data.list[store.result].name"></div></h3>
 					<div class="col2">
 						<div class="left">
-							<div class="bx_img" :style="{ background: 'url(\'/img/card/card' + store.result + '.jpg\') no-repeat 50% -4px'}">
+							<div class="bx_img" :style="{ background: 'url(\'/tarot/img/card/card' + store.result + '.jpg\') no-repeat 50% -4px'}">
 								<span class="blind">{{ store.result }}번 {{data.list[store.result].name}} 이미지</span>
 							</div>
 						</div>
