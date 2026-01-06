@@ -3,7 +3,8 @@
 .nuxt
 .nitro
 .cache
-dist/html
+dist
+dist/*
 
 # Node dependencies
 node_modules
@@ -27,5 +28,3 @@ node_modules/*
 package-lock.json
 .history
 .history/*
-.dist
-.dist/*
