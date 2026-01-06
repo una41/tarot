@@ -57,10 +57,19 @@ export const useTarotStore = defineStore('tarot', {
                 this.ipt_birth4 = "";
                 return;
             }
-            const tempStr = this.ipt_year + "" + this.ipt_birth4;
-            const digits = tempStr.split('');
+            // 3. 연도, 월, 일 분리 및 1차 합산
+            const year = Number(this.ipt_year);
+            const month = Number(this.ipt_birth4.substring(0, 2)); // 앞 2자리 (월)
+            const day = Number(this.ipt_birth4.substring(2, 4));   // 뒤 2자리 (일)
+            
+            const i_sum = year + month + day; // 예: 2026 + 12 + 24 = 2062
+            // 계산 과정 저장 (화면 표시용)
+            this.y_calc[0] = `${year} + ${month} + ${day} = ${i_sum}`;
+            // 4. 결과값의 각 자릿수 더하기 (2차 합산)
+            const digits = i_sum.toString().split(''); // ['2', '0', '6', '2']
             let sum = digits.reduce((acc, curr) => acc + Number(curr), 0);
-            this.y_calc[0] = digits.join(' + ');
+            this.y_calc[1] = digits.join(' + '); // "2 + 0 + 6 + 2"
+            
             if (sum > 21) {
                 this.y_calc[1] = sum;
                 const temp = sum.toString().split('');
@@ -68,7 +77,6 @@ export const useTarotStore = defineStore('tarot', {
                 this.y_calc[2] = temp.join(' + ');
 				if(sum == 22) sum = 0;
             }
-            // this.y_result = sum;
             this.result = sum;
         },
 
