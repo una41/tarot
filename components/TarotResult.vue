@@ -18,7 +18,7 @@
 						<div class="right" v-if="store.picked === 'r1'">
 							<dl class="mt0">
 								<dt>생년월일</dt>
-								<dd>{{ store.ipt_birth8 }}</dd>
+								<dd>{{ f_Birth }}</dd>
 							</dl>
 							<dl v-for="(val, key) in {인생테마: 'keyword', 성격특성: 'point', 교훈: 'leading', 요약: 'Summary'}" :key="key">
 								<dt>{{ key }}</dt>
@@ -32,7 +32,7 @@
 						<div class="right" v-else>
 							<dl class="mt0">
 								<dt>생년월일</dt>
-								<dd>{{store.ipt_year + store.ipt_birth4}}</dd>
+								<dd>{{f_Birth}}</dd>
 							</dl>
 							<dl>
 								<dt>운</dt>
@@ -62,4 +62,6 @@
 	import { useTarotStore } from '~/stores/tarot';
 	const store = useTarotStore();
 	defineProps(['data']);
+	const birth = store.picked === 'r1' ? store.ipt_birth8 : store.ipt_year+ store.ipt_birth4; // 혹은 "19902190"
+	const f_Birth = birth.replace(/(\d{4})(\d{2})(\d{2})/, '$1년 $2월 $3일');
 </script>
