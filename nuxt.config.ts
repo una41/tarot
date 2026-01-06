@@ -68,10 +68,18 @@ export default defineNuxtConfig({
 		htmlAttrs: {
 			lang: 'ko' // 이 부분이 페이지를 한국어로 인식하게 만듭니다.
 		},
-		title: '타로카드 - 생일 & 해운 ',
+		title: '타로카드 - 생일 & 해운',
 		meta: [
 				{ charset: 'utf-8' },
 				{ name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
+				
+				{ property: 'og:title', content: '타로카드 - 생일 & 해운'},
+				// 2. 상세 설명
+				{ property: 'og:description', content: '부자사관학교 타로수업🔮' },
+				// 3. 이미지 URL (반드시 http/https로 시작하는 전체 경로여야 합니다)
+				{ property: 'og:image', content: 'https://una41.github.io/tarot/og-thumbnail.jpg' },
+				// 4. 클릭 시 이동할 주소
+				{ property: 'og:url', content: 'https://una41.github.io/tarot/img/main.jpg' },
 			],
 			link: [
 				{ rel: 'icon', type: 'image/x-icon', href: '/tarot/favicon.ico' }
