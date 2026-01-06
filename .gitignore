@@ -27,3 +27,5 @@ node_modules/*
 package-lock.json
 .history
 .history/*
+.dist
+.dist/*

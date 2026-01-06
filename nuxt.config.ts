@@ -1,3 +1,5 @@
+import { defineNuxtConfig } from 'nuxt/config'
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
 	compatibilityDate: '2026-01-06',
@@ -6,11 +8,11 @@ export default defineNuxtConfig({
 	// '@nuxtjs/tailwindcss', // 예시 모듈
 	// '@pinia/nuxt',
 	],
-  // 2. 개발 및 런타임 설정 (Devtools & Runtime Configuration)
+  	// 2. 개발 및 런타임 설정 (Devtools & Runtime Configuration)
 	devtools: { enabled: true },
 
-  // 3. 빌드 설정 (Vite Configuration)
-  // Vite 빌더에 대한 설정을 지정할 수 있습니다.
+  	// 3. 빌드 설정 (Vite Configuration)
+ 	// Vite 빌더에 대한 설정을 지정할 수 있습니다.
 	// vite: {
 	// 예: CSS 전처리기 설정
 	// css: {
@@ -42,20 +44,25 @@ export default defineNuxtConfig({
 		}
 	},
 
-  // 5. 서버 측 렌더링 (SSR) 및 환경 변수 설정
-
+	// 5. ★ 중요: 빌드 결과물을 docs 폴더로 변경하는 설정 ★
 	ssr: false,// 서버 측 렌더링 비활성화
-	runtimeConfig: {
-	// 서버에서만 접근 가능한 변수 (외부 노출 X)
-	apiSecret: 'my-secret', 
-	// 공개적으로 접근 가능한 변수 (클라이언트에서도 접근 가능)
-	public: {
-		apiBase: '/api'
-	}
+	nitro: {
+		preset: 'github-pages',
+		output: {
+			publicDir: 'docs' // 빌드된 정적 파일들이 프로젝트 루트의 /docs 폴더로 들어갑니다.
+		}
 	},
 
-  // 6. 헤더 및 메타데이터 설정 (App Configuration)
-  // 모든 페이지에 공통적으로 적용될 <head> 태그 내용을 설정합니다.
+	// 6. 런타임 설정
+	runtimeConfig: { 
+		apiSecret: 'my-secret',
+		public: {
+			apiBase: '/api'
+		}
+	},
+
+	// 6. 헤더 및 메타데이터 설정 (App Configuration)
+	// 모든 페이지에 공통적으로 적용될 <head> 태그 내용을 설정합니다.
 	app: {
 	head: {
 		htmlAttrs: {
@@ -63,23 +70,15 @@ export default defineNuxtConfig({
 		},
 		title: '타로카드 - 생일 & 해운 ',
 		meta: [
-			{ charset: 'utf-8' },
-			{ name: 'viewport', content: 'width=device-width, initial-scale=1' },
-			// { hid: 'description', name: 'description', content: 'Nuxt 3 프로젝트 기본 템플릿입니다.' }
+				{ charset: 'utf-8' },
+				{ name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
 			],
 			link: [
-			{ rel: 'icon', type: 'image/x-icon', href: '/tarot/favicon.ico' }
+				{ rel: 'icon', type: 'image/x-icon', href: '/tarot/favicon.ico' }
 			]
 		},
     	// 본인의 깃허브 저장소 이름이 'Tarot'이라면 아래와 같이 설정
 		baseURL: '/tarot/', 
 		buildAssetsDir: 'assets',
 	},
-	nitro: {
-		preset: 'github-pages'
-	}
-  // 7. 기타 설정
-  // typescript: {
-  //   typeCheck: true // 타입 체크 활성화
-  // },
 })

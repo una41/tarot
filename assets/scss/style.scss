@@ -3,7 +3,7 @@
 @use 'svg' as *;
 
 .wrap {
-	@include setCont(100%, 100vh, block, relative);
+	@include setCont(100%, 100dvh, block, relative);
 	@include bg("bg.jpg", no-repeat, 45% 50%, auto 100%, #121212);
 	min-height: 790px; // 화면 전체 높이
 	@include mobile{
