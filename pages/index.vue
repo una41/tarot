@@ -7,7 +7,8 @@
 				<TarotInput/>
 			</div>
 		</div>
-		<TarotResult :data="store.picked === 'r1'? birthData : yearData" v-if="store.result !== null"/>
+		<!-- <TarotResult :data="store.picked === 'r1'? birthData : yearData" v-if="store.result !== null"/> -->
+		<TarotProResult :data="store.picked === 'r1'? birthData : yearData" v-if="store.result !== null"/>
 	</div>
 </template>
 <script setup>
@@ -15,6 +16,6 @@
 	import { useTarotStore } from '~/stores/tarot'
 	const store = useTarotStore();
 	// 데이터 가져오기 (GET)
-	const { data: birthData } = await useFetch('/data/birth.json');
+	const { data: birthData } = await useFetch('/data/pro_birth.json');
 	const { data: yearData } = await useFetch('/data/year.json');
 </script>

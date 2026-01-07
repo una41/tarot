@@ -12,6 +12,20 @@
         background-position: 44% 93%;
         background-size: auto 140%;
 	}
+	.btn{
+		@include setCont(100%, auto, block, relative, rgba(228, 202, 101, 0.9));
+		@include font(15, normal, rgba(36, 36, 36, 0.9), $medi);
+		padding: 15px 10px;
+		border-radius: 5px;
+		transition: all 300ms;
+		@include mobile{
+			@include font(13);
+		}
+		&:hover{
+			background-color: rgba(150, 128, 42, 0.9);
+			font-weight: 400;
+		}
+	}
 	h1{
 		@include blind;
 	}
@@ -126,10 +140,10 @@
 				@include mobile{
 					@include font(13);
 				}
-			&:hover{
-				background-color: rgba(150, 128, 42, 0.9);
-				font-weight: 400;
-			}
+				&:hover{
+					background-color: rgba(150, 128, 42, 0.9);
+					font-weight: 400;
+				}
 			}
 			.c_year{
 				.bx_ipt{
@@ -162,7 +176,7 @@
 		}
 		.r_wrap{
 			@include setCont(90%, 80%, block, absolute, #fff);
-			max-width: 700px;
+			max-width: 740px;
 			overflow: hidden;
 			border-radius: 10px;
 			overflow: hidden;
@@ -205,7 +219,7 @@
 			.r_cont{
 				@include setCont(100%, calc(100% - 50px), block, relative);
 				overflow: auto;
-				padding: 0 50px 0;
+				padding: 0 45px 0;
 				h3{
 					@include font(17, 25, #121212, $bold);
 					width: 100%;
@@ -225,10 +239,10 @@
 		.col2{
 			@include setCont(100%, auto, flex, relative);
 			justify-content: space-between;
+			align-items: center;
 			padding: 25px 0 0;
 			@include mobile{
 				display: block;
-				padding: 25px 0 0;
 			}
 			.left{
 				flex-shrink: 0;
@@ -245,60 +259,135 @@
 						width: 100%;
 					}
 				}
+				.btn{
+					@include font(14, 14);
+					padding: 7px 5px;
+					margin-top: 10px;
+					background-color:rgb(179, 173, 148, 0.85);
+					box-shadow: 0 2px 3px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+				}
 			}
 			.right{
-				padding: 7px 0 0 30px;
+				padding: 0 0 0 30px;
 				@include mobile{
 					padding: 40px 0 50px;
 				}
 			}
 		}
 		dl{
-		@include setCont(100%, auto, flex);
-		align-items: top;
-		justify-content: start;
-		margin-top: 15px;
-		dt,dd{
-			display: inline-block;
-				@include font(15, 22);
-		}
-		dt{
-			min-width: 65px;
-			font-weight: $bold;
-			flex-shrink: 0;
-			padding-right: 10px;
-		}
-		dd{
-			margin-left: 4px;
-			li{
+			@include setCont(100%, auto, flex);
+			align-items: top;
+			justify-content: flex-start;
+			margin-top: 15px;
+			dt,dd{
 				display: inline-block;
-				&::after{
-					content: ", ";
+					@include font(15, 22);
+			}
+			dt{
+				min-width: 65px;
+				font-weight: $bold;
+				flex-shrink: 0;
+				padding-right: 10px;
+			}
+			dd{
+				li{
 					display: inline-block;
-					margin-right: 4px;
-				}
-				&:last-child{
 					&::after{
-					content: "";
+						content: ", ";
+						display: inline-block;
+						margin-right: 4px;
+					}
+					&:last-child{
+						&::after{
+						content: "";
+						}
+					}
 					}
 				}
-				}
+		}
+		.txt_bg, .tag{
+			@include font(12, normal, #fff, $medi);
+			padding: 4px 6px 5px;
+			border-radius: 5px;
+			display: inline-block;
+			&.bad{
+				background: #f35757;
 			}
-			.txt_bg{
-				@include font(12, normal, #fff, $medi);
-				padding: 4px 6px 5px;
-				border-radius: 5px;
-				&.bad{
-					background: #f35757;
-				}
-				&.good{
-					background: #469c84;
-				}
-				&.normal{
-					background: #aaa;
-				}
+			&.good{
+				background: #469c84;
+			}
+			&.normal{
+				background: #aaa;
 			}
 		}
+		.tag{
+			margin: 2px 4px;
+			background: #ddd;
+			color: #222;
+			letter-spacing: -0.2px;
+		}
+		.bx_key{
+			width: calc(100% + 4px);
+			margin: 15px 0 0 -5px;
+		}
+		/* 요약 박스 (우측 상단) */
+		.summary_box { 
+			width: 100%;
+			margin: 15px 0; 
+			.sub_tit { 
+				@include font(16);
+				letter-spacing: -0.5px;
+				margin-bottom: 10px;
+			}
+			.cont { 
+				@include font(15, 21);
+			}
+		}
+		.detail{
+			margin: 50px 0 70px;
+			word-break: keep-all;
+			.item {
+				margin-bottom: 35px;
+				&:last-child{
+					margin-bottom: 0;
+				} 
+			}
+			.d_tit {
+				@include font(18,25, #b08d57);
+				padding-left: 12px; 
+				position: relative;
+				margin-bottom: 10px;
+				&::before { 
+					@include setCont(4px, 100%, block, absolute, #b08d57);
+					border-radius: 2px;
+					left: 0;
+					top: 50%; 
+					transform: translateY(-50%);
+				}
+			}
+			.d_cont{
+				padding-left: 12px;
+				.d_sub_tit { 
+					@include font(16,24, #333);
+					display: block;
+					margin-bottom: 8px; 
+				}
+				.d_desc { 
+					@include font(15,24, #555);
+					white-space: pre-wrap; 
+				}
+			}
+
+		}
+		/* 상세 섹션 스타일 (제목-서브-내용) */
+		// .detail_sections { border-top: 2px solid #eee; padding-top: 30px; }
+		// .d_body { padding-left: 12px; }
+		// .d_sub { display: block; font-size: 1.1rem; font-weight: bold; color: #333; margin-bottom: 10px; line-height: 1.4; }
+		// .d_cont { font-size: 1rem; line-height: 1.8; color: #555; white-space: pre-wrap; }
+
+		// /* 전문가 팁 박스 */
+		// .special_tip { margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px; font-size: 0.95rem; color: #444; border: 1px dashed #ccc; }
+		// .special_tip strong { color: #c9302c; }
 	}
 }
 .pc{
