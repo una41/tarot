@@ -262,7 +262,7 @@
 				.btn{
 					@include font(14, 14);
 					padding: 7px 5px;
-					margin-top: 10px;
+					margin-top: 15px;
 					background-color:rgb(179, 173, 148, 0.85);
 					box-shadow: 0 2px 3px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 				}
@@ -276,9 +276,9 @@
 		}
 		dl{
 			@include setCont(100%, auto, flex);
-			align-items: top;
+			align-items: center;
 			justify-content: flex-start;
-			margin-top: 15px;
+			margin-top: 10px;
 			dt,dd{
 				display: inline-block;
 					@include font(15, 22);
@@ -335,9 +335,9 @@
 			width: 100%;
 			margin: 15px 0; 
 			.sub_tit { 
-				@include font(16);
+				@include font(15, 22);
 				letter-spacing: -0.5px;
-				margin-bottom: 10px;
+				margin-bottom: 7px;
 			}
 			.cont { 
 				@include font(15, 21);
@@ -377,7 +377,27 @@
 					white-space: pre-wrap; 
 				}
 			}
-
+			h6{
+				@include font(15,24, #333);
+				margin: 0 0 5px;
+				em{
+					@include font(10,13, #fff, $normal);
+					vertical-align: middle;
+					background: #2c2d78;
+					display: inline-block;
+					padding: 4px 4px;
+					border-radius: 3px;
+					margin-left: 4px;
+				}
+			}
+			.special_tip{
+				@include font(15,22, #555);
+				white-space: pre-wrap; 
+				background: #e8f1fd;
+				padding: 17px 20px;
+				border-radius: 10px;
+				margin-top: 15px;
+			}
 		}
 		/* 상세 섹션 스타일 (제목-서브-내용) */
 		// .detail_sections { border-top: 2px solid #eee; padding-top: 30px; }

@@ -16,7 +16,7 @@
 							<div class="bx_img" :style="{ background: 'url(\'https://una41.github.io/tarot/img/card/card' + store.result + '.jpg\') no-repeat 50% -4px' }">
 								<span class="blind">{{ store.result }}번 {{ data.list[store.result].name }} 이미지</span>
 							</div>
-							<button class="btn" @click="fnComingSoon">카드 설명 보기</button>
+							<button class="btn" @click="fnComingSoon">고유 설명 보기</button>
 						</div>
 						<div class="right">
 							<dl class="info_birth mt0">
@@ -49,10 +49,12 @@
 										{{ data.list[store.result][val].sub_title }}
 									</strong>
 									<p class="d_desc" v-html="data.list[store.result][val].cont || data.list[store.result][val]"></p>
-									<div class="special_tip" v-if="val === 'wealth' && data.list[store.result].wealth.rich_action">
-										<strong>투자 비책 :</strong> {{ data.list[store.result].wealth.rich_action }}
+									<div class="special_tip" v-if="val === 'wealth' && data.list[store.result].rich">
+										<h6>경매 및 투자운 <em>부자사관학교 전용 가이드</em></h6>
+										<div class="s_cont" v-html="data.list[store.result].rich.cont"></div>
 									</div>
-								</div>								<div class="match_box" v-if="val.includes('match')"></div>
+								</div>								
+								<div class="match_box" v-if="val.includes('match')"></div>
 							</div>
 						</template>
 					</div>
@@ -83,9 +85,9 @@
 		if (store.picked === 'r1') {
 			return {
 				"인생 전체운": "total",
+				"당신을 위한 조언": "life_lesson",
 				"타고난 성격": "character",
 				"재물 관리": "wealth",
-				"부자사관학교 전용 가이드 (경매 및 투자운)": "rich",
 				"직업과 사회적 성공": "career",
 				"사랑과 인연": "love",
 				"최고의 파트너": "lucky_match",
