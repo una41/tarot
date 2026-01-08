@@ -53,6 +53,13 @@
 										<h6>경매 및 투자운 <em>부자사관학교 전용 가이드</em></h6>
 										<div class="s_cont" v-html="data.list[store.result].rich.cont"></div>
 									</div>
+									<div class="career_tip" v-if="val === 'career' && data.list[store.result].career.recommend">
+										<h6>💡추천직업</h6>
+										<div class="s_cont">
+											<span v-for="(job, i) in data.list[store.result].career.recommend" :key="i">{{ job }}</span>
+										</div>
+									</div>
+									
 								</div>								
 								<div class="match_box" v-if="val.includes('match')"></div>
 							</div>

@@ -380,6 +380,14 @@
 			h6{
 				@include font(15,24, #333);
 				margin: 0 0 5px;
+			}
+			.special_tip{
+				@include font(15,22, #555);
+				white-space: pre-wrap; 
+				background: #e8f1fd;
+				padding: 17px 20px;
+				border-radius: 10px;
+				margin-top: 15px;
 				em{
 					@include font(10,13, #fff, $normal);
 					vertical-align: middle;
@@ -390,13 +398,27 @@
 					margin-left: 4px;
 				}
 			}
-			.special_tip{
-				@include font(15,22, #555);
-				white-space: pre-wrap; 
-				background: #e8f1fd;
-				padding: 17px 20px;
-				border-radius: 10px;
-				margin-top: 15px;
+			.career_tip{
+				margin-top: 10px;
+				@include font(15,21, #555);
+				h6{
+					position: relative;
+				}
+				.s_cont{
+					padding-left: 20px;
+					span{
+						&:after{
+							content: ",";
+							margin-right: 3px;
+							display: inline-block;
+						}
+						&:last-child{
+							&:after{
+								content: "";
+							}
+						}
+					}
+				}
 			}
 		}
 		/* 상세 섹션 스타일 (제목-서브-내용) */
