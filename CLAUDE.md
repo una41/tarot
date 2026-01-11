@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Nuxt 3-based Tarot card reading application that calculates birth cards and yearly fortune cards based on numerology. The app features admin authentication, multiple reading modes, and is configured for static deployment to GitHub Pages.
+This is a Nuxt 3 application that calculates tarot card readings based on birth dates and yearly fortunes. The app uses numerology to reduce dates to tarot card numbers (0-21) and displays corresponding card interpretations.
 
 ## Development Commands
 
@@ -12,111 +12,73 @@ This is a Nuxt 3-based Tarot card reading application that calculates birth card
 # Install dependencies
 npm install
 
-# Development server (runs on http://localhost:3000)
+# Start development server (http://localhost:3000)
 npm run dev
 
-# Build for production (outputs to /docs folder for GitHub Pages)
+# Build for production
 npm run build
 
 # Preview production build
 npm run preview
 
-# Nuxt prepare (run after dependency changes)
-npm run postinstall
+# Generate static site
+npm run generate
 ```
 
-## Architecture & Key Concepts
+## Architecture
 
-### State Management (Pinia Store)
-
-The application uses a single Pinia store ([stores/tarot.js](stores/tarot.js)) that manages:
-
-- **Input states**: `ipt_birth8` (8-digit birthdate), `ipt_birth4` (4-digit month/day), `ipt_year` (4-digit year)
-- **Calculation states**: `calc` and `y_calc` arrays store step-by-step calculation strings for display
-- **Result state**: `result` holds the final tarot card number (0-21)
-- **Reading mode**: `isReading` toggles between basic and professional reading modes
-- **Tab state**: `picked` switches between birth card ('r1') and yearly fortune card ('r2')
-- **Authentication**: Admin login with Base64-encoded credentials stored in cookies using js-cookie
-
-### Calculation Logic
-
-**Birth Card** ([stores/tarot.js:42-63](stores/tarot.js#L42-L63)):
-1. Takes 8-digit birthdate (e.g., 19990101)
-2. Sums all digits
-3. If sum > 21, reduces by summing digits again
-4. Final number maps to tarot card
-
-**Yearly Fortune Card** ([stores/tarot.js:67-106](stores/tarot.js#L67-L106)):
-1. Takes 4-digit year + 4-digit birth month/day
-2. Adds year + month + day as numbers
-3. Sums digits of result
-4. If sum > 21, reduces further
-5. Special case: sum of 22 becomes 0 (The Fool)
-
-### Component Structure
-
-- **[app.vue](app.vue)**: Root component with loading animation and authentication guard
-- **[pages/index.vue](pages/index.vue)**: Main page that fetches tarot data and conditionally renders result components
-- **[components/TarotTabs.vue](components/TarotTabs.vue)**: Radio buttons for birth/yearly card selection
-- **[components/TarotInput.vue](components/TarotInput.vue)**: Input forms with reading mode checkbox
-- **[components/TarotResult.vue](components/TarotResult.vue)**: Basic birth card reading display
-- **[components/TarotProResult.vue](components/TarotProResult.vue)**: Professional birth card reading (shown when `isReading: true`)
-- **[components/TarotResultYear.vue](components/TarotResultYear.vue)**: Yearly fortune card reading display
-- **[components/Login.vue](components/Login.vue)**: Admin login component (blocks app when not authenticated)
+### State Management
+- Uses Pinia store ([stores/tarot.js](stores/tarot.js)) for centralized state
+- Store handles two calculation modes:
+  - **Birth Card (생일카드)**: Takes 8-digit birth date (YYYYMMDD), sums digits and reduces to 0-21
+  - **Year Card (해운카드)**: Takes 4-digit year + 4-digit birth date (MMDD), sums and reduces to 0-21
+- Calculation logic: Sum all digits → if > 21, sum digits again → repeat until ≤ 21
 
 ### Data Structure
+- Tarot card data stored in JSON files at [assets/data/](assets/data/):
+  - `birth.json`: Birth card interpretations
+  - `year.json`: Year card interpretations
+- Data served via API endpoint [server/api/data.ts](server/api/data.ts) that reads JSON files based on `?type=` query parameter
 
-Tarot card data is stored in JSON files in [public/data/](public/data/):
-- `birth.json`: Basic birth card readings
-- `pro_birth.json`: Professional birth card readings
-- `year.json`: Yearly fortune card readings
-- `premium_year.json`: Premium yearly readings (not currently used)
-
-Each card object contains:
-```json
-{
-  "id": 0-21,
-  "name": "Card name",
-  "keyword": ["array", "of", "keywords"],
-  "theme": ["array of themes with <strong> tags"],
-  "point": ["personality points"],
-  "summary": ["summary points"],
-  "leading": ["guidance points"],
-  "lucky_group": { "color", "number", "day" },
-  "soul": { "card", "cont" }
-}
-```
+### Component Architecture
+- [pages/index.vue](pages/index.vue): Main page that fetches both datasets and conditionally renders result
+- [components/TarotTabs.vue](components/TarotTabs.vue): Radio button tabs to switch between birth/year modes
+- [components/TarotInput.vue](components/TarotInput.vue): Input forms for both modes (conditional rendering based on store.picked)
+- [components/TarotResult.vue](components/TarotResult.vue): Displays tarot card result and calculation steps
 
 ### Styling
+- Uses SCSS with global imports configured in [nuxt.config.ts](nuxt.config.ts)
+- SCSS files in [assets/scss/](assets/scss/):
+  - `style.scss`: Main stylesheet (imported globally in nuxt.config)
+  - `_reset.scss`: Reset styles (auto-imported via `additionalData`)
+  - `_variable.scss`, `_mixin.scss`, `_svg.scss`: Utilities and design tokens
+- Tailwind CSS is installed but not actively used (no @tailwind directives found)
 
-- **SCSS**: Global styles in [assets/scss/style.scss](assets/scss/style.scss)
-- **Reset**: Auto-injected via [assets/scss/_reset.scss](assets/scss/_reset.scss) (configured in [nuxt.config.ts:41](nuxt.config.ts#L41))
-- **SVG icons**: [assets/scss/_svg.scss](assets/scss/_svg.scss)
-- **Tailwind CSS**: Configured but primarily uses custom SCSS
+## Key Implementation Details
 
-### GitHub Pages Deployment
+### Numerology Calculation
+The calculation reduces any date to a number 0-21:
+1. Sum all individual digits
+2. If sum > 21, convert to string, sum digits again
+3. Repeat until ≤ 21
+4. Special case: For year cards, if final result is 22, convert to 0
 
-The project is configured for GitHub Pages deployment ([nuxt.config.ts:48-54](nuxt.config.ts#L48-L54)):
-- SSR disabled (`ssr: false`)
-- Nitro preset: `github-pages`
-- Build output: `/docs` folder
-- Base URL: `/tarot/`
-- Build assets dir: `assets`
+### Data Flow
+1. User selects mode (birth/year) via tabs → updates `store.picked`
+2. User enters date(s) → stored in `store.ipt_birth8` or `store.ipt_year`/`store.ipt_birth4`
+3. Form submission triggers `store.fnBirthCalc()` or `store.fnYearCalc()`
+4. Result stored in `store.result`, calculation steps in `store.calc` or `store.y_calc`
+5. [pages/index.vue](pages/index.vue) conditionally renders TarotResult with appropriate dataset
 
-After running `npm run build`, commit the `/docs` folder and configure GitHub Pages to serve from `/docs` on the main branch.
+### API Endpoint
+[server/api/data.ts](server/api/data.ts) uses Node.js `fs` module to read JSON files synchronously:
+- Query param `?type=birth` → returns `birth.json`
+- Query param `?type=year` → returns `year.json`
+- Default is `birth` if no type specified
 
-### Authentication System
+## Configuration Notes
 
-Simple admin authentication using:
-- Hardcoded Base64 credentials in store (admin / tarot123!)
-- Cookie-based session (expires on browser close: `expires: 0`)
-- Authentication check on app mount and page navigation
-- Login component blocks entire app until authenticated
-
-## Important Notes
-
-- The app shows a 1.2s intro loader on initial mount with fade-out animation
-- All user inputs are validated for numeric-only input
-- Data fetching uses Nuxt's `useFetch` composable with static JSON files
-- The calculation process is stored step-by-step in `calc`/`y_calc` arrays for educational display
-- Component transitions use Vue's `<Transition>` with custom fade animations
+- Korean language app (`lang: 'ko'` in nuxt.config)
+- SSR enabled
+- Devtools enabled
+- Uses Nuxt 4.x with Pinia for state management
