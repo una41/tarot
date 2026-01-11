@@ -1,5 +1,9 @@
 <template>
 	<div>
+		<div class="bx_chk" v-if="store.picked === 'r1'">
+			<input type="checkbox" id="chk1" class="chk" v-model="store.isReading">
+			<label for="chk1">리딩용</label>
+		</div>
 		<div class="c_wrap" v-if="'r1' == store.picked">
 			<form @submit.prevent="store.fnBirthCalc">
 				<div class="bx_ipt">

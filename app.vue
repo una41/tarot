@@ -1,39 +1,47 @@
 <template>
 	<div>
-		<Transition name="fade">
+		<Transition name="ifade">
 			<div v-if="isLoading" class="intro-loader">
 				<div class="loader-content">
-				<div class="mystic-icon">🔮</div>
-				<h1 class="title">운명의 흐름을 읽는 중</h1>
-				<div class="progress-bar">
-					<div class="progress-inner"></div>
-				</div>
-				<p class="subtitle">잠시만 기다려 주세요...</p>
+					<div class="mystic-icon">🔮</div>
+					<h1 class="title">운명의 흐름을 읽는 중</h1>
+					<div class="progress-bar">
+						<div class="progress-inner"></div>
+					</div>
+					<p class="subtitle">잠시만 기다려 주세요...</p>
 				</div>
 			</div>
 		</Transition>
-
 		<div v-show="!isLoading">
-			<NuxtLayout>
+			<NuxtLayout v-if="store.isLoggedIn">
 				<NuxtPage />
 			</NuxtLayout>
+			<Login v-else/>
 		</div>
+
+		<!-- 전역 모달 -->
+		<AlertModal />
+		<ConfirmModal />
 	</div>
 </template>
 
 <script setup>
+	import { useTarotStore } from '~/stores/tarot';
+	const store = useTarotStore();
 	const isLoading = ref(true);
 	onMounted(() => {
-  	// 최소 1.2초는 보여줌
-	setTimeout(() => {
-		// 브라우저에게 "다음 화면 그릴 준비가 되면 알려줘"라고 요청
-		requestAnimationFrame(() => {
-			// 한 번 더 요청하여 확실하게 프레임 준비를 마침 (더블 버퍼링 개념)
+		// 앱이 켜질 때 쿠키에 토큰이 있는지 확인
+		store.checkAuth();
+  		// 최소 1.2초는 보여줌
+		setTimeout(() => {
+			// 브라우저에게 "다음 화면 그릴 준비가 되면 알려줘"라고 요청
 			requestAnimationFrame(() => {
-				isLoading.value = false;
+				// 한 번 더 요청하여 확실하게 프레임 준비를 마침 (더블 버퍼링 개념)
+				requestAnimationFrame(() => {
+					isLoading.value = false;
+				});
 			});
-		});
-	}, 1200);
+		}, 1200);
 	});
 </script>
 
@@ -105,13 +113,13 @@
 	}
 
 	/* 사라지기 시작할 때의 상태 정의 (Vue Transition) */
-	.fade-leave-active {
+	.ifade-leave-active {
 	/* 시간을 1.5초로 늘리고, ease-in-out으로 부드럽게 시작하고 끝나게 설정 */
 	transition: all 1.5s ease-in-out;
 	}
 
 	/* 사라지는 마지막 순간의 상태 */
-	.fade-leave-to {
+	.ifade-leave-to {
 		opacity: 0;
 	/* 핵심: 사라지면서 약간 흐려지고 커지면서 안개처럼 흩어짐 */
 	filter: blur(20px);
