@@ -20,7 +20,7 @@
 								<dt>생년월일</dt>
 								<dd>{{ f_Birth }}</dd>
 							</dl>
-							<dl v-for="(val, key) in {인생테마: 'keyword', 성격특성: 'point', 교훈: 'leading', 요약: 'Summary'}" :key="key">
+							<dl v-for="(val, key) in {인생테마: 'keyword', 성격특성: 'point', 성격특성: 'point', 교훈: 'leading', 요약: 'Summary'}" :key="key">
 								<dt>{{ key }}</dt>
 								<dd>
 									<ul>
