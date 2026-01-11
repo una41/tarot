@@ -17,10 +17,34 @@
 
 <script setup>
 import { useTarotStore } from '~/stores/tarot';
+import { onMounted, onUnmounted, watch } from 'vue';
 
 const store = useTarotStore();
 
 const handleClose = () => {
 	store.closeAlert();
 };
+
+const handleKeyDown = (event) => {
+	if (!store.alertData.isVisible) return;
+
+	if (event.key === 'Enter' || event.key === 'Escape') {
+		event.preventDefault();
+		handleClose();
+	}
+};
+
+// 모달이 열릴 때 이벤트 리스너 추가
+watch(() => store.alertData.isVisible, (isVisible) => {
+	if (isVisible) {
+		window.addEventListener('keydown', handleKeyDown);
+	} else {
+		window.removeEventListener('keydown', handleKeyDown);
+	}
+});
+
+// 컴포넌트 언마운트 시 정리
+onUnmounted(() => {
+	window.removeEventListener('keydown', handleKeyDown);
+});
 </script>
