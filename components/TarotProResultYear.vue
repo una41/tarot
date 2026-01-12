@@ -5,7 +5,7 @@
 			<div v-if="store.result !== null" class="r_wrap result_year">
 				<div class="r_top colb">
 					<div class="c_left">
-						<h3>{{ store.ipt_year + '년 해운카드'}}  <span>(해석)</span></h3>
+						<h3>{{ store.ipt_year + '년 해운카드'}} 결과 <span>(해석)</span></h3>
 						<button class="link" @click="store.fnGo('reading')">🔗리딩 보기</button>
 					</div>
 					<div class="c_right">
@@ -45,7 +45,7 @@
 									<dt>좋은 분기</dt>
 									<dd>{{ data.list[store.result].lucky_group.lucky_timing }}</dd>
 								</dl>
-								</div>
+							</div>
 							<div class="summary_box hr"  v-for="(val, key) in luckyMap" :key="key">
 								<h5 class="sub_tit">{{ key }}</h5>
 								<p class="cont" v-html="data.list[store.result].lucky_group[val]"></p>
