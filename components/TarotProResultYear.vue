@@ -158,7 +158,6 @@
 	// 하단 상세 섹션 맵핑
 	const activeSections = computed(() => {
 		return {
-			"연간 로드맵": "roadmap",
 			"내 삶의 전반적 흐름": "total",
 			"당신을 위한 조언": "advice",
 			"재물 흐름": "wealth",
