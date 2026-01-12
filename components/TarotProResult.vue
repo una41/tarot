@@ -5,7 +5,7 @@
 			<div v-if="store.result !== null" class="r_wrap result_birth">
 				<div class="r_top colb">
 					<div class="c_left">
-						<h3>{{ store.picked === 'r1' ? '생일카드' : store.ipt_year + '년 해운카드' }} 결과 <span>(해석)</span></h3>
+						<h3>생일카드 결과 <span>(해석)</span></h3>
 						<button class="link" @click="store.fnGo('reading')">🔗리딩 보기</button>
 					</div>
 					<div class="c_right">
@@ -55,7 +55,7 @@
 									<div class="bx_tip soul_tip" v-if="val === 'total' && data.list[store.result].soul.cont">
 										<h6>🔮소울카드 <span>- {{ data.list[store.result].soul.card }} </span></h6>
 										<div class="sl_desc">소울카드는 메인 생일카드 해석만으로는 다 알 수 없는, 당신의 깊은 내면에 감수성 있게 감춰진 본질적인 욕구와 영혼이 가진 고유한 기질을 상징하는 카드입니다.</div>
-										<div class="t_cont" v-html="data.list[store.result].soul.cont"></div>
+										<div class="sl_cont" v-html="data.list[store.result].soul.cont"></div>
 									</div>
 									<div class="bx_tip special_tip" v-if="val === 'wealth' && data.list[store.result].rich">
 										<h6>경매 및 투자운 <em>부자사관학교 전용 가이드</em></h6>

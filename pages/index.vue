@@ -13,18 +13,22 @@
 		<!-- <TarotProResult v-if="store.result !== null && !store.isReading" :data="store.picked === 'r1'? proBirthData : proYearData"/> -->
 		<!-- <TarotResult v-else-if="store.result !== null" :data="store.picked === 'r1'? birthData : yearData"/> -->
 		<transition name="fade">
-			<TarotProResult 
-				v-if="store.result !== null && store.picked === 'r1' && !store.isReading" 
-				:data="proBirthData" 
+			<TarotProResult
+				v-if="store.result !== null && store.picked === 'r1' && !store.isReading"
+				:data="proBirthData"
 			/>
 
-			<TarotResult 
-				v-else-if="store.result !== null && store.picked === 'r1'" 
-				:data="birthData" 
+			<TarotResult
+				v-else-if="store.result !== null && store.picked === 'r1' && store.isReading"
+				:data="birthData"
 			/>
 
+			<TarotProResultYear
+				v-else-if="store.result !== null && store.picked === 'r2' && !store.isReading"
+				:data="proYearData"
+			/>
 			<TarotResultYear
-				v-else-if="store.result !== null && store.picked === 'r2'"
+				v-else-if="store.result !== null && store.picked === 'r2' && store.isReading"
 				:data="yearData"
 			/>
 		</transition>
