@@ -138,15 +138,21 @@
 								<div class="love_details" v-if="data.list[store.result].love.solo || data.list[store.result].love.couple || data.list[store.result].love.married">
 									<div class="love_item" v-if="data.list[store.result].love.solo">
 										<h6 class="sub_tit">💫 솔로</h6>
-										<p class="love_desc" v-html="data.list[store.result].love.solo"></p>
+										<ul class="love_desc">
+											<li v-for="(item, i) in data.list[store.result].love.solo" :key="i" v-html="item"></li>
+										</ul>
 									</div>
 									<div class="love_item" v-if="data.list[store.result].love.couple">
 										<h6 class="sub_tit">💕 커플</h6>
-										<p class="love_desc" v-html="data.list[store.result].love.couple"></p>
+										<ul class="love_desc">
+											<li v-for="(item, i) in data.list[store.result].love.couple" :key="i" v-html="item"></li>
+										</ul>
 									</div>
 									<div class="love_item" v-if="data.list[store.result].love.married">
 										<h6 class="sub_tit">💍 결혼</h6>
-										<p class="love_desc" v-html="data.list[store.result].love.married"></p>
+										<ul class="love_desc">
+											<li v-for="(item, i) in data.list[store.result].love.married" :key="i" v-html="item"></li>
+										</ul>
 									</div>
 								</div>
 							</div>

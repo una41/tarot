@@ -1,11 +1,11 @@
 <template>
 	<Transition name="fade">
-		<div class="result"  @click.stop>
+		<div class="result result_year"  @click.stop>
 			<div class="bg" @click="store.fnClose"></div>
-			<div v-if="store.result !== null" class="r_wrap result_year">
+			<div v-if="store.result !== null" class="r_wrap">
 				<div class="r_top colb">
 					<div class="c_left">
-						<h3>{{ store.ipt_year + '년 해운카드'}} 결과 <span>(해석)</span></h3>
+						<h3>{{ store.ipt_year + '년 해운카드'}} <b class="pc">결과</b> <span>(해석)</span></h3>
 						<button class="link" @click="store.fnGo('reading')">🔗리딩 보기</button>
 					</div>
 					<div class="c_right">
@@ -46,11 +46,11 @@
 									<dd>{{ data.list[store.result].lucky_group.lucky_timing }}</dd>
 								</dl>
 							</div>
-							<div class="item hr"  v-for="(val, key) in luckyMap" :key="key">
+							<div class="summary_box hr"  v-for="(val, key) in luckyMap" :key="key">
 								<h5 class="sub_tit">{{ key }}</h5>
 								<p class="cont" v-html="data.list[store.result].lucky_group[val]"></p>
 							</div>
-							<div class="item" v-if="data.list[store.result].summary">
+							<div class="summary_box" v-if="data.list[store.result].summary">
 								<h5 class="sub_tit">{{ data.list[store.result].summary.sub_title }}</h5>
 								<p class="cont" v-html="data.list[store.result].summary.cont"></p>
 							</div>

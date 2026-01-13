@@ -68,7 +68,7 @@ export default defineNuxtConfig({
 		htmlAttrs: {
 			lang: 'ko' // 이 부분이 페이지를 한국어로 인식하게 만듭니다.
 		},
-		title: '타로카드 - 생일 & 해운',
+		title: '수비학으로 보는 타로카드',
 		meta: [
 				{ charset: 'utf-8' },
 				{ name: 'viewport', content: 'width=device-width, initial-scale=1.0' },

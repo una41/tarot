@@ -2,6 +2,12 @@
 @use 'mixin' as *;
 @use 'svg' as *;
 
+h3{
+	@include font(18, 25);
+	@include mobile {
+		@include font(16, 23);
+	}
+}
 .btn{
 	@include setCont(100%, auto, block, relative, rgba(228, 202, 101, 0.9));
 	@include font(15, normal, rgba(36, 36, 36, 0.9), $medi);
@@ -271,6 +277,9 @@ h6{
 				padding: 0 20px 0 30px;
 				justify-content: space-between;
 				align-items: center;
+				@include mobile{
+					padding: 0 calcPercent(15) 0 calcPercent(20);
+				}
 				&.colb{
 					.c_left{
 						flex-grow: 1;
@@ -305,6 +314,9 @@ h6{
 					padding: 3px 14px 5px 10px;
 					border-radius: 5px;
 					transition: all 300ms;
+					@include mobile{
+						margin-right: 10px;
+					}
 					&:hover{
 						background-color: #ac8464;
 					}
@@ -331,6 +343,9 @@ h6{
 				@include setCont(100%, calc(100% - 50px), block, relative);
 				overflow: auto;
 				padding: 0 45px 0;
+				@include mobile{
+					padding: 0 calcPercent(20);
+				}
 				h3{
 					@include font(17, 25, #121212, $bold);
 					width: 100%;
@@ -341,9 +356,6 @@ h6{
 					.tit{
 						display: inline-block;
 					}
-				}
-				@include mobile{
-					padding: 0 calcPercent(30);
 				}
 			}
 		}
@@ -570,23 +582,7 @@ h6{
 
 		}
 	}
-	.result_reading{
-		.r_cont{
-			.right{
-				height: 383px;
-				display: flex;
-				flex-wrap: wrap;
-				align-content: space-between;
-				padding: 10px 0 0 30px;
-				@include mobile{
-					padding: 40px 0 50px;
-					height: auto;
-				}
-				.right_inner{
-					width: 100%;
-				}
-			}
-		}
+	.result_reading, .result_reading_year{
 		.reading_tip{
 			width: 100%;
 			background-color: #eceae3;
@@ -607,129 +603,9 @@ h6{
 				letter-spacing: -0.5px;
 			}
 		}
-		.detail{
-			width: 100%;
-			@include mobile{
-				margin-top: 0;
-				display: block;
-			}
-			.area{
-				display: flex;
-				flex-wrap: wrap;
-				justify-content: space-between;
-				word-wrap: break-word;
-				border-top: 1px solid #ddd;
-				// border-left: none;
-				// border-right: none;
-				padding: 40px 0;
-			}
-			.item{
-				width: calc(50% - 10px);
-				margin-bottom: 0;
-				&:first-child, &:nth-child(2n){
-					border: none;
-					padding: 0;
-				}
-				// &:last-child{
-				// 	margin-bottom: 70px;
-				// }
-				@include mobile{
-					width: 100%;
-					margin-bottom: 45px;
-					&:last-child{
-						margin-bottom: 50px;
-					}
-				}
-			}
-			.pc_half{
-				width: calc(50% - 10px);
-				@include mobile{
-					width: 100%;
-				}
-			}
-			.colb{
-				display: flex;
-				flex-wrap: wrap;
-				justify-content: space-between;
-				@include mobile{
-					display: block;
-				}
-			}
-			.bx_tip{
-				margin-top: 0;
-				@include mobile{
-					margin-top: 30px;
-				}
-			}
-			.special_tip{
-				margin-top: 15px;
-				h6{
-					margin-bottom: 8px;
-				}
-			}
-			.soul_tip{
-				h6{
-					margin-bottom: 8px;
-				}
-			}
-			.career_tip{
-				span{
-					display: inline-block;
-				}
-				.c_cont{
-					padding-left:0;
-				}
-			}
-			.summary{
-				width: 100%;
-			}
-			.love{
-				width: 100%;
-				position: relative;
-				.item{
-					width: 100%;
-					position: relative;
-					z-index: 2;
-				}
-				.d_desc{
-					padding: 0;
-					display: flex;
-					justify-content: flex-start;
-					align-items: flex-start;
-					li{
-						width: calc(33.3% - 12px);
-						margin: 0;
-						&:first-child{
-							margin-right: 18px;
-						}
-					}
-				}
-				.love_details{
-					display: flex;
-					justify-content: space-between;
-					align-items: flex-start;
-					padding-left: 12px;
-					.love_item{
-						width: calc(33.3% - 12px);
-						margin-bottom: 0;
-						&:last-child{
-							border-right: none;
-							padding-right: 0;
-							margin-right: 0;
-						}
-						.love_desc{
-							span{
-								display: block;
-							}
-						}
-					}
-				}
-			}
-		}
-		// .d_cont, .d_desc, .sl_cont{
-		.d_desc, .sl_cont{
+		.d_desc, .sl_cont, .love_desc, .special_tip{
 			li{
-				margin-top: 7px;
+				margin-top: 10px;
 				&:first-child{
 					margin-top: 0;
 				}
@@ -744,15 +620,177 @@ h6{
 				}
 			}
 		}
-	}
-	.result_year{
 		.r_cont{
+			.detail{
+				width: 100%;
+				@include mobile{
+					margin-top: 0;
+					display: block;
+				}
+				.area{
+					width: 100%;
+					display: flex;
+					flex-wrap: wrap;
+					justify-content: space-between;
+					word-wrap: break-word;
+					border-top: 1px solid #ddd;
+					padding: 40px 0;
+					@include mobile{
+						border: none;
+						padding: 0;
+					}
+					&:last-child{
+						margin-bottom: 30px;
+					}
+					.left{
+						width: calc(50% - 10px);
+						.item{
+							width: 100%;
+						}
+					}
+					.item{
+						width: calc(50% - 10px);
+						margin-bottom: 0;
+						&.summary{
+							width: 100%;
+						}
+						&:first-child, &:nth-child(2n){
+							border: none;
+							padding: 0;
+						}
+						@include mobile{
+							width: 100%;
+							margin-bottom: 40px;
+							padding-top: 40px !important;
+							border-top: 1px solid #ddd !important;
+						}
+					}
+				}
+				.pc_half{
+					width: calc(50% - 10px);
+					@include mobile{
+						width: 100%;
+					}
+				}
+				.colb{
+					display: flex;
+					flex-wrap: wrap;
+					justify-content: space-between;
+					@include mobile{
+						display: block;
+					}
+				}
+				.bx_tip{
+					margin-top: 0;
+					@include mobile{
+						margin-top: 30px;
+					}
+				}
+				.special_tip{
+					margin-top: 15px;
+					h6{
+						margin-bottom: 8px;
+					}
+				}
+				.soul_tip{
+					h6{
+						margin-bottom: 8px;
+					}
+				}
+				.career_tip{
+					span{
+						display: inline-block;
+					}
+					.c_cont{
+						padding-left:0;
+					}
+				}
+				.summary{
+					width: 100%;
+				}
+				.love{
+					width: 100%;
+					position: relative;
+					.item{
+						width: 100%;
+						position: relative;
+						z-index: 2;
+					}
+					.d_desc{
+						padding: 0;
+						display: flex;
+						justify-content: flex-start;
+						align-items: flex-start;
+						@include mobile{
+							display: block;
+						}
+						li{
+							width: calc(33.3% - 12px);
+							margin: 0;
+							@include mobile{
+								width: 100%;
+								margin-top: 10px;
+							}
+							&:first-child{
+								margin-right: 18px;
+							}
+						}
+					}
+					.love_details{
+						width: 100%;
+						display: flex;
+						justify-content: space-between;
+						align-items: flex-start;
+						margin-top: 25px;
+						padding-left: 12px;
+						@include mobile{
+							margin-top: 15px;
+							display: block;
+						}
+						.love_item{
+							width: calc(33.3% - 12px);
+							margin-bottom: 0;
+							@include mobile{
+								width: 100%;
+								margin-bottom: 15px;
+							}
+							&:last-child{
+								border-right: none;
+								padding-right: 0;
+								margin-right: 0;
+							}
+							.love_desc{
+								li{
+									margin-top: 10px;
+									&:first-child{
+										margin-top: 0;
+									}
+								}
+								span{
+									display: block;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	.result_year, .result_reading_year{
+		.r_cont{
+			.right{
+				dl{
+					margin-top: 5px;
+				}
+			}
 			.col2{
 				align-items: flex-start;
 				.right{
 					margin-top: 5px;
 					@include mobile{
-						padding: 40px 0 50px;
+						margin-top: 35px !important;
+						padding: 20px 0 40px !important;
+						border-top: 1px solid #e7e7e7;
 					}
 					.r_colb{
 						display: flex;
@@ -761,15 +799,69 @@ h6{
 						.dl{
 							width: 50%;
 						}
+						dt, dd{
+							@include mobile{
+								@include font(14, 22);
+							}
+						}
+						dt{
+							@include mobile{
+								width: 60px;
+							}
+						}
 					}
-					.item{
-						margin:0 0 10px 0;
+					.summary_box{
 						width: 100%;
+						&.hr{
+							border-top: 1px solid #ddd;
+						}
+						.sub_tit { 
+							letter-spacing: -0.5px;
+						}
+					}
+				}
+			}
+			.roadmap{
+				.r_item{
+					margin-top: 10px;
+				}
+				.cont{
+					@include font(15, 22);
+				}
+			}
+			.detail{
+				.item{
+					@include mobile{
+						margin-bottom: 35px;
+						&:nth-child(2n){
+							padding: 35px 0;
+						}
+					}
+				}
+			}
+		}
+	}
+	.result_year{
+		.r_cont{
+			.right{
+				dl{
+					margin-top: 5px;
+				}
+			}
+			.col2{
+				.right{
+					margin-top: 10px;
+					@include mobile{
+						padding: 40px 0 50px;
+					}
+					.summary_box{
 						margin: 20px 0;
 						&.hr{
 							padding-top: 15px;
 							margin-top: 15px;
-							border-top: 1px solid #ddd;
+							@include mobile{
+								margin-top: 20px;
+							}
 						}
 						.sub_tit { 
 							@include font(15, 23);
@@ -782,12 +874,82 @@ h6{
 					}
 				}
 			}
-			.roadmap{
-				.r_item{
-					margin-top: 10px;
+		}
+	}
+	.result_reading_year{
+		.r_cont{
+			.right {
+				dl {
+					margin-top: 5px;
 				}
-				.cont{
-					@include font(15, 22);
+			}
+			.col2 {
+				.right{
+					.summary_box {
+						margin:0 0 10px 0;
+						width: 100%;
+						margin: 10px 0;
+						&.hr{
+							padding-top: 10px;
+							margin-top: 10px;
+							border-top: 1px solid #ddd;
+							@include mobile{
+								margin: 20px 0;
+								padding-top: 20px;
+							}
+						}
+						.sub_tit { 
+							@include font(14, 20);
+							letter-spacing: -0.5px;
+							margin-bottom: 4px;
+						}
+						.cont { 
+							@include font(14, 20);
+							strong, span{
+								display: block;
+							}
+							li{
+								margin-top: 5px;
+							}
+						}
+					}
+					.bx_key{
+						margin-top: 10px;
+					}
+				}
+			}
+			.detail{
+				.wealth{
+					.item{
+						width: 100%;
+					}
+					.colb{
+						.d_cont, .special_tip{
+							width: calc(50% - 10px);
+							@include mobile{
+								width: 100%;
+							}
+						}
+					}
+					.special_tip{
+						margin-top: -35px;
+						@include mobile{
+						margin-top: 25px;
+						}
+					}
+				}
+				.love{
+					.d_desc{
+						// padding: 0;
+						display: block;
+						li{
+							width: 100%;
+							margin: 0;
+							&:first-child{
+								margin-right: 18px;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -1037,12 +1199,12 @@ h6{
 
 .pc{
 	@include mobile{
-		display: none;
+		display: none !important;
 	}
 }
 .mobile{
-	display: none;
+	display: none !important;
 	@include mobile{
-		display: block;
+		display: block !important;
 	}
 }
