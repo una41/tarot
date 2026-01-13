@@ -67,7 +67,21 @@
 											<span v-for="(job, i) in data.list[store.result].career.recommend" :key="i">{{ job }}</span>
 										</div>
 									</div>
-									
+									<!-- 사랑과 인연 상세 (솔로/커플/결혼) -->
+									<div class="love_details" v-if="val === 'love' && (data.list[store.result][val].solo || data.list[store.result][val].couple || data.list[store.result][val].married)">
+										<div class="love_item" v-if="data.list[store.result][val].solo">
+											<h6 class="sub_tit">💫 솔로</h6>
+											<p class="love_desc" v-html="data.list[store.result][val].solo"></p>
+										</div>
+										<div class="love_item" v-if="data.list[store.result][val].couple">
+											<h6 class="sub_tit">💕 커플</h6>
+											<p class="love_desc" v-html="data.list[store.result][val].couple"></p>
+										</div>
+										<div class="love_item" v-if="data.list[store.result][val].married">
+											<h6 class="sub_tit">💍 결혼</h6>
+											<p class="love_desc" v-html="data.list[store.result][val].married"></p>
+										</div>
+									</div>
 								</div>								
 								<div class="match_box" v-if="val.includes('match')"></div>
 							</div>
@@ -115,6 +129,7 @@
 				"타고난 성격": "character",
 				"재물 관리": "wealth",
 				"직업과 사회적 성공": "career",
+				"학업 및 자기개발": "study",
 				"사랑과 인연": "love",
 				"최고의 파트너": "lucky_match",
 				"주의해야 할 인연": "caution_match",
