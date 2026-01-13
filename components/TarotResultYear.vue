@@ -125,6 +125,53 @@
 							</ul>
 						</div>
 
+						<!-- 재물 흐름 -->
+						<div class="item" v-if="data.list[store.result].wealth">
+							<h4 class="d_tit">재물 흐름</h4>
+							<h5 class="sub_tit" v-if="data.list[store.result].wealth.sub_title">{{ data.list[store.result].wealth.sub_title }}</h5>
+							<ul class="d_cont" v-if="data.list[store.result].wealth.cont">
+								<li v-for="(item, i) in data.list[store.result].wealth.cont" :key="i" v-html="item"></li>
+							</ul>
+							<ul class="d_cont" v-else-if="Array.isArray(data.list[store.result].wealth)">
+								<li v-for="(item, i) in data.list[store.result].wealth" :key="i" v-html="item"></li>
+							</ul>
+						</div>
+
+						<!-- 경매 및 투자운 (부자사관학교) -->
+						<div class="item" v-if="data.list[store.result].rich">
+							<h4 class="d_tit">경매 및 투자운</h4>
+							<h5 class="sub_tit" v-if="data.list[store.result].rich.sub_title">{{ data.list[store.result].rich.sub_title }}</h5>
+							<ul class="d_cont" v-if="data.list[store.result].rich.cont">
+								<li v-for="(item, i) in data.list[store.result].rich.cont" :key="i" v-html="item"></li>
+							</ul>
+							<ul class="d_cont" v-else-if="Array.isArray(data.list[store.result].rich)">
+								<li v-for="(item, i) in data.list[store.result].rich" :key="i" v-html="item"></li>
+							</ul>
+						</div>
+						<!-- 직업과 사회적 성공 -->
+						<div class="item" v-if="data.list[store.result].career">
+							<h4 class="d_tit">직업과 사회적 성공</h4>
+							<h5 class="sub_tit" v-if="data.list[store.result].career.sub_title">{{ data.list[store.result].career.sub_title }}</h5>
+							<ul class="d_cont" v-if="data.list[store.result].career.cont">
+								<li v-for="(item, i) in data.list[store.result].career.cont" :key="i" v-html="item"></li>
+							</ul>
+							<ul class="d_cont" v-else-if="Array.isArray(data.list[store.result].career)">
+								<li v-for="(item, i) in data.list[store.result].career" :key="i" v-html="item"></li>
+							</ul>
+						</div>
+
+						<!-- 학업 및 자기개발 -->
+						<div class="item" v-if="data.list[store.result].study">
+							<h4 class="d_tit">학업 및 자기개발</h4>
+							<h5 class="sub_tit" v-if="data.list[store.result].study.sub_title">{{ data.list[store.result].study.sub_title }}</h5>
+							<ul class="d_cont" v-if="data.list[store.result].study.cont">
+								<li v-for="(item, i) in data.list[store.result].study.cont" :key="i" v-html="item"></li>
+							</ul>
+							<ul class="d_cont" v-else-if="Array.isArray(data.list[store.result].study)">
+								<li v-for="(item, i) in data.list[store.result].study" :key="i" v-html="item"></li>
+							</ul>
+						</div>
+
 						<!-- 사랑과 인연 -->
 						<div class="item" v-if="data.list[store.result].love">
 							<h4 class="d_tit">사랑과 인연</h4>
@@ -155,55 +202,6 @@
 								<li v-for="(item, i) in data.list[store.result].love" :key="i" v-html="item"></li>
 							</ul>
 						</div>
-
-						<!-- 직업과 사회적 성공 -->
-						<div class="item" v-if="data.list[store.result].career">
-							<h4 class="d_tit">직업과 사회적 성공</h4>
-							<h5 class="sub_tit" v-if="data.list[store.result].career.sub_title">{{ data.list[store.result].career.sub_title }}</h5>
-							<ul class="d_cont" v-if="data.list[store.result].career.cont">
-								<li v-for="(item, i) in data.list[store.result].career.cont" :key="i" v-html="item"></li>
-							</ul>
-							<ul class="d_cont" v-else-if="Array.isArray(data.list[store.result].career)">
-								<li v-for="(item, i) in data.list[store.result].career" :key="i" v-html="item"></li>
-							</ul>
-						</div>
-
-						<!-- 학업 및 자기개발 -->
-						<div class="item" v-if="data.list[store.result].study">
-							<h4 class="d_tit">학업 및 자기개발</h4>
-							<h5 class="sub_tit" v-if="data.list[store.result].study.sub_title">{{ data.list[store.result].study.sub_title }}</h5>
-							<ul class="d_cont" v-if="data.list[store.result].study.cont">
-								<li v-for="(item, i) in data.list[store.result].study.cont" :key="i" v-html="item"></li>
-							</ul>
-							<ul class="d_cont" v-else-if="Array.isArray(data.list[store.result].study)">
-								<li v-for="(item, i) in data.list[store.result].study" :key="i" v-html="item"></li>
-							</ul>
-						</div>
-
-						<!-- 재물 흐름 -->
-						<div class="item" v-if="data.list[store.result].wealth">
-							<h4 class="d_tit">재물 흐름</h4>
-							<h5 class="sub_tit" v-if="data.list[store.result].wealth.sub_title">{{ data.list[store.result].wealth.sub_title }}</h5>
-							<ul class="d_cont" v-if="data.list[store.result].wealth.cont">
-								<li v-for="(item, i) in data.list[store.result].wealth.cont" :key="i" v-html="item"></li>
-							</ul>
-							<ul class="d_cont" v-else-if="Array.isArray(data.list[store.result].wealth)">
-								<li v-for="(item, i) in data.list[store.result].wealth" :key="i" v-html="item"></li>
-							</ul>
-						</div>
-
-						<!-- 경매 및 투자운 (부자사관학교) -->
-						<div class="item" v-if="data.list[store.result].rich">
-							<h4 class="d_tit">경매 및 투자운</h4>
-							<h5 class="sub_tit" v-if="data.list[store.result].rich.sub_title">{{ data.list[store.result].rich.sub_title }}</h5>
-							<ul class="d_cont" v-if="data.list[store.result].rich.cont">
-								<li v-for="(item, i) in data.list[store.result].rich.cont" :key="i" v-html="item"></li>
-							</ul>
-							<ul class="d_cont" v-else-if="Array.isArray(data.list[store.result].rich)">
-								<li v-for="(item, i) in data.list[store.result].rich" :key="i" v-html="item"></li>
-							</ul>
-						</div>
-
 						<!-- 건강과 에너지 -->
 						<div class="item" v-if="data.list[store.result].health">
 							<h4 class="d_tit">건강과 에너지</h4>
