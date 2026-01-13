@@ -618,7 +618,7 @@ h6{
 				flex-wrap: wrap;
 				justify-content: space-between;
 				word-wrap: break-word;
-				border-top: 1px solid #e7e7e7;
+				border-top: 1px solid #ddd;
 				// border-left: none;
 				// border-right: none;
 				padding: 40px 0;
@@ -682,8 +682,6 @@ h6{
 			}
 			.summary{
 				width: 100%;
-				border-left: none;
-				border-right: none;
 			}
 			.love{
 				width: 100%;
@@ -764,15 +762,22 @@ h6{
 							width: 50%;
 						}
 					}
-					.summary_box{
+					.item{
 						margin:0 0 10px 0;
+						width: 100%;
+						margin: 20px 0;
 						&.hr{
 							padding-top: 15px;
 							margin-top: 15px;
-							border-top: 1px solid #eee;
+							border-top: 1px solid #ddd;
 						}
-						.sub_tit{
-							margin-bottom: 4px;
+						.sub_tit { 
+							@include font(15, 23);
+							letter-spacing: -0.5px;
+							margin-bottom: 7px;
+						}
+						.cont { 
+							@include font(15, 25);
 						}
 					}
 				}

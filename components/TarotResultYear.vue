@@ -44,11 +44,11 @@
 									<dd>{{ data.list[store.result].lucky_group.lucky_timing }}</dd>
 								</dl>
 							</div>
-							<div class="summary_box hr"  v-for="(val, key) in luckyMap" :key="key">
+							<div class="item hr"  v-for="(val, key) in luckyMap" :key="key">
 								<h5 class="sub_tit">{{ key }}</h5>
 								<p class="cont" v-html="data.list[store.result].lucky_group[val]"></p>
-							</div>
-							<div class="summary_box" v-if="data.list[store.result].summary">
+							</div> 
+							<div class="item" v-if="data.list[store.result].summary">
 								<h5 class="sub_tit" v-if="data.list[store.result].summary.sub_title">{{ data.list[store.result].summary.sub_title }}</h5>
 								<ul v-if="data.list[store.result].summary.cont">
 									<li v-for="(item, i) in data.list[store.result].summary.cont" :key="i" v-html="item"></li>
