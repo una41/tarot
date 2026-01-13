@@ -48,39 +48,145 @@
 								</ul>
 							</div>
 						</div>
-                    </div>
-                    <div class="detail">
-                        <div class="item full" v-if="data.list[store.result].summary">
-                            <h4 class="d_tit">내 삶의 전반적 흐름</h4>
-                            <div class="colb">
-								<ul class="d_cont pc_half">
-									<li v-for="(item, i) in data.list[store.result].summary" :key="i" v-html="item"></li>
-								</ul>
-								<div class="bx_tip soul_tip pc_half">
-									<h6>🔮소울카드 <span>- {{ data.list[store.result].soul.card }} </span></h6>
-									<div class="sl_desc">소울카드는 메인 생일카드 해석만으로는 다 알 수 없는, 당신의 깊은 내면에 감수성 있게 감춰진 본질적인 욕구와 영혼이 가진 고유한 기질을 상징하는 카드입니다.</div>
-									<div class="t_cont" v-html="data.list[store.result].soul.cont"></div>
+					</div>
+					<div class="detail">
+						<div class="area">
+							<div class="item" v-if="data.list[store.result].theme">
+								<h5 class="d_tit">인생테마</h5>
+								<div class="d_cont">
+									<ul class="d_desc">
+										<li v-for="(item, i) in data.list[store.result].theme" :key="i" v-html="item"></li>
+									</ul>
 								</div>
 							</div>
-                        </div>
-						<div class="item" v-if="data.list[store.result].theme">
-							<h5 class="d_tit">인생테마</h5>
-							<ul class="d_cont">
-								<li v-for="(item, i) in data.list[store.result].theme" :key="i" v-html="item"></li>
-							</ul>
+							<div class="item" v-if="data.list[store.result].point">
+								<h4 class="d_tit">성격특성</h4>
+								<div class="d_cont">
+									<ul class="d_desc">
+										<li v-for="(item, i) in data.list[store.result].point" :key="i" v-html="item"></li>
+									</ul>
+								</div>
+							</div>
 						</div>
-                        <div class="item" v-if="data.list[store.result].point">
-                            <h4 class="d_tit">성격특성</h4>
-                            <ul class="d_cont">
-								<li v-for="(item, i) in data.list[store.result].point" :key="i" v-html="item"></li>
-                            </ul>
-                        </div>
-                        <div class="item" v-if="data.list[store.result].leading">
-                            <h4 class="d_tit">조언</h4>
-                            <ul class="d_cont">
-								<li v-for="(item, i) in data.list[store.result].leading" :key="i" v-html="item"></li>
-                            </ul>
-                        </div>
+						<div class="area">
+							<div class="item summary" v-if="data.list[store.result].summary">
+								<h4 class="d_tit">내 삶의 전반적 흐름</h4>
+								<div class="d_cont colb">
+									<ul class="d_desc pc_half">
+										<li v-for="(item, i) in data.list[store.result].summary" :key="i" v-html="item"></li>
+									</ul>
+									<div class="bx_tip soul_tip pc_half">
+										<h6>🔮소울카드 <span>- {{ data.list[store.result].soul.card }} </span></h6>
+										<ul class="sl_cont">
+											<li v-for="(item, i) in data.list[store.result].soul.cont" :key="i" v-html="item"></li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="area">
+							<div class="item" v-if="data.list[store.result].leading">
+								<h4 class="d_tit">조언</h4>
+								<div class="d_cont">
+									<ul class="d_desc">
+										<li v-for="(item, i) in data.list[store.result].leading" :key="i" v-html="item"></li>
+									</ul>
+								</div>
+							</div>
+							<div class="item" v-if="data.list[store.result].wealth">
+								<h4 class="d_tit">재물 관리</h4>
+								<div class="d_cont">
+									<ul class="d_desc">
+										<li v-for="(item, i) in data.list[store.result].wealth.cont" :key="i" v-html="item"></li>
+									</ul>
+								</div>
+								<div class="bx_tip special_tip" v-if="data.list[store.result].rich">
+									<h6>💰경매 및 투자운 <em>부자사관학교 전용 가이드</em></h6>
+									<ul class="t_cont">
+										<li v-for="(item, i) in data.list[store.result].rich.cont" :key="i" v-html="item"></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+						<div class="area">
+							<div class="item" v-if="data.list[store.result].career">
+								<h4 class="d_tit">직업과 사회적 성공</h4>
+								<div class="d_cont">
+									<ul class="d_desc">
+										<li v-for="(item, i) in data.list[store.result].career.cont" :key="i" v-html="item"></li>
+									</ul>
+								</div>
+							</div>
+							<div class="item" v-if="data.list[store.result].study">
+								<h4 class="d_tit">학업 및 자기개발</h4>
+								<div class="d_cont">
+									<ul class="d_desc">
+										<li v-for="(item, i) in data.list[store.result].study.cont" :key="i" v-html="item"></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+						<div class="area love">
+							<div class="item">
+								<h4 class="d_tit">사랑과 인연</h4>
+								<div class="d_cont">
+									<ul class="d_desc">
+										<li v-for="(item, i) in data.list[store.result].love.cont" :key="i" v-html="item"></li>
+									</ul>
+								</div>
+								<!-- 사랑과 인연 상세 (솔로/커플/결혼) -->
+								<div class="love_details" v-if="data.list[store.result].love.solo || data.list[store.result].love.couple || data.list[store.result].love.married">
+									<div class="love_item" v-if="data.list[store.result].love.solo">
+										<h6 class="sub_tit">💫 솔로</h6>
+										<p class="love_desc" v-html="data.list[store.result].love.solo"></p>
+									</div>
+									<div class="love_item" v-if="data.list[store.result].love.couple">
+										<h6 class="sub_tit">💕 커플</h6>
+										<p class="love_desc" v-html="data.list[store.result].love.couple"></p>
+									</div>
+									<div class="love_item" v-if="data.list[store.result].love.married">
+										<h6 class="sub_tit">💍 결혼</h6>
+										<p class="love_desc" v-html="data.list[store.result].love.married"></p>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="area">
+							<div class="item">
+								<h4 class="d_tit">최고의 파트너</h4>
+								<div class="d_cont">
+									<ul class="d_desc">
+										<li v-for="(item, i) in data.list[store.result].lucky_match.cont" :key="i" v-html="item"></li>
+									</ul>
+								</div>
+							</div>
+							<div class="item">
+								<h4 class="d_tit">주의해야 할 인연</h4>
+								<div class="d_cont">
+									<ul class="d_desc">
+										<li v-for="(item, i) in data.list[store.result].lucky_match.cont" :key="i" v-html="item"></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+						<div class="area">
+							<div class="item">
+								<h4 class="d_tit">건강과 에너지</h4>
+								<div class="d_cont">
+									<ul class="d_desc">
+										<li v-for="(item, i) in data.list[store.result].health.cont" :key="i" v-html="item"></li>
+									</ul>
+								</div>
+							</div>
+							<div class="item">
+								<h4 class="d_tit">운명의 가이드</h4>
+								<div class="d_cont">
+									<ul class="d_desc">
+										<li v-for="(item, i) in data.list[store.result].advice.cont" :key="i" v-html="item"></li>
+									</ul>
+								</div>
+							</div>
+						</div>
                     </div>
                 </div>
             </div>
@@ -95,5 +201,10 @@
 	const birth = store.picked === 'r1' ? store.ipt_birth8 : store.ipt_year+ store.ipt_birth4; // 혹은 "19902190"
 	const f_Birth = birth.replace(/(\d{4})(\d{2})(\d{2})/, '$1년 $2월 $3일');
 	const luckyMap = { '컬러': 'color', '숫자': 'number', '요일': 'day' };
-
+	const activeSections = computed(() => {
+		return {
+			"건강과 에너지": "health",
+			"운명의 가이드": "advice"
+		};
+	});
 </script>

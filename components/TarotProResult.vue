@@ -122,30 +122,18 @@
 
 	// 하단 상세 섹션 맵핑 (picked에 따라 다르게 구성)
 	const activeSections = computed(() => {
-		if (store.picked === 'r1') {
-			return {
-				"내 삶의 전반적 흐름": "total",
-				"당신을 위한 조언": "life_lesson",
-				"타고난 성격": "character",
-				"재물 관리": "wealth",
-				"직업과 사회적 성공": "career",
-				"학업 및 자기개발": "study",
-				"사랑과 인연": "love",
-				"최고의 파트너": "lucky_match",
-				"주의해야 할 인연": "caution_match",
-				"건강과 에너지": "health",
-				"운명의 가이드": "advice"
-			};
-		} else {
-			// 해운카드의 경우 (데이터 구조에 따라 추가 확장 가능)
-			return {
-				"2026년 대운": "general",
-				"금전 흐름": "wealth",
-				"사업/직업운": "career",
-				"애정/관계": "love",
-				"건강 가이드": "health",
-				"총평": "advice"
-			};
-		}
+		return {
+			"내 삶의 전반적 흐름": "total",
+			"당신을 위한 조언": "life_lesson",
+			"타고난 성격": "character",
+			"재물 관리": "wealth",
+			"직업과 사회적 성공": "career",
+			"학업 및 자기개발": "study",
+			"사랑과 인연": "love",
+			"최고의 파트너": "lucky_match",
+			"주의해야 할 인연": "caution_match",
+			"건강과 에너지": "health",
+			"운명의 가이드": "advice"
+		};
 	});
 </script>
