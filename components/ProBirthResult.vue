@@ -1,9 +1,6 @@
 <template>
 	<Transition name="fade">
 		<div class="result" @click.stop>
-			<button class="btn btn_pdf" @click="downloadPDF">
-				<span>PDF 저장</span>
-			</button>
 			<div class="bg" @click="store.fnClose"></div>
 			<div v-if="store.result !== null" class="r_wrap result_birth" ref="pdfContent">
 				<!-- PDF 전용 헤더 (화면에는 안보임) -->
@@ -19,10 +16,13 @@
 				<div class="r_top colb">
 					<div class="c_left">
 						<h3>생일카드 결과 <span>(해석)</span></h3>
-						<button class="link" @click="store.fnGo('reading')">🔗리딩 보기</button>
 					</div>
 					<div class="c_right">
 						<button class="btn_close" @click="store.fnClose"><span>닫기</span></button>
+					</div>
+					<div class="gnb">
+						<button class="link" @click="store.fnGo('reading')">🔗리딩</button>
+						<button class="btn_pdf" @click="downloadPDF">💾PDF</button>
 					</div>
 				</div>
 				<div class="r_cont">

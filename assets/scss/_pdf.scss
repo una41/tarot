@@ -7,6 +7,9 @@
 	color: #000 !important;
 	height: auto !important;
 	overflow: visible !important;
+	@include mobile{
+		width: 770px !important;
+	}
 	h1, h2, h3, h4, h5, h6, strong, b{
 		font-weight: 700;
 	}
