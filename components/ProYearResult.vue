@@ -2,13 +2,25 @@
 	<Transition name="fade">
 		<div class="result result_year"  @click.stop>
 			<div class="bg" @click="store.fnClose"></div>
-			<div v-if="store.result !== null" class="r_wrap">
+			<div v-if="store.result !== null" class="r_wrap" ref="pdfContent">
+				<!-- PDF 전용 헤더 (화면에는 안보임) -->
+				<div class="pdf_only_header" style="display: none;">
+					<h2 style="text-align: center; margin-bottom: 20px; font-size: 24px;">
+						{{ store.ipt_year }}년 해운카드 타로 해석 결과
+					</h2>
+					<p style="text-align: center; margin-bottom: 30px; color: #666;">
+						생년월일: {{ f_BirthMD }}
+					</p>
+				</div>
 				<div class="r_top colb">
 					<div class="c_left">
 						<h3>{{ store.ipt_year + '년 해운카드'}} <b class="pc">결과</b> <span>(해석)</span></h3>
 						<button class="link" @click="store.fnGo('reading')">🔗리딩 보기</button>
 					</div>
 					<div class="c_right">
+						<button class="btn btn_pdf" @click="downloadPDF">
+							<span>PDF 저장</span>
+						</button>
 						<button class="btn_close" @click="store.fnClose"><span>닫기</span></button>
 					</div>
 				</div>
@@ -142,8 +154,11 @@
 </template>
 
 <script setup>
-	import { computed } from 'vue';
+	import { ref, computed } from 'vue';
 	import { useTarotStore } from '~/stores/tarot';
+	import html2canvas from 'html2canvas';
+	import { jsPDF } from 'jspdf';
+
 	const store = useTarotStore();
 	const props = defineProps(['data']);
 
@@ -169,4 +184,92 @@
 			"운명의 가이드": "lucky_tips"
 		};
 	});
+
+	// PDF 관련
+	const pdfContent = ref(null);
+
+	const downloadPDF = async () => {
+		if (!pdfContent.value) return;
+
+		try {
+			const element = pdfContent.value;
+
+			// PDF 전용 요소 표시
+			const pdfOnlyElements = element.querySelectorAll('.pdf_only_header');
+			pdfOnlyElements.forEach(el => el.style.display = 'block');
+
+			// 화면 전용 요소 숨기기 (버튼 등)
+			const screenOnlyElements = element.querySelectorAll('.r_top');
+			screenOnlyElements.forEach(el => el.style.display = 'none');
+
+			// 스크롤 위치 저장 및 최상단으로 이동
+			const originalScrollTop = window.pageYOffset;
+			window.scrollTo(0, 0);
+
+			// 약간의 대기 시간 후 캔버스 생성 (DOM 업데이트 대기)
+			await new Promise(resolve => setTimeout(resolve, 100));
+
+			// html2canvas로 캔버스 생성
+			const canvas = await html2canvas(element, {
+				scale: 2,
+				useCORS: true,
+				logging: false,
+				scrollY: 0,
+				scrollX: 0,
+				height: element.scrollHeight,
+				windowHeight: element.scrollHeight,
+				allowTaint: true,
+				backgroundColor: '#ffffff'
+			});
+
+			// 캔버스를 이미지로 변환
+			const imgData = canvas.toDataURL('image/jpeg', 0.98);
+
+			// PDF 생성 - A4 크기
+			const pdf = new jsPDF({
+				unit: 'mm',
+				format: 'a4',
+				orientation: 'portrait'
+			});
+
+			// A4 크기 설정
+			const pdfWidth = 210; // A4 width in mm
+			const pdfHeight = 297; // A4 height in mm
+			const margin = 10;
+			const imgWidth = pdfWidth - (margin * 2);
+			const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+			let heightLeft = imgHeight;
+			let position = margin;
+
+			// 첫 페이지
+			pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
+			heightLeft -= (pdfHeight - margin);
+
+			// 추가 페이지
+			while (heightLeft > 0) {
+				position = -(imgHeight - heightLeft) + margin;
+				pdf.addPage();
+				pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
+				heightLeft -= (pdfHeight - margin);
+			}
+
+			const filename = `타로_${store.ipt_year}년_해운카드_해석_${f_BirthMD}.pdf`;
+			pdf.save(filename);
+
+			// 원래 상태로 복원
+			pdfOnlyElements.forEach(el => el.style.display = 'none');
+			screenOnlyElements.forEach(el => el.style.display = '');
+			window.scrollTo(0, originalScrollTop);
+		} catch (error) {
+			console.error('PDF 생성 오류:', error);
+			alert('PDF 생성 중 오류가 발생했습니다.');
+
+			// 에러 발생 시에도 원래 상태로 복원
+			const pdfOnlyElements = pdfContent.value?.querySelectorAll('.pdf_only_header');
+			const screenOnlyElements = pdfContent.value?.querySelectorAll('.r_top');
+			pdfOnlyElements?.forEach(el => el.style.display = 'none');
+			screenOnlyElements?.forEach(el => el.style.display = '');
+		}
+	};
 </script>

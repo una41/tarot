@@ -1,6 +1,7 @@
 @use 'variable' as *;
 @use 'mixin' as *;
 @use 'svg' as *;
+@use 'pdf' as *;
 
 h3{
 	@include font(18, 25);
@@ -22,7 +23,14 @@ h3{
 		font-weight: 400;
 	}
 }
-
+.btn_pdf{
+    width: 100px;
+    z-index: 20;
+    left: 50%;
+    position: absolute;
+	// margin-left: 405px;
+	transform: translateX(405px);
+}
 .header {
     position: fixed;
     top: 10px;
@@ -477,20 +485,25 @@ h6{
 				margin-top: 0;
 			}
 			.item {
-				margin-bottom: 45px;
-				&:nth-child(2n){
-					border: 1px solid #e7e7e7;
-					border-left: none;
-					border-right: none;
-					padding: 45px 0;
+				// margin-bottom: 45px;
+				border-top: 1px solid #e7e7e7;
+				padding: 45px 0;
+				@include mobile{
+					padding: 40px;
 				}
-				&:first-child{
-					border-top: 1px solid #e7e7e7;
-					padding: 45px 0 0;
-				}
-				&:last-child{
-					margin-bottom: 0;
-				} 
+				// &:nth-child(2n){
+				// 	border: 1px solid #e7e7e7;
+				// 	border-left: none;
+				// 	border-right: none;
+				// 	padding: 45px 0;
+				// }
+				// &:first-child{
+				// 	border-top: 1px solid #e7e7e7;
+				// 	padding: 45px 0 0;
+				// }
+				// &:last-child{
+				// 	margin-bottom: 0;
+				// } 
 			}
 			.d_tit {
 				@include font(18,25, #b08d57);
@@ -516,6 +529,9 @@ h6{
 					@include font(15,26, #555);
 					white-space: pre-wrap; 
 				}
+			}
+			.love_details{
+				padding-left: 12px;
 			}
 			h6{
 				margin: 0 0 5px;
@@ -571,7 +587,7 @@ h6{
 			padding: 20px 30px;
 			border-radius: 5px;
 			background: #e2ded2;
-			margin:40px auto 70px;
+			margin:0 auto 70px;
 			p+p{
 				margin-top: 5px;
 			}
@@ -660,9 +676,9 @@ h6{
 						}
 						@include mobile{
 							width: 100%;
-							margin-bottom: 40px;
-							padding-top: 40px !important;
-							border-top: 1px solid #ddd !important;
+							// margin-bottom: 40px;
+							// padding-top: 40px !important;
+							// border-top: 1px solid #ddd !important;
 						}
 					}
 				}
@@ -1207,4 +1223,7 @@ h6{
 	@include mobile{
 		display: block !important;
 	}
+}
+.pdf_info{
+	display: none;
 }
