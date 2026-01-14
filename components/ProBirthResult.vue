@@ -5,7 +5,7 @@
 			<div v-if="store.result !== null" class="r_wrap result_birth" ref="pdfContent">
 				<!-- PDF 전용 헤더 (화면에는 안보임) -->
 				<div class="pdf_only_header" style="display: none;">
-					<p class="logo"><b>numerology Tarot</b></p>
+					<!-- <p class="logo"><b>numerology Tarot</b></p> -->
 					<h2>
 						생일카드 타로 해석 결과
 					</h2>

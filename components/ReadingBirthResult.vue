@@ -22,7 +22,8 @@
 					<div class="gnb">
 						<button class="link" @click="store.fnGo('result')">🔗 해석</button>
 					</div>
-				</div><div class="r_cont">
+				</div>
+				<div class="r_cont">
                     <h3 class="main_card_tit">
                         {{ store.result }}번 - <div class="tit" v-html="data.list[store.result].name"></div>
                     </h3>

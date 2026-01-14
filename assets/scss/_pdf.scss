@@ -2,6 +2,7 @@
 @use 'mixin' as *;
 /* 1. 기본 상태에서는 숨겨져 있다가 PDF 전용일 때만 최적화 */
 .pdf_print {
+	position: relative;
 	padding: 0 !important;
 	background-color: #ffffff !important;
 	color: #000 !important;
@@ -67,6 +68,21 @@
         break-inside: avoid;
     }
 	section{
+		position: relative;
+		&:before {
+			content: "numerology Tarot";
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%) rotate(-45deg); /* 대각선 회전 */
+			font-size: 3rem;
+			color: rgba(0, 0, 0, 0.1); /* 아주 연한 회색 */
+			font-weight: bold;
+			pointer-events: none; /* 클릭 방해 금지 */
+			z-index: 999;
+			white-space: nowrap;
+			// 수채화 느낌을 주고 싶다면 폰트를 나눔명조 같은 걸로 써도 예뻐요!
+		}
 		.item{
 			padding: 40px 0 45px!important;
 			&:first-child{
@@ -109,7 +125,7 @@
 // 화면에는 display:none, PDF 생성 시에만 JavaScript로 표시됨
 
 .pdf_only_header {
-	padding: 35px 0;
+	padding: 37px 0;
 	border-bottom: 2px solid #e4ca65;
 	background-color: #fbdf70;
 	position: relative;
@@ -124,7 +140,7 @@
 		color: #010101;
 	}
 	h2 {
-		font-size: 20px;
+		font-size: 19px;
 		font-weight: 700;
 		color: #010101;
 		text-align: center;

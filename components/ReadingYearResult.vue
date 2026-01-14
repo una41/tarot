@@ -15,13 +15,12 @@
 				<div class="r_top colb">
 					<div class="c_left">
 						<h3>{{ store.ipt_year + '년 해운카드' }} <b class="pc">결과</b> <span>(리딩)</span></h3>
-						<button class="link" @click="store.fnGo('result')">🔗 해석 보기</button>
 					</div>
 					<div class="c_right">
-						<button class="btn btn_pdf" @click="downloadPDF">
-							<span>PDF 저장</span>
-						</button>
 						<button class="btn_close" @click="store.fnClose"><span>닫기</span></button>
+					</div>
+					<div class="gnb">
+						<button class="link" @click="store.fnGo('result')">🔗 해석</button>
 					</div>
 				</div>
 				<div class="r_cont">
