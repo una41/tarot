@@ -166,9 +166,9 @@ export const useTarotStore = defineStore('tarot', {
             this.token = token;
             this.isLoggedIn = true;
 
-            // 쿠키 저장 (7일 유지)
-            Cookies.set('user_token', token, { expires: 7 });
-            Cookies.set('user_info', JSON.stringify(userData), { expires: 7 });
+            // 쿠키 저장 (세션 쿠키 - 브라우저 닫으면 만료)
+            Cookies.set('user_token', token);
+            Cookies.set('user_info', JSON.stringify(userData));
         },
 
         // 2. 관리자 로그인 시도 함수
