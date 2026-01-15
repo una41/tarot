@@ -21,8 +21,8 @@
 						<button class="btn_close" @click="store.fnClose"><span>닫기</span></button>
 					</div>
 					<div class="gnb">
-						<button class="link" @click="store.fnGo('reading')">🔗리딩</button>
 						<button class="btn_pdf" @click="downloadPDF">💾PDF</button>
+						<button class="link" @click="store.fnGo('reading')">🔗리딩</button>
 					</div>
 				</div>
 				<div class="r_cont">
@@ -246,88 +246,13 @@
 
 	// PDF 관련
 	const pdfContent = ref(null);
-	const downloadPDF = async () => {
-    if (!pdfContent.value) return;
-
-    try {
-        const element = pdfContent.value;
-		element.classList.add('pdf_print');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgWidth = 210;
-        // 1. 캡처 대상 섹션 리스트
-        const sectionSelectors = [
-            '.pdf_section1',
-            '.pdf_section2',
-            '.pdf_section3',
-            '.pdf_section4',
-            '.pdf_section5',
-        ];
-
-        // 헬퍼 함수: 특정 요소를 캡처하여 이미지 데이터 반환
-        const captureElement = async (el) => {
-            const canvas = await html2canvas(el, {
-                scale: 3,
-                useCORS: true,
-                backgroundColor: '#ffffff',
-                logging: false,
-            });
-            return {
-                data: canvas.toDataURL('image/jpeg', 1.0),
-                height: (canvas.height * imgWidth) / canvas.width
-            };
-        };
-
-        // 2. PDF 전용 헤더 미리 캡처
-        const headerEl = element.querySelector('.pdf_only_header');
-        headerEl.style.display = 'block'; // 잠시 보임
-        const headerImg = await captureElement(headerEl);
-        headerEl.style.display = 'none'; // 다시 숨김
-
-        // 3. 섹션별 순회 및 페이지 생성
-        for (let i = 0; i < sectionSelectors.length; i++) {
-            const target = element.querySelector(sectionSelectors[i]);
-            if (!target) continue;
-
-            const originalDisplay = target.style.display;
-            target.style.display = 'block';
-            const sectionImg = await captureElement(target);
-            target.style.display = originalDisplay;
-
-            if (i > 0) pdf.addPage();
-
-            // [설정] 본문 양옆 여백 (20mm씩)
-            const sideMargin = 20;
-            const contentWidth = imgWidth - (sideMargin * 2); // 210 - 20 = 190mm
-            // 줄어든 너비에 맞춰 높이도 비율대로 계산
-            const contentHeight = (sectionImg.height * contentWidth) / imgWidth;
-
-            let currentY = 0;
-
-            // 1페이지일 때만 헤더 삽입
-            if (i === 0) {
-                // 헤더는 양옆 여백 없이 꽉 차게 (0, 0에서 시작)
-                pdf.addImage(headerImg.data, 'JPEG', 0, 0, imgWidth, headerImg.height);
-                currentY = headerImg.height + 5; // 헤더 아래 5mm 간격
-            } else {
-                currentY = 15; // 2페이지부터는 상단 여백 10mm
-            }
-
-            // [수정] 본문 섹션만 x좌표를 sideMargin(10)만큼 띄우고 너비를 contentWidth(190)로 설정
-            pdf.addImage(sectionImg.data, 'JPEG', sideMargin, currentY, contentWidth, contentHeight);
-
-            // 4. 하단 페이지 번호 추가
-            pdf.setFontSize(10);
-            pdf.setTextColor(150);
-            pdf.text('- '+String(i + 1)+' -', 105, 287, { align: 'center' });
-        }
-
-        pdf.save(`타로_${store.ipt_year}년_해운카드_해석_${f_BirthMD}.pdf`);
-		element.classList.remove('pdf_print');
-
-    } catch (error) {
-        console.error('PDF 생성 에러:', error);
-		element.classList.remove('pdf_print');
-        alert('PDF 저장 중 오류가 발생했습니다.');
-    }
-};
+	const downloadPDF = () => {
+		if (!pdfContent.value) return;
+		store.downloadPDF({
+			pdfContent: pdfContent.value,
+			html2canvas,
+			jsPDF,
+			filename: `타로_${store.ipt_year}년_해운카드_해석_${f_BirthMD}.pdf`
+		});
+	};
 </script>
