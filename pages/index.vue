@@ -6,25 +6,29 @@
 		</div>
 		<div class="main">
 			<div class="f_wrap">
-				<TarotTabs/>
-				<TarotInput/>
+				<Tabs/>
+				<Input/>
 			</div>
 		</div>
 		<!-- <TarotProResult v-if="store.result !== null && !store.isReading" :data="store.picked === 'r1'? proBirthData : proYearData"/> -->
-		<!-- <TarotResult v-else-if="store.result !== null" :data="store.picked === 'r1'? birthData : yearData"/> -->
+		<!-- <ReadingBirthResult v-else-if="store.result !== null" :data="store.picked === 'r1'? birthData : yearData"/> -->
 		<transition name="fade">
-			<TarotProResult 
-				v-if="store.result !== null && store.picked === 'r1' && !store.isReading" 
-				:data="proBirthData" 
+			<ProBirthResult
+				v-if="store.result !== null && store.picked === 'r1' && !store.isReading"
+				:data="proBirthData"
 			/>
 
-			<TarotResult 
-				v-else-if="store.result !== null && store.picked === 'r1'" 
-				:data="birthData" 
+			<ReadingBirthResult
+				v-else-if="store.result !== null && store.picked === 'r1' && store.isReading"
+				:data="birthData"
 			/>
 
-			<TarotResultYear
-				v-else-if="store.result !== null && store.picked === 'r2'"
+			<ProYearResult
+				v-else-if="store.result !== null && store.picked === 'r2' && !store.isReading"
+				:data="proYearData"
+			/>
+			<ReadingYearResult
+				v-else-if="store.result !== null && store.picked === 'r2' && store.isReading"
 				:data="yearData"
 			/>
 		</transition>

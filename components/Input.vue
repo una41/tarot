@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<div class="bx_chk" v-if="store.picked === 'r1'">
+		<div class="bx_chk">
 			<input type="checkbox" id="chk1" class="chk" v-model="store.isReading">
 			<label for="chk1">리딩용</label>
 		</div>

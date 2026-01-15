@@ -57,11 +57,11 @@ The application uses a single Pinia store ([stores/tarot.js](stores/tarot.js)) t
 
 - **[app.vue](app.vue)**: Root component with loading animation and authentication guard
 - **[pages/index.vue](pages/index.vue)**: Main page that fetches tarot data and conditionally renders result components
-- **[components/TarotTabs.vue](components/TarotTabs.vue)**: Radio buttons for birth/yearly card selection
-- **[components/TarotInput.vue](components/TarotInput.vue)**: Input forms with reading mode checkbox
-- **[components/TarotResult.vue](components/TarotResult.vue)**: Basic birth card reading display
+- **[components/Tabs.vue](components/Tabs.vue)**: Radio buttons for birth/yearly card selection
+- **[components/Input.vue](components/Input.vue)**: Input forms with reading mode checkbox
+- **[components/ReadingBirthResult.vue](components/ReadingBirthResult.vue)**: Basic birth card reading display
 - **[components/TarotProResult.vue](components/TarotProResult.vue)**: Professional birth card reading (shown when `isReading: true`)
-- **[components/TarotResultYear.vue](components/TarotResultYear.vue)**: Yearly fortune card reading display
+- **[components/ReadingBirthResultYear.vue](components/ReadingBirthResultYear.vue)**: Yearly fortune card reading display
 - **[components/Login.vue](components/Login.vue)**: Admin login component (blocks app when not authenticated)
 
 ### Data Structure

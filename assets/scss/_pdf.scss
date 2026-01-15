@@ -1,0 +1,162 @@
+@use 'variable' as *;
+@use 'mixin' as *;
+/* 1. 기본 상태에서는 숨겨져 있다가 PDF 전용일 때만 최적화 */
+.pdf_print {
+	position: relative;
+	padding: 0 !important;
+	background-color: #ffffff !important;
+	color: #000 !important;
+	height: auto !important;
+	overflow: visible !important;
+	@include mobile{
+		width: 770px !important;
+	}
+	h1, h2, h3, h4, h5, h6, strong, b{
+		font-weight: 700;
+	}
+	.col2{
+		max-width: 680px !important;
+		margin: 0 auto !important;
+		display: block !important;
+		padding: 40px 0 0 !important;
+		.left, .right{
+			width: 100%;
+		}
+		.right{
+			margin-top: 50px;
+			padding-left: 0 !important;
+		}
+		.summary_box{
+			margin-top: 30px !important;
+		}
+	}
+	.pdf_info{
+		display: block !important;
+		width: 680px;
+		background-color: #eceae3;
+		margin: 30px auto 0;
+		padding: 20px 30px;
+		border-radius: 5px;
+		.d_tit{
+			@include font(15, 22, #111, $bold);
+			margin-bottom: 10px;
+		}
+		.d_cont{
+			@include font(15, 22);
+			letter-spacing: -0.5px;
+		}
+	}
+    /* PDF 내에서 텍스트와 이미지 가독성 높이기 */
+    .main_card_tit {
+		max-width: 700px !important;
+		margin: 0 auto !important;
+        font-size: 28px !important;
+        margin-bottom: 30px !important;
+    }
+	
+    .bx_img {
+        /* 배경 이미지가 잘린다면 크기를 고정 */
+        // width: 250px !important;
+        // height: 400px !important;
+        background-size: contain !important;
+		margin: 0 auto;
+    }
+
+    /* 2. PDF 내에서 섹션별 페이지 잘림 방지 */
+    .item, .summary_box, .bx_tip {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+	section{
+		position: relative;
+		&:before {
+			content: "numerology Tarot";
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%) rotate(-45deg); /* 대각선 회전 */
+			font-size: 3rem;
+			color: rgba(0, 0, 0, 0.1); /* 아주 연한 회색 */
+			font-weight: bold;
+			pointer-events: none; /* 클릭 방해 금지 */
+			z-index: 999;
+			white-space: nowrap;
+			// 수채화 느낌을 주고 싶다면 폰트를 나눔명조 같은 걸로 써도 예뻐요!
+		}
+		.item{
+			padding: 40px 0 45px!important;
+			&:first-child{
+				padding-top: 0 !important;
+				border-top: none !important;
+			}
+		}
+		.d_tit{
+			font-weight: 700 !important;
+		}
+	}
+    
+    /* 화면용 버튼 숨기기 (혹시 모르니 한번 더 처리) */
+    .btn, .btn_close, .link {
+        display: none !important;
+    }
+	
+	.r_cont {
+		padding: 50px 0 30px!important;
+		width: calc(100% - 165px);
+		.main_card_tit{
+			margin-top: 30px;
+		}
+	}
+	// /* 텍스트 박스나 카드 이미지가 페이지 경계에서 잘리는 것 방지 */
+	.item, .bx_tip, .summary_box, .main_card_tit, .lucky_group {
+		page-break-inside: avoid !important;
+		break-inside: avoid !important;
+		/* html2canvas가 인식할 수 있도록 position 보정 */
+		position: relative !important; 
+	}
+	.pdf_generating_overlay {
+		@include setCont(100%, 100%, flex, fixed, #000);
+		z-index: 99999;
+	}
+}
+
+/* 제목 강조 */
+// .pdf_print .d_tit {
+//     border-bottom: 2px solid #e0c389; /* 타로 느낌의 금색 라인 */
+//     padding-bottom: 5px;
+//     margin-bottom: 15px;
+// }// PDF 전용 스타일
+// 화면에는 display:none, PDF 생성 시에만 JavaScript로 표시됨
+
+.pdf_only_header {
+	padding: 37px 0;
+	border-bottom: 2px solid #e4ca65;
+	background-color: #fbdf70;
+	position: relative;
+	.logo{
+		font-size: 16px;
+		margin-bottom: 10px;
+		text-align: right;
+		position: absolute;
+		left: 25px;
+		top: 20px;
+		margin: 0;
+		color: #010101;
+	}
+	h2 {
+		font-size: 19px;
+		font-weight: 700;
+		color: #010101;
+		text-align: center;
+		line-height: 1.4;
+	}
+	.sub_tit {
+		display: flex;
+		justify-content: center;
+		margin: 10px 0 0;
+		font-size: 16px;
+		color: #47484e;
+		font-weight: 700;
+	}
+}
+

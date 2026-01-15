@@ -43,6 +43,11 @@ export const useTarotStore = defineStore('tarot', {
             cancelText: '취소',
             onConfirm: null,
             onCancel: null
+        },
+        // --- 글로벌 로딩 상태 ---
+        loader: {
+            isAppLoading: true,    // 앱 초기 로딩
+            isPdfLoading: false,   // PDF 생성 로딩
         }
 	}),
 	actions: {
@@ -263,6 +268,95 @@ export const useTarotStore = defineStore('tarot', {
 
         closeConfirm() {
             this.confirmData.isVisible = false;
+        },
+
+        // 7. 로더 제어
+        setAppLoading(status) {
+            this.loader.isAppLoading = status;
+        },
+        setPdfLoading(status) {
+            this.loader.isPdfLoading = status;
+        },
+
+        // 8. PDF 다운로드
+        async downloadPDF(options) {
+            const { pdfContent, html2canvas, jsPDF, filename } = options;
+            if (!pdfContent) return;
+
+            try {
+                this.setPdfLoading(true);
+                const element = pdfContent;
+                element.classList.add('pdf_print');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210;
+
+                const sectionSelectors = [
+                    '.pdf_section1',
+                    '.pdf_section2',
+                    '.pdf_section3',
+                    '.pdf_section4',
+                    '.pdf_section5',
+                ];
+
+                const captureElement = async (el) => {
+                    const canvas = await html2canvas(el, {
+                        scale: 3,
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
+                        logging: false,
+                    });
+                    return {
+                        data: canvas.toDataURL('image/jpeg', 1.0),
+                        height: (canvas.height * imgWidth) / canvas.width
+                    };
+                };
+
+                const headerEl = element.querySelector('.pdf_only_header');
+                headerEl.style.display = 'block';
+                const headerImg = await captureElement(headerEl);
+                headerEl.style.display = 'none';
+
+                for (let i = 0; i < sectionSelectors.length; i++) {
+                    const target = element.querySelector(sectionSelectors[i]);
+                    if (!target) continue;
+
+                    const originalDisplay = target.style.display;
+                    target.style.display = 'block';
+                    const sectionImg = await captureElement(target);
+                    target.style.display = originalDisplay;
+
+                    if (i > 0) pdf.addPage();
+
+                    const sideMargin = 20;
+                    const contentWidth = imgWidth - (sideMargin * 2);
+                    const contentHeight = (sectionImg.height * contentWidth) / imgWidth;
+
+                    let currentY = 0;
+
+                    if (i === 0) {
+                        pdf.addImage(headerImg.data, 'JPEG', 0, 0, imgWidth, headerImg.height);
+                        currentY = headerImg.height + 5;
+                    } else {
+                        currentY = 15;
+                    }
+
+                    pdf.addImage(sectionImg.data, 'JPEG', sideMargin, currentY, contentWidth, contentHeight);
+
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(150);
+                    pdf.text('- ' + String(i + 1) + ' -', 105, 287, { align: 'center' });
+                }
+
+                pdf.save(filename);
+                element.classList.remove('pdf_print');
+                this.setPdfLoading(false);
+
+            } catch (error) {
+                console.error('PDF 생성 에러:', error);
+                element.classList.remove('pdf_print');
+                this.setPdfLoading(false);
+                alert('PDF 저장 중 오류가 발생했습니다.');
+            }
         },
 	}
 })
