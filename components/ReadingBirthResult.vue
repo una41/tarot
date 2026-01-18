@@ -186,7 +186,7 @@
 									</ul>
 								</div>
 							</div> 
-						</div>
+						</div> 
 						<div class="area">
 							<div class="item">
 								<h4 class="d_tit">건강과 에너지</h4>
