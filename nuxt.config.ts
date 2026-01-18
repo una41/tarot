@@ -47,7 +47,7 @@ export default defineNuxtConfig({
 	// 5. ★ 중요: 빌드 결과물을 docs 폴더로 변경하는 설정 ★
 	ssr: false,// 서버 측 렌더링 비활성화
 	nitro: {
-		preset: 'github-pages',
+		preset: 'static',
 		output: {
 			publicDir: 'docs' // 빌드된 정적 파일들이 프로젝트 루트의 /docs 폴더로 들어갑니다.
 		}
@@ -88,7 +88,7 @@ export default defineNuxtConfig({
 				{ property: 'og:url', content: 'https://una41.github.io/tarot/' },
 			],
 			link: [
-				{ rel: 'icon', type: 'image/x-icon', href: '/tarot/favicon.ico' }
+				{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
 			]
 		},
     	// 본인의 깃허브 저장소 이름이 'Tarot'이라면 아래와 같이 설정
