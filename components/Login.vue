@@ -2,45 +2,188 @@
 	<div class="login">
 		<div class="l_wrap">
 			<div class="icon">🔮</div>
-			<h2 class="tit">운명의 문을 여세요</h2>
-			<div class="l_form">
-				<input class="ipt" v-model="id" type="text" placeholder="아이디" @keyup.enter="fnleLogin" />
-				<input class="ipt" v-model="pw" type="password" placeholder="비밀번호" @keyup.enter="fnleLogin" />
-				<button class="btn" @click="fnleLogin">운명 확인하기</button>
-			</div>
+			<p class="l_logo">numerologyTarot</p>
+			<Transition name="l_fade" mode="out-in">
+				<h2 class="tit" :key="currentMode">{{ modeTitle }}</h2>
+			</Transition>
+
+			<!-- 이메일 인증 안내 화면 -->
+			<Transition name="l_fade" mode="out-in">
+				<div v-if="store.pendingVerificationEmail" class="verification_notice" key="verification">
+					<p class="notice_icon">✉️</p>
+					<p class="notice_tit">인증 메일을 발송했습니다</p>
+					<p class="notice_txt">{{ store.pendingVerificationEmail }}로 전송된 인증 링크를 클릭해주세요.</p>
+					<button class="btn" @click="goToLogin">로그인하러 가기</button>
+				</div>
+
+				<!-- 비밀번호 찾기 폼 -->
+				<div v-else-if="isForgotPassword" key="forgot">
+					<div class="l_form">
+						<input class="ipt" v-model="email" type="email" placeholder="이메일" @keyup.enter="handleResetPassword" />
+						<button class="btn" @click="handleResetPassword" :disabled="store.authLoading">
+							{{ store.authLoading ? '처리 중...' : '비밀번호 재설정 메일 발송' }}
+						</button>
+					</div>
+					<div class="bx_member">
+						<button class="link_member" @click="goToLogin">로그인으로 돌아가기</button>
+					</div>
+				</div>
+
+				<!-- 로그인/회원가입 폼 -->
+				<div v-else :key="isSignUp ? 'signup' : 'login'">
+					<div class="l_form">
+						<input class="ipt" v-model="email" type="email" placeholder="이메일" @keyup.enter="handleSubmit" />
+						<div class="ipt_pw_wrap">
+							<input class="ipt" v-model="pw" :type="showPw ? 'text' : 'password'" placeholder="비밀번호" @keyup.enter="handleSubmit" />
+							<button type="button" class="btn_eye" :class="{ on: showPw }" @click="showPw = !showPw"></button>
+						</div>
+						<div v-if="isSignUp" class="ipt_pw_wrap">
+							<input class="ipt" v-model="pwConfirm" :type="showPwConfirm ? 'text' : 'password'" placeholder="비밀번호 확인" @keyup.enter="handleSubmit" />
+							<button type="button" class="btn_eye" :class="{ on: showPwConfirm }" @click="showPwConfirm = !showPwConfirm"></button>
+						</div>
+						<button class="btn" @click="handleSubmit" :disabled="store.authLoading">
+							{{ store.authLoading ? '처리 중...' : (isSignUp ? '가입하기' : '운명 확인하기') }}
+						</button>
+					</div>
+					<div v-if="isSignUp" class="bx_member">
+						<span>이미 계정이 있으신가요?</span> <button class="link_member" @click="toggleMode">로그인</button>
+					</div>
+					<div v-else class="bx_member">
+						<span>계정이 없으신가요?</span> <button class="link_member" @click="toggleMode">회원가입</button>
+						<span class="divider">|</span>
+						<button class="link_member" @click="goToForgotPassword">비밀번호 찾기</button>
+					</div>
+				</div>
+			</Transition>
 		</div>
 	</div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useTarotStore } from '~/stores/tarot';
 
 const store = useTarotStore();
 
-const id = ref('');
+const email = ref('');
 const pw = ref('');
+const pwConfirm = ref('');
+const isSignUp = ref(false);
+const isForgotPassword = ref(false);
+const showPw = ref(false);
+const showPwConfirm = ref(false);
 
-const fnleLogin = () => {
-	if (!id.value || !pw.value) {
+const currentMode = computed(() => {
+	if (isForgotPassword.value) return 'forgot';
+	return isSignUp.value ? 'signup' : 'login';
+});
+
+const modeTitle = computed(() => {
+	if (isForgotPassword.value) return 'Reset Password';
+	return isSignUp.value ? 'Join' : 'Login';
+});
+
+const toggleMode = () => {
+	isSignUp.value = !isSignUp.value;
+	pw.value = '';
+	pwConfirm.value = '';
+	showPw.value = false;
+	showPwConfirm.value = false;
+};
+
+const goToLogin = () => {
+	store.clearPendingVerification();
+	isSignUp.value = false;
+	isForgotPassword.value = false;
+	pw.value = '';
+	pwConfirm.value = '';
+	showPw.value = false;
+	showPwConfirm.value = false;
+};
+
+const goToForgotPassword = () => {
+	isForgotPassword.value = true;
+	pw.value = '';
+	pwConfirm.value = '';
+};
+
+const handleResetPassword = async () => {
+	if (!email.value) {
 		store.showAlert({
 			title: '',
-			message: '아이디와 비밀번호를 입력해주세요.',
+			message: '이메일을 입력해주세요.',
 			icon: '🌙'
 		});
 		return;
 	}
 
-	const success = store.fnLogin(id.value, pw.value);
-	if (success) {
-		// 로그인 성공 시 자동으로 메인 페이지로 전환됨 (app.vue의 v-if 조건)
+	const result = await store.fnResetPassword(email.value);
+	if (result.success) {
+		store.showAlert({
+			title: '메일 발송 완료',
+			message: '비밀번호 재설정 링크를 이메일로 발송했습니다.',
+			icon: '✉️'
+		});
+		goToLogin();
 	} else {
 		store.showAlert({
-			title: '로그인 실패',
-			message: '아이디 또는 비밀번호가 일치하지 않습니다.',
+			title: '발송 실패',
+			message: result.error,
 			icon: '🌙'
 		});
-		pw.value = ''; // 비밀번호 입력창 초기화
+	}
+};
+
+const handleSubmit = async () => {
+	if (!email.value || !pw.value) {
+		store.showAlert({
+			title: '',
+			message: '이메일과 비밀번호를 입력해주세요.',
+			icon: '🌙'
+		});
+		return;
+	}
+
+	if (isSignUp.value) {
+		// 회원가입
+		if (pw.value !== pwConfirm.value) {
+			store.showAlert({
+				title: '',
+				message: '비밀번호가 일치하지 않습니다.',
+				icon: '🌙'
+			});
+			return;
+		}
+
+		const result = await store.fnSignUp(email.value, pw.value);
+		if (!result.success) {
+			store.showAlert({
+				title: '회원가입 실패',
+				message: result.error,
+				icon: '🌙'
+			});
+		}
+		// 성공 시 store.pendingVerificationEmail이 설정되어 자동으로 안내 화면 표시
+	} else {
+		// 로그인
+		const result = await store.fnLogin(email.value, pw.value);
+		if (!result.success) {
+			let title = '로그인 실패';
+			let icon = '🌙';
+			if (result.needVerification) {
+				title = '이메일 인증 필요';
+				icon = '✉️';
+			} else if (result.needApproval) {
+				title = '승인 대기';
+				icon = '⏳';
+			}
+			store.showAlert({
+				title,
+				message: result.error,
+				icon
+			});
+			pw.value = '';
+		}
 	}
 };
 </script>

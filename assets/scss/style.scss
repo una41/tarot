@@ -9,6 +9,9 @@ h3{
 		@include font(16, 23);
 	}
 }
+button{
+	transition: all 400ms;
+}
 .btn{
 	@include setCont(100%, auto, block, relative, rgba(228, 202, 101, 0.9));
 	@include font(15, normal, rgba(36, 36, 36, 0.9), $medi);
@@ -24,20 +27,74 @@ h3{
 	}
 }
 .header {
+	@include setCont(100vw, 50px, flex, fixed, #fbdf70);
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 20PX;
     position: fixed;
+	top: 0 !important;
+	left: 0;
     top: 10px;
     right: 10px;
 	display: flex;
-	.logout-btn {
+	@include mobile{
+		height: 40px;
+	}
+	.left{
+		h1{
+			@include font(16,16, #442d13);
+			@include mobile{
+
+			}
+		}
+		p{
+			@include font(12,12, #442d13);
+			margin-top: 5px;
+			@include mobile{
+				@include font(10);
+				margin-top: 2px;
+			}
+		}
+	}
+	.right{
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+	.user_grade{
+		@include font(12, 12, #fff, $bold);
+		padding: 4px 10px 5px;
+		border-radius: 3px;
+		background: #888;
+		&.normal{
+			background: #6b7280;
+		}
+		&.pro{
+			background: #7c3aed;
+		}
+		&.master{
+			background: linear-gradient(90deg, #f59e0b, #ef4444);
+		}
+		@include mobile{
+			@include font(10, 10);
+			padding: 3px 8px 4px;
+		}
+	}
+	.btn_logout {
 		padding: 5px 20px 7px;
-		border: 2px solid #aaa;
-		color: #b4b4b4;
+		border: 2px solid rgba(67, 46, 22, 0.8);
+		color: #422b12;
 		border-radius: 5px;
 		font-size: 14px;
+		@include font(14, 14);
 		transition: all 400ms ease;
-	}
-	.logout-btn:hover {
-		opacity: 0.8;
+		&:hover {
+			opacity: 0.6;
+		}
+		@include mobile{
+			padding: 4px 15px 5px;
+			@include font(12, 12);
+		}
 	}
 }
 
@@ -103,9 +160,6 @@ h6{
 		min-height: 500px; // 화면 전체 높이
         background-position: 44% 93%;
         background-size: auto 140%;
-	}
-	h1{
-		@include blind;
 	}
 	.main{
 		@include setCont(100%, 83%, block, absolute);
@@ -971,14 +1025,58 @@ h6{
 	background: #121212;
 	justify-content: center;
 	align-items: center;
+	flex-direction: column;
 	color: #ddd6fe; /* 🌟 중요: 부드러운 하드웨어 가속을 위해 추가 */
 	will-change: opacity, transform, filter;
 	opacity: 1;
 	filter: blur(0px);
 	transform: scale(1);
+	// 로고
+	.l_logo {
+		@include font(16, normal, #c084fc, $bold);
+		letter-spacing: 0.05rem;
+		margin-bottom: 10px;
+		filter: drop-shadow(0 0 15px rgba(192, 132, 252, 0.5));
+	}
+	.tit {
+		@include font(14, 22, #ddd6fe, $normal);
+		letter-spacing:2.5px;
+	}
+	.bx_member{
+		margin-top: 20px;
+		span{
+			@include font(16,16, #ddd6fe);
+			margin-right: 5px;
+			@include mobile{
+				@include font(14,14, #ddd6fe);
+			}
+		}
+		.divider{
+			@include font(14, 16, rgba(192, 132, 252, 0.5));
+			margin: 0 10px;
+			@include mobile{
+				@include font(12,14, #c084fc, 500);
+			}
+		}
+		.link_member{
+			@include font(16,16, #c084fc, 500);
+			&:hover{
+				opacity: 0.7;
+				text-decoration: underline;
+			}
+			@include mobile{
+				@include font(13,13, #c084fc, 500);
+			}
+		}
+	}
 	.l_wrap{
-		@include setCont(350px, 250px);
+		@include setCont(350px, auto);
+		min-height: 250px;
 		text-align: center;
+        margin-top: -50px;
+		@include mobile{
+			@include setCont(300px, auto);
+		}
 	}
 	.icon {
 		font-size: 3rem;
@@ -986,14 +1084,10 @@ h6{
 		filter: drop-shadow(0 0 10px #c084fc);
 		animation: float 2s ease-in-out infinite;
 	}
-	.tit {
-		@include font(16, 27, #ddd6fe, $normal);
-		letter-spacing: 0.1rem;
-		margin-bottom:20px;
-	}
 	.l_form{
 		display: flex;
 		flex-direction: column;
+		margin-top: 20px;
 	}
 	.ipt {
 		@include setCont(100%, 45px);
@@ -1027,6 +1121,30 @@ h6{
 			margin-top: 10px;
 		}
     }
+	.ipt_pw_wrap{
+		position: relative;
+		margin-top: 10px;
+		.ipt{
+			padding-right: 45px;
+		}
+		.btn_eye{
+			position: absolute;
+			right: 12px;
+			top: 50%;
+			transform: translateY(-50%);
+			@include setCont(20px, 20px, block);
+			@include bgSvg(eyeOff("888"), no-repeat, center, 18px auto);
+			opacity: 0.8;
+			transition: opacity 300ms;
+			&:hover{
+				opacity: 1;
+			}
+			&.on{
+				@include bgSvg(eyeOn("c084fc"), no-repeat, center, 18px auto);
+				opacity: 1;
+			}
+		}
+	}
 	.btn {
 		margin-top: 30px;
 		background: linear-gradient(90deg, #a78bfa, #c084fc);
@@ -1042,7 +1160,26 @@ h6{
 			opacity: 0.7;
 		}
 	}
-
+	// 이메일 인증 안내 화면
+	.verification_notice {
+		text-align: center;
+		padding: 20px 0;
+		.notice_icon {
+			font-size: 3rem;
+			margin-bottom: 1rem;
+			filter: drop-shadow(0 0 10px #c084fc);
+		}
+		.notice_tit {
+			@include font(16, 27, #ddd6fe, $normal);
+			letter-spacing: 0.1rem;
+			margin-bottom: 20px;
+		}
+		.notice_txt {
+			@include font(14, 22, #a78bfa);
+			margin-bottom: 24px;
+			word-break: break-all;
+		}
+	}
 }
 .modal{
 	position: fixed;
@@ -1205,6 +1342,15 @@ h6{
 	opacity: 0;
 }
 
+// 로그인/회원가입 전환 애니메이션
+.l_fade-enter-active,
+.l_fade-leave-active {
+	transition: opacity 0.3s ease;
+}
+.l_fade-enter-from,
+.l_fade-leave-to {
+	opacity: 0;
+}
 
 .pc{
 	@include mobile{

@@ -1,9 +1,15 @@
 <template>
 	<div class="wrap">
-		<div class="header">
-			<h1>tarot card</h1>
-			<button class="logout-btn" @click="showLogoutModal">Logout</button>
-		</div>
+		<header class="header">
+			<div class="left">
+				<h1 class="l_logo">numerologyTarot</h1>
+				<p>수비학으로 보는 타로카드</p>
+			</div>
+			<div class="right">
+				<span class="user_grade" :class="gradeClass">{{ store.userGrade }}</span>
+				<button class="btn_logout" @click="showLogoutModal">Logout</button>
+			</div>
+		</header>
 		<div class="main">
 			<div class="f_wrap">
 				<Tabs/>
@@ -44,6 +50,14 @@
 	const { data: proYearData } = await useFetch('/data/pro_year.json');
 	const { data: birthData } = await useFetch('/data/birth.json');
 	const { data: yearData } = await useFetch('/data/year.json');
+
+	// 회원 등급에 따른 클래스
+	const gradeClass = computed(() => {
+		const grade = store.userGrade;
+		if (grade === '마스터') return 'master';
+		if (grade === '프로') return 'pro';
+		return 'normal';
+	});
 
 	onMounted(() => {
 		// 앱이 로드될 때 쿠키를 다시 확인

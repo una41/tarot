@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import Cookies from 'js-cookie';
-
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 export const useTarotStore = defineStore('tarot', {
 	state: () => ({
 		ipt_birth8: '',
@@ -16,16 +17,22 @@ export const useTarotStore = defineStore('tarot', {
 			{ text: '생일카드', id: 'r1' },
 			{ text: '해운카드', id: 'r2' },
 		],
+        // [임시 계정 - Firebase 연동 전 사용]
         // 관리자 확인을 위한 임시 계정 정보 (Base64 인코딩)
         // ID: admin -> 'YWRtaW4='
         // PW: tarot123! -> 'dGFyb3QxMjMh'
-        adminUser: {
-            account: 'YWRtaW4=', 
-            secret: 'dGFyb3QxMjMh' 
-        },
+        // adminUser: {
+        //     account: 'YWRtaW4=',
+        //     secret: 'dGFyb3QxMjMh'
+        // },
+
+        // Firebase 인증 상태
         user: null,
+        userGrade: null, // 회원 등급 (일반, 프로, 마스터)
         isLoggedIn: false,
         token: null,
+        authLoading: false, // 인증 처리 중 로딩 상태
+        pendingVerificationEmail: null, // 이메일 인증 대기 중인 이메일
         // --- 커스텀 모달 상태 추가 ---
         alertData: {
             isVisible: false,
@@ -160,67 +167,281 @@ export const useTarotStore = defineStore('tarot', {
             this.fnReset();
         },
         
-        // 1. 실제 로그인 처리 (상태 변경 + 쿠키 저장)
-        loginProcess(userData, token) {
-            this.user = userData;
-            this.token = token;
-            this.isLoggedIn = true;
+        // [임시 계정용 로그인 - Firebase 연동 전 사용]
+        // // 1. 실제 로그인 처리 (상태 변경 + 쿠키 저장)
+        // loginProcess(userData, token) {
+        //     this.user = userData;
+        //     this.token = token;
+        //     this.isLoggedIn = true;
+        //     Cookies.set('user_token', token);
+        //     Cookies.set('user_info', JSON.stringify(userData));
+        // },
+        //
+        // // 2. 관리자 로그인 시도 함수
+        // fnLogin(id, pw) {
+        //     const encodedId = btoa(id);
+        //     const encodedPw = btoa(pw);
+        //     if (encodedId === this.adminUser.account && encodedPw === this.adminUser.secret) {
+        //         const dummyToken = btoa(`${encodedId}:${encodedPw}`);
+        //         const userData = {
+        //             id: id,
+        //             role: 'admin',
+        //             name: '타로 마스터',
+        //             loginAt: new Date().toLocaleString()
+        //         };
+        //         this.loginProcess(userData, dummyToken);
+        //         return true;
+        //     }
+        //     return false;
+        // },
 
-            // 쿠키 저장 (세션 쿠키 - 브라우저 닫으면 만료)
-            Cookies.set('user_token', token);
-            Cookies.set('user_info', JSON.stringify(userData));
+        // ========== Firebase 인증 함수 ==========
+
+        // 1. Firebase 회원가입 (이메일 인증 포함)
+        async fnSignUp(email, password) {
+            const { $auth, $db } = useNuxtApp();
+            this.authLoading = true;
+
+            // 먼저 pendingVerificationEmail 설정 (onAuthStateChanged에서 무시하도록)
+            this.pendingVerificationEmail = email;
+
+            try {
+                // 1. Firebase Auth에 계정 생성
+                const userCredential = await createUserWithEmailAndPassword($auth, email, password);
+                const user = userCredential.user;
+
+                // 2. 이메일 인증 발송
+                await sendEmailVerification(user);
+
+                // 3. Firestore에 초기 권한 정보 저장 (핵심 로직)
+                await setDoc(doc($db, 'users', user.uid), {
+                    email: email,
+                    isApproved: false, // 기본값: 승인 대기
+                    grade: '일반',      // 기본값: 일반 등급 일반, 프로, 마스터
+                    createdAt: new Date()
+                });
+
+                // 4. 자동 로그인 상태 해제 (가입 후 자동 로그인 방지)
+                await signOut($auth);
+
+                return { success: true };
+
+            } catch (error) {
+                console.error("가입 에러 상세:", error.code);
+                this.pendingVerificationEmail = null; // 실패 시 초기화
+                return { success: false, error: this.getFirebaseErrorMessage(error.code) };
+            } finally {
+                this.authLoading = false;
+            }
         },
 
-        // 2. 관리자 로그인 시도 함수
-        fnLogin(id, pw) {
-            const encodedId = btoa(id);
-            const encodedPw = btoa(pw);
+        // 인증 안내 화면 닫기
+        clearPendingVerification() {
+            this.pendingVerificationEmail = null;
+        },
 
-            if (encodedId === this.adminUser.account && encodedPw === this.adminUser.secret) {
-                // 로그인 성공 시 세션용 토큰 생성 (여기선 간단히 ID/PW 조합)
-                const dummyToken = btoa(`${encodedId}:${encodedPw}`);
-                
-                const userData = {
-                    id: id,
-                    role: 'admin',
-                    name: '타로 마스터',
+        // 인증 이메일 재발송
+        async fnResendVerification() {
+            const { $auth } = useNuxtApp();
+            const user = $auth.currentUser;
+            if (user && !user.emailVerified) {
+                try {
+                    await sendEmailVerification(user);
+                    return { success: true };
+                } catch (error) {
+                    return { success: false, error: this.getFirebaseErrorMessage(error.code) };
+                }
+            }
+            return { success: false, error: '재발송할 수 없습니다.' };
+        },
+
+        // 비밀번호 재설정 이메일 발송
+        async fnResetPassword(email) {
+            const { $auth } = useNuxtApp();
+            this.authLoading = true;
+            try {
+                await sendPasswordResetEmail($auth, email);
+                this.authLoading = false;
+                return { success: true };
+            } catch (error) {
+                this.authLoading = false;
+                return { success: false, error: this.getFirebaseErrorMessage(error.code) };
+            }
+        },
+
+        // 2. Firebase 로그인 (이메일 인증 + 승인 확인)
+        async fnLogin(email, password) {
+            const { $auth, $db } = useNuxtApp();
+            this.authLoading = true;
+            try {
+                const userCredential = await signInWithEmailAndPassword($auth, email, password);
+                const user = userCredential.user;
+
+                // 1. 이메일 인증 확인
+                if (!user.emailVerified) {
+                    await signOut($auth);
+                    this.authLoading = false;
+                    return { success: false, needVerification: true, error: '이메일 인증이 필요합니다. 메일함을 확인해주세요.' };
+                }
+
+                // 2. Firestore에서 승인 여부 확인
+                const userDoc = await getDoc(doc($db, 'users', user.uid));
+                if (!userDoc.exists()) {
+                    await signOut($auth);
+                    this.authLoading = false;
+                    return { success: false, error: '사용자 정보를 찾을 수 없습니다.' };
+                }
+
+                const userData = userDoc.data();
+                if (!userData.isApproved) {
+                    await signOut($auth);
+                    this.authLoading = false;
+                    return { success: false, needApproval: true, error: '관리자 승인 대기 중입니다. 승인 후 이용 가능합니다.' };
+                }
+
+                // 3. 모든 조건 통과 시 로그인 처리
+                this.user = {
+                    uid: user.uid,
+                    email: user.email,
+                    emailVerified: user.emailVerified,
                     loginAt: new Date().toLocaleString()
                 };
+                this.userGrade = userData.grade || '일반';
+                this.token = await user.getIdToken();
+                this.isLoggedIn = true;
 
-                // 통합된 로그인 처리 함수 호출
-                this.loginProcess(userData, dummyToken);
-                return true;
+                // 쿠키 저장
+                Cookies.set('user_token', this.token);
+                Cookies.set('user_info', JSON.stringify(this.user));
+                Cookies.set('user_grade', this.userGrade);
+
+                this.authLoading = false;
+                return { success: true };
+            } catch (error) {
+                this.authLoading = false;
+                return { success: false, error: this.getFirebaseErrorMessage(error.code) };
             }
-            return false;
         },
 
-        // 3. 로그아웃 (상태 초기화 + 쿠키 삭제)
-        fnLogout() {
+        // 3. Firebase 로그아웃
+        async fnLogout() {
+            const { $auth } = useNuxtApp();
+            try {
+                await signOut($auth);
+            } catch (error) {
+                console.error('로그아웃 오류:', error);
+            }
             this.user = null;
+            this.userGrade = null;
             this.token = null;
             this.isLoggedIn = false;
-
             Cookies.remove('user_token');
             Cookies.remove('user_info');
+            Cookies.remove('user_grade');
         },
 
-        // 4. 인증 체크 (새로고침 시 호출)
+        // 4. 인증 상태 체크 (앱 시작 시 호출)
         checkAuth() {
-            const token = Cookies.get('user_token');
-            const userInfo = Cookies.get('user_info');
+            const { $auth, $db } = useNuxtApp();
 
-            if (token && userInfo) {
-                try {
-                    this.token = token;
-                    this.user = JSON.parse(userInfo);
-                    this.isLoggedIn = true;
-                } catch (error) {
-                    console.error('쿠키 파싱 오류:', error);
-                    this.fnLogout();
+            onAuthStateChanged($auth, async (user) => {
+                // 이메일 인증 대기 중이면 상태 변경 무시
+                if (this.pendingVerificationEmail) {
+                    return;
                 }
-            } else {
-                this.fnLogout();
-            }
+
+                if (user) {
+                    // 1. 이메일 인증 확인
+                    if (!user.emailVerified) {
+                        // 이메일 미인증 사용자는 로그인 상태로 전환하지 않음
+                        this.user = null;
+                        this.token = null;
+                        this.isLoggedIn = false;
+                        return;
+                    }
+
+                    // 2. Firestore에서 승인 여부 확인
+                    let userGrade = '일반';
+                    try {
+                        const userDoc = await getDoc(doc($db, 'users', user.uid));
+                        if (userDoc.exists()) {
+                            const userData = userDoc.data();
+                            if (!userData.isApproved) {
+                                // 승인되지 않은 사용자는 로그인 상태로 전환하지 않음
+                                await signOut($auth);
+                                this.user = null;
+                                this.userGrade = null;
+                                this.token = null;
+                                this.isLoggedIn = false;
+                                return;
+                            }
+                            userGrade = userData.grade || '일반';
+                        } else {
+                            // 사용자 문서가 없으면 로그인 불가
+                            await signOut($auth);
+                            this.user = null;
+                            this.userGrade = null;
+                            this.token = null;
+                            this.isLoggedIn = false;
+                            return;
+                        }
+                    } catch (error) {
+                        console.error('사용자 정보 확인 오류:', error);
+                        this.user = null;
+                        this.userGrade = null;
+                        this.token = null;
+                        this.isLoggedIn = false;
+                        return;
+                    }
+
+                    // 3. 모든 조건 통과 시 로그인 처리
+                    this.user = {
+                        uid: user.uid,
+                        email: user.email,
+                        emailVerified: user.emailVerified,
+                        loginAt: new Date().toLocaleString()
+                    };
+                    this.userGrade = userGrade;
+                    this.token = await user.getIdToken();
+                    this.isLoggedIn = true;
+                } else {
+                    // 쿠키에서 복원 시도
+                    const token = Cookies.get('user_token');
+                    const userInfo = Cookies.get('user_info');
+                    const userGrade = Cookies.get('user_grade');
+                    if (token && userInfo) {
+                        try {
+                            this.token = token;
+                            this.user = JSON.parse(userInfo);
+                            this.userGrade = userGrade || '일반';
+                            this.isLoggedIn = true;
+                        } catch (error) {
+                            this.fnLogout();
+                        }
+                    } else {
+                        this.user = null;
+                        this.userGrade = null;
+                        this.token = null;
+                        this.isLoggedIn = false;
+                    }
+                }
+            });
+        },
+
+        // 5. Firebase 에러 메시지 변환
+        getFirebaseErrorMessage(code) {
+            const messages = {
+                'auth/email-already-in-use': '이미 사용 중인 이메일입니다.',
+                'auth/invalid-email': '유효하지 않은 이메일 형식입니다.',
+                'auth/operation-not-allowed': '이메일/비밀번호 로그인이 비활성화되어 있습니다.',
+                'auth/weak-password': '비밀번호는 6자 이상이어야 합니다.',
+                'auth/user-disabled': '비활성화된 계정입니다.',
+                'auth/user-not-found': '등록되지 않은 이메일입니다.',
+                'auth/wrong-password': '비밀번호가 일치하지 않습니다.',
+                'auth/invalid-credential': '이메일 또는 비밀번호가 올바르지 않습니다.',
+                'auth/too-many-requests': '너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.',
+            };
+            return messages[code] || '인증 오류가 발생했습니다.';
         },
 
         // 5. Alert 모달 제어
