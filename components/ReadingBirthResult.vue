@@ -182,7 +182,7 @@
 								<h4 class="d_tit">주의해야 할 인연</h4>
 								<div class="d_cont">
 									<ul class="d_desc">
-										<li v-for="(item, i) in data.list[store.result].lucky_match.cont" :key="i" v-html="item"></li>
+										<li v-for="(item, i) in data.list[store.result].caution_match.cont" :key="i" v-html="item"></li>
 									</ul>
 								</div>
 							</div>
