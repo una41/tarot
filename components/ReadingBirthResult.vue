@@ -185,7 +185,7 @@
 										<li v-for="(item, i) in data.list[store.result].caution_match.cont" :key="i" v-html="item"></li>
 									</ul>
 								</div>
-							</div>
+							</div> 
 						</div>
 						<div class="area">
 							<div class="item">
