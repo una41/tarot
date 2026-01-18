@@ -405,25 +405,15 @@ export const useTarotStore = defineStore('tarot', {
                     this.token = await user.getIdToken();
                     this.isLoggedIn = true;
                 } else {
-                    // 쿠키에서 복원 시도
-                    const token = Cookies.get('user_token');
-                    const userInfo = Cookies.get('user_info');
-                    const userGrade = Cookies.get('user_grade');
-                    if (token && userInfo) {
-                        try {
-                            this.token = token;
-                            this.user = JSON.parse(userInfo);
-                            this.userGrade = userGrade || '일반';
-                            this.isLoggedIn = true;
-                        } catch (error) {
-                            this.fnLogout();
-                        }
-                    } else {
-                        this.user = null;
-                        this.userGrade = null;
-                        this.token = null;
-                        this.isLoggedIn = false;
-                    }
+                    // Firebase 세션이 없으면 로그아웃 상태로 설정
+                    // 쿠키가 남아있어도 Firebase 인증이 없으면 로그인 불가
+                    this.user = null;
+                    this.userGrade = null;
+                    this.token = null;
+                    this.isLoggedIn = false;
+                    Cookies.remove('user_token');
+                    Cookies.remove('user_info');
+                    Cookies.remove('user_grade');
                 }
             });
         },
