@@ -95,8 +95,8 @@ export default defineNuxtConfig({
 			]
 		},
     	// 본인의 깃허브 저장소 이름이 'Tarot'이라면 아래와 같이 설정
-		baseURL: '/', //cloudflare
-		// baseURL: '/tarot/', //git
+		// baseURL: '/', //cloudflare
+		baseURL: '/tarot/', //git
 		buildAssetsDir: 'assets',
 	},
 })

@@ -1090,6 +1090,8 @@ h6{
 	opacity: 1;
 	filter: blur(0px);
 	transform: scale(1);
+    min-width: 300px;
+    margin: 0 auto;
 	// 로고
 	.l_logo {
 		@include font(16, normal, #c084fc, $bold);
