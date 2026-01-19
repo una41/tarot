@@ -41,6 +41,13 @@
 							<input class="ipt" v-model="pwConfirm" :type="showPwConfirm ? 'text' : 'password'" placeholder="비밀번호 확인" @keyup.enter="handleSubmit" />
 							<button type="button" class="btn_eye" :class="{ on: showPwConfirm }" @click="showPwConfirm = !showPwConfirm"></button>
 						</div>
+						<input v-if="isSignUp" class="ipt" v-model="userName" type="text" placeholder="이름" @keyup.enter="handleSubmit" />
+						<input v-if="isSignUp" class="ipt" v-model="userPhone" type="tel" placeholder="연락처" @keyup.enter="handleSubmit" />
+						<select v-if="isSignUp" class="ipt" v-model="isStartup">
+							<option value="" disabled>창업반 여부</option>
+							<option value="Y">Y</option>
+							<option value="N">N</option>
+						</select>
 						<button class="btn" @click="handleSubmit" :disabled="store.authLoading">
 							{{ store.authLoading ? '처리 중...' : (isSignUp ? '가입하기' : '운명 확인하기') }}
 						</button>
@@ -68,6 +75,9 @@ const store = useTarotStore();
 const email = ref('');
 const pw = ref('');
 const pwConfirm = ref('');
+const userName = ref('');
+const userPhone = ref('');
+const isStartup = ref('');
 const isSignUp = ref(false);
 const isForgotPassword = ref(false);
 const showPw = ref(false);
@@ -87,6 +97,9 @@ const toggleMode = () => {
 	isSignUp.value = !isSignUp.value;
 	pw.value = '';
 	pwConfirm.value = '';
+	userName.value = '';
+	userPhone.value = '';
+	isStartup.value = '';
 	showPw.value = false;
 	showPwConfirm.value = false;
 };
@@ -97,6 +110,9 @@ const goToLogin = () => {
 	isForgotPassword.value = false;
 	pw.value = '';
 	pwConfirm.value = '';
+	userName.value = '';
+	userPhone.value = '';
+	isStartup.value = '';
 	showPw.value = false;
 	showPwConfirm.value = false;
 };
@@ -146,6 +162,15 @@ const handleSubmit = async () => {
 
 	if (isSignUp.value) {
 		// 회원가입
+		if (!userName.value || !userPhone.value || !isStartup.value) {
+			store.showAlert({
+				title: '',
+				message: '모든 항목을 입력해주세요.',
+				icon: '🌙'
+			});
+			return;
+		}
+
 		if (pw.value !== pwConfirm.value) {
 			store.showAlert({
 				title: '',

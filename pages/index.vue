@@ -6,7 +6,7 @@
 				<p>수비학으로 보는 타로카드</p>
 			</div>
 			<div class="right">
-				<span class="user_grade" :class="gradeClass">{{ store.userGrade }}</span>
+				<!-- <span class="user_grade" :class="gradeClass">{{ store.userGrade }}</span> -->
 				<button class="btn_logout" @click="showLogoutModal">Logout</button>
 			</div>
 		</header>
