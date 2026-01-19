@@ -30,15 +30,17 @@ button{
 	@include setCont(100vw, 50px, flex, fixed, #fbdf70);
 	justify-content: space-between;
 	align-items: center;
-	padding: 0 20PX;
+	padding: 0 25px 0 20px;
     position: fixed;
 	top: 0 !important;
 	left: 0;
     top: 10px;
     right: 10px;
 	display: flex;
+	z-index: 150;
 	@include mobile{
 		height: 40px;
+		padding: 0 calcPercent(15);
 	}
 	.left{
 		h1{
@@ -61,11 +63,83 @@ button{
 		align-items: center;
 		gap: 10px;
 	}
+	.user_menu{
+		position: relative;
+		.btn_user{
+			@include setCont(32px, 32px);
+			@include bgSvg(user("422b12"), no-repeat, center, 22px auto);
+			transition: opacity 300ms;
+			&:hover{
+				opacity: 0.7;
+			}
+			@include mobile{
+				@include setCont(30px, 30px);
+				background-size: 18px auto;
+			}
+		}
+		.user_dropdown{
+			position: absolute;
+			top: calc(100% + 3px);
+			right: -12px;
+			padding: 15px;
+			// background: #fff;
+			background: rgba(0, 0, 0, 0.85);
+			border-radius: 8px;
+			box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+			min-width: 160px;
+			opacity: 0;
+			visibility: hidden;
+			transform: translateY(-10px);
+			&::before{
+				content: '';
+				position: absolute;
+				top: -7px;
+				right: 18px;
+				border-left: 8px solid transparent;
+				border-right: 8px solid transparent;
+				border-bottom: 8px solid rgba(0, 0, 0, 0.85);
+			}
+			transition: all 300ms ease;
+			z-index: 100;
+			.user_info{
+				@include setCont(100% , auto, flex);
+				@include font(13, 18, #fff);
+				align-items: center;
+				padding-bottom: 10px;
+				// border-bottom: 1px solid #eee;
+				// margin-bottom: 10px;
+				.user_grade{
+					@include font(11, 11, #fff, $bold);
+					padding: 3px 6px 4px;
+					border-radius: 3px;
+					margin-left: 5px;
+					vertical-align: middle;
+				}
+			}
+			.btn_logout{
+				@include setCont(100%, 30px, flex);
+				@include font(12, 36, #eee);
+				align-items: center;
+				justify-content: center;
+				border: 1px solid #fff;
+				border-radius: 5px;
+				transition: all 300ms ease;
+				&:hover{
+					border: 1px solid #888;
+					color: #888;
+				}
+			}
+		}
+		&.on{
+			.user_dropdown{
+				opacity: 1;
+				visibility: visible;
+				transform: translateY(0);
+			}
+		}
+	}
 	.user_grade{
-		@include font(12, 12, #fff, $bold);
-		padding: 4px 10px 5px;
-		border-radius: 3px;
-		background: #888;
+		background: #6b7280;
 		&.normal{
 			background: #6b7280;
 		}
@@ -74,26 +148,6 @@ button{
 		}
 		&.master{
 			background: linear-gradient(90deg, #f59e0b, #ef4444);
-		}
-		@include mobile{
-			@include font(10, 10);
-			padding: 3px 8px 4px;
-		}
-	}
-	.btn_logout {
-		padding: 5px 20px 7px;
-		border: 2px solid rgba(67, 46, 22, 0.8);
-		color: #422b12;
-		border-radius: 5px;
-		font-size: 14px;
-		@include font(14, 14);
-		transition: all 400ms ease;
-		&:hover {
-			opacity: 0.6;
-		}
-		@include mobile{
-			padding: 4px 15px 5px;
-			@include font(12, 12);
 		}
 	}
 }
@@ -290,6 +344,7 @@ h6{
 				.bx_ipt{
 					display: flex;
 					justify-content: space-between;
+					margin: 20px 0 10px;
 					.ipt{
 					width: calc(50% - 3px);
 					letter-spacing: 2px;
@@ -297,12 +352,16 @@ h6{
 					text-align: center;
 					}
 				}
+				.desc{
+					@include font(12, 16, #fff);
+					margin-bottom: 15px;
+				}
 			}
 		}
 	}
 	.result{
 		@include setCont(100%, 100%, flex, absolute);
-		z-index: 10;
+		z-index: 250;
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
@@ -1117,13 +1176,12 @@ h6{
 			/* 테두리나 기타 효과가 변하지 않도록 설정 */
 			transition: background-color 5000s ease-in-out 0s;
 		}
-		&+.ipt{
+		&+.ipt, &+.ipt_pw_wrap{
 			margin-top: 10px;
 		}
     }
 	.ipt_pw_wrap{
 		position: relative;
-		margin-top: 10px;
 		.ipt{
 			padding-right: 45px;
 		}
@@ -1142,6 +1200,80 @@ h6{
 			&.on{
 				@include bgSvg(eyeOn("c084fc"), no-repeat, center, 18px auto);
 				opacity: 1;
+			}
+		}
+		&+.ipt, &+.ipt_pw_wrap{
+			margin-top: 10px;
+		}
+	}
+	.slct{
+		position: relative;
+		margin-top: 10px;
+		.slct_tit{
+			@include setCont(100%, 45px);
+			padding: 0 30px;
+			background: rgba(0, 0, 0, 0);
+			border: 2px solid rgba(192, 132, 252, 0.3);
+			@include font(15, 44, #aaa);
+			text-align: left;
+			border-radius: 5px;
+			transition: all 400ms ease;
+			cursor: pointer;
+			&::after{
+				content: '';
+				position: absolute;
+				right: 15px;
+				top: 50%;
+				transform: translateY(-50%);
+				border-left: 5px solid transparent;
+				border-right: 5px solid transparent;
+				border-top: 6px solid #aaa;
+				transition: transform 300ms;
+			}
+		}
+		.slct_cont{
+			position: absolute;
+			top: 100%;
+			left: 0;
+			width: 100%;
+			background: #1a1a1a;
+			border: 2px solid rgba(192, 132, 252, 0.3);
+			border-top: none;
+			border-radius: 0 0 5px 5px;
+			overflow: hidden;
+			max-height: 0;
+			opacity: 0;
+			transition: all 300ms ease;
+			z-index: 10;
+			button{
+				@include setCont(100%, 40px);
+				padding: 0 30px;
+				@include font(15, 40, #fff);
+				text-align: left;
+				background: transparent;
+				transition: background 200ms;
+				&:hover{
+					background: rgba(192, 132, 252, 0.2);
+				}
+			}
+		}
+		&.on{
+			.slct_tit{
+				color: #fff;
+				border-color: rgba(192, 132, 252, 0.5);
+				border-radius: 5px 5px 0 0;
+				&::after{
+					transform: translateY(-50%) rotate(180deg);
+				}
+			}
+			.slct_cont{
+				max-height: 200px;
+				opacity: 1;
+			}
+		}
+		&.selected{
+			.slct_tit{
+				color: #fff;
 			}
 		}
 	}

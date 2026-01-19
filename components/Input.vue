@@ -17,9 +17,10 @@
 		<div class="c_wrap c_year" v-else>
 			<form @submit.prevent="store.fnYearCalc">
 				<div class="bx_ipt">
-					<input v-model="store.ipt_year" type="text" placeholder="연도(2026)" maxlength="4" class="ipt"/>
-					<input v-model="store.ipt_birth4" type="text" placeholder="생일(0130)" maxlength="4" class="ipt"/>
+					<input key="year" v-model="store.ipt_year" type="text" placeholder="연도(2026)" maxlength="4" class="ipt"/>
+					<input key="birth" v-model="store.ipt_birth4" type="text" placeholder="생일(0130)" maxlength="4" class="ipt"/>
 				</div>
+				<p class="desc">💡 운세 볼 연도를 입력하세요</p>
 				<div class="bx_btn">
 					<button class="btn"><b>해운카드 보기</b></button>
 				</div>

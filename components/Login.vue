@@ -35,19 +35,23 @@
 						<input class="ipt" v-model="email" type="email" placeholder="이메일" @keyup.enter="handleSubmit" />
 						<div class="ipt_pw_wrap">
 							<input class="ipt" v-model="pw" :type="showPw ? 'text' : 'password'" placeholder="비밀번호" @keyup.enter="handleSubmit" />
-							<button type="button" class="btn_eye" :class="{ on: showPw }" @click="showPw = !showPw"></button>
+							<button type="button" class="btn_eye" :class="{ on: showPw }" @click="showPw = !showPw" tabindex="-1"></button>
 						</div>
 						<div v-if="isSignUp" class="ipt_pw_wrap">
 							<input class="ipt" v-model="pwConfirm" :type="showPwConfirm ? 'text' : 'password'" placeholder="비밀번호 확인" @keyup.enter="handleSubmit" />
-							<button type="button" class="btn_eye" :class="{ on: showPwConfirm }" @click="showPwConfirm = !showPwConfirm"></button>
+							<button type="button" class="btn_eye" :class="{ on: showPwConfirm }" @click="showPwConfirm = !showPwConfirm" tabindex="-1"></button>
 						</div>
 						<input v-if="isSignUp" class="ipt" v-model="userName" type="text" placeholder="이름" @keyup.enter="handleSubmit" />
-						<input v-if="isSignUp" class="ipt" v-model="userPhone" type="tel" placeholder="연락처" @keyup.enter="handleSubmit" />
-						<select v-if="isSignUp" class="ipt" v-model="isStartup">
-							<option value="" disabled>창업반 여부</option>
-							<option value="Y">Y</option>
-							<option value="N">N</option>
-						</select>
+						<input v-if="isSignUp" class="ipt" v-model="userPhone" type="tel" placeholder="연락처 (010-0000-0000)" @keyup.enter="handleSubmit" />
+						<div v-if="isSignUp" class="slct" :class="{ on: isSlctOpen, selected: isStartup }">
+							<button type="button" class="slct_tit" @click="isSlctOpen = !isSlctOpen">
+								{{ isStartup || '창업반' }}
+							</button>
+							<div class="slct_cont">
+								<button type="button" @click="selectStartup('Y')">Y</button>
+								<button type="button" @click="selectStartup('N')">N</button>
+							</div>
+						</div>
 						<button class="btn" @click="handleSubmit" :disabled="store.authLoading">
 							{{ store.authLoading ? '처리 중...' : (isSignUp ? '가입하기' : '운명 확인하기') }}
 						</button>
@@ -78,6 +82,7 @@ const pwConfirm = ref('');
 const userName = ref('');
 const userPhone = ref('');
 const isStartup = ref('');
+const isSlctOpen = ref(false);
 const isSignUp = ref(false);
 const isForgotPassword = ref(false);
 const showPw = ref(false);
@@ -93,6 +98,11 @@ const modeTitle = computed(() => {
 	return isSignUp.value ? 'Join' : 'Login';
 });
 
+const selectStartup = (value) => {
+	isStartup.value = value;
+	isSlctOpen.value = false;
+};
+
 const toggleMode = () => {
 	isSignUp.value = !isSignUp.value;
 	pw.value = '';
@@ -100,6 +110,7 @@ const toggleMode = () => {
 	userName.value = '';
 	userPhone.value = '';
 	isStartup.value = '';
+	isSlctOpen.value = false;
 	showPw.value = false;
 	showPwConfirm.value = false;
 };
@@ -113,6 +124,7 @@ const goToLogin = () => {
 	userName.value = '';
 	userPhone.value = '';
 	isStartup.value = '';
+	isSlctOpen.value = false;
 	showPw.value = false;
 	showPwConfirm.value = false;
 };
@@ -171,6 +183,17 @@ const handleSubmit = async () => {
 			return;
 		}
 
+		// 전화번호 형식 검증 (010-0000-0000)
+		const phoneRegex = /^01[0-9]-[0-9]{4}-[0-9]{4}$/;
+		if (!phoneRegex.test(userPhone.value)) {
+			store.showAlert({
+				title: '',
+				message: '연락처 형식을 확인해주세요. (010-0000-0000)',
+				icon: '🌙'
+			});
+			return;
+		}
+
 		if (pw.value !== pwConfirm.value) {
 			store.showAlert({
 				title: '',
@@ -180,7 +203,7 @@ const handleSubmit = async () => {
 			return;
 		}
 
-		const result = await store.fnSignUp(email.value, pw.value);
+		const result = await store.fnSignUp(email.value, pw.value, userName.value, userPhone.value, isStartup.value);
 		if (!result.success) {
 			store.showAlert({
 				title: '회원가입 실패',

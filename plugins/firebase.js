@@ -1,14 +1,11 @@
 // plugins/firebase.js
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore"; // Firestore 추가
+// 동적 import로 번들 분리 (초기 로딩 최적화)
 
-// 전역 변수로 선언하여 export 합니다.
 let auth;
 let db;
 let firebaseApp;
 
-export default defineNuxtPlugin((nuxtApp) => {
+export default defineNuxtPlugin(async (nuxtApp) => {
 	const config = useRuntimeConfig();
 
 	const firebaseConfig = {
@@ -20,10 +17,21 @@ export default defineNuxtPlugin((nuxtApp) => {
 		appId: config.public.firebaseAppId,
 	};
 
-	// Firebase 초기화 (중복 방지)
+	// 동적 import로 Firebase 모듈 로드
+	const [{ initializeApp }, { getAuth, browserSessionPersistence, setPersistence }, { getFirestore }] = await Promise.all([
+		import('firebase/app'),
+		import('firebase/auth'),
+		import('firebase/firestore')
+	]);
+
+	// Firebase 초기화
 	firebaseApp = initializeApp(firebaseConfig);
 	auth = getAuth(firebaseApp);
-	db = getFirestore(firebaseApp); // Firestore 초기화
+
+	// 모든 서버에서 브라우저 닫으면 로그아웃
+	await setPersistence(auth, browserSessionPersistence);
+
+	db = getFirestore(firebaseApp);
 
 	return {
 		provide: {

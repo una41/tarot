@@ -198,7 +198,7 @@ export const useTarotStore = defineStore('tarot', {
         // ========== Firebase 인증 함수 ==========
 
         // 1. Firebase 회원가입 (이메일 인증 포함)
-        async fnSignUp(email, password) {
+        async fnSignUp(email, password, userName, userPhone, isStartup) {
             const { $auth, $db } = useNuxtApp();
             this.authLoading = true;
 
@@ -216,6 +216,9 @@ export const useTarotStore = defineStore('tarot', {
                 // 3. Firestore에 초기 권한 정보 저장 (핵심 로직)
                 await setDoc(doc($db, 'users', user.uid), {
                     email: email,
+                    name: userName,
+                    phone: userPhone,
+                    isStartup: isStartup,
                     isApproved: false, // 기본값: 승인 대기
                     grade: '일반',      // 기본값: 일반 등급 일반, 프로, 마스터
                     createdAt: new Date()
@@ -303,6 +306,7 @@ export const useTarotStore = defineStore('tarot', {
                 this.user = {
                     uid: user.uid,
                     email: user.email,
+                    name: userData.name || '',
                     emailVerified: user.emailVerified,
                     loginAt: new Date().toLocaleString()
                 };
@@ -314,6 +318,12 @@ export const useTarotStore = defineStore('tarot', {
                 Cookies.set('user_token', this.token);
                 Cookies.set('user_info', JSON.stringify(this.user));
                 Cookies.set('user_grade', this.userGrade);
+
+                // 로그인 성공 시 로더 표시 (메인 페이지 로드 동안)
+                this.setAppLoading(true);
+                setTimeout(() => {
+                    this.setAppLoading(false);
+                }, 600);
 
                 this.authLoading = false;
                 return { success: true };
@@ -362,6 +372,7 @@ export const useTarotStore = defineStore('tarot', {
 
                     // 2. Firestore에서 승인 여부 확인
                     let userGrade = '일반';
+                    let userName = '';
                     try {
                         const userDoc = await getDoc(doc($db, 'users', user.uid));
                         if (userDoc.exists()) {
@@ -376,6 +387,7 @@ export const useTarotStore = defineStore('tarot', {
                                 return;
                             }
                             userGrade = userData.grade || '일반';
+                            userName = userData.name || '';
                         } else {
                             // 사용자 문서가 없으면 로그인 불가
                             await signOut($auth);
@@ -398,6 +410,7 @@ export const useTarotStore = defineStore('tarot', {
                     this.user = {
                         uid: user.uid,
                         email: user.email,
+                        name: userName,
                         emailVerified: user.emailVerified,
                         loginAt: new Date().toLocaleString()
                     };

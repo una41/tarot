@@ -6,8 +6,13 @@
 				<p>수비학으로 보는 타로카드</p>
 			</div>
 			<div class="right">
-				<!-- <span class="user_grade" :class="gradeClass">{{ store.userGrade }}</span> -->
-				<button class="btn_logout" @click="showLogoutModal">Logout</button>
+				<div class="user_menu" :class="{ on: isUserMenuOpen }">
+					<button type="button" class="btn_user" @click="isUserMenuOpen = !isUserMenuOpen"></button>
+					<div class="user_dropdown">
+						<div class="user_info">{{ userName }}님 <span class="user_grade" :class="gradeClass">{{ store.userGrade }}</span></div>
+						<button type="button" class="btn_logout" @click.stop="showLogoutModal">로그아웃</button>
+					</div>
+				</div>
 			</div>
 		</header>
 		<div class="main">
@@ -43,6 +48,7 @@
 </template>
 <script setup>
 	//Store
+	import { ref, computed, onMounted, onUnmounted } from 'vue';
 	import { useTarotStore } from '~/stores/tarot'
 	const store = useTarotStore();
 	// 데이터 가져오기 (GET)
@@ -50,6 +56,14 @@
 	const { data: proYearData } = await useFetch('/data/pro_year.json');
 	const { data: birthData } = await useFetch('/data/birth.json');
 	const { data: yearData } = await useFetch('/data/year.json');
+
+	// 유저 메뉴 토글
+	const isUserMenuOpen = ref(false);
+
+	// 유저 이름 (Firestore에서 가져온 이름)
+	const userName = computed(() => {
+		return store.user?.name || '사용자';
+	});
 
 	// 회원 등급에 따른 클래스
 	const gradeClass = computed(() => {
@@ -59,13 +73,27 @@
 		return 'normal';
 	});
 
+	// 바깥 클릭 시 유저 메뉴 닫기
+	const closeUserMenu = (e) => {
+		if (!e.target.closest('.user_menu')) {
+			isUserMenuOpen.value = false;
+		}
+	};
+
 	onMounted(() => {
 		// 앱이 로드될 때 쿠키를 다시 확인
 		store.checkAuth();
+		// 바깥 클릭 이벤트 등록
+		document.addEventListener('click', closeUserMenu);
+	});
+
+	onUnmounted(() => {
+		document.removeEventListener('click', closeUserMenu);
 	});
 
 	// 로그아웃 모달 표시
 	const showLogoutModal = () => {
+		isUserMenuOpen.value = false;
 		store.showConfirm({
 			title: '운명의 길을 닫으시겠습니까?',
 			icon: '🌙',
