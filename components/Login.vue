@@ -12,7 +12,8 @@
 				<div v-if="store.pendingVerificationEmail" class="verification_notice" key="verification">
 					<p class="notice_icon">✉️</p>
 					<p class="notice_tit">인증 메일을 발송했습니다</p>
-					<p class="notice_txt">{{ store.pendingVerificationEmail }}로 전송된 인증 링크를 클릭해주세요.</p>
+					<p class="txt_notice">{{ store.pendingVerificationEmail }}로 전송된 인증 링크를 클릭해주세요.</p>
+					<p class="txt_alert">메일이 보이지 않으면 스팸함을 확인해주세요.</p>
 					<button class="btn" @click="goToLogin">로그인하러 가기</button>
 				</div>
 
@@ -43,7 +44,7 @@
 						</div>
 						<input v-if="isSignUp" class="ipt" v-model="userName" type="text" placeholder="이름" @keyup.enter="handleSubmit" />
 						<input v-if="isSignUp" class="ipt" v-model="userPhone" type="tel" placeholder="연락처 (010-0000-0000)" @keyup.enter="handleSubmit" />
-						<div v-if="isSignUp" class="slct" :class="{ on: isSlctOpen, selected: isStartup }">
+						<div v-if="isSignUp" ref="slctRef" class="slct" :class="{ on: isSlctOpen, selected: isStartup }">
 							<button type="button" class="slct_tit" @click="isSlctOpen = !isSlctOpen">
 								{{ isStartup || '창업반' }}
 							</button>
@@ -71,10 +72,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useTarotStore } from '~/stores/tarot';
 
 const store = useTarotStore();
+const slctRef = ref(null);
 
 const email = ref('');
 const pw = ref('');
@@ -102,6 +104,21 @@ const selectStartup = (value) => {
 	isStartup.value = value;
 	isSlctOpen.value = false;
 };
+
+// 셀렉트 박스 바깥 클릭 시 닫기
+const handleClickOutside = (event) => {
+	if (slctRef.value && !slctRef.value.contains(event.target)) {
+		isSlctOpen.value = false;
+	}
+};
+
+onMounted(() => {
+	document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+	document.removeEventListener('click', handleClickOutside);
+});
 
 const toggleMode = () => {
 	isSignUp.value = !isSignUp.value;

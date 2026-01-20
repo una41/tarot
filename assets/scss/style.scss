@@ -2,6 +2,7 @@
 @use 'mixin' as *;
 @use 'svg' as *;
 @use 'pdf' as *;
+@use 'wiki' as *;
 
 h3{
 	@include font(18, 25);
@@ -1132,11 +1133,12 @@ h6{
 	}
 	.l_wrap{
 		@include setCont(350px, auto);
-		min-height: 250px;
 		text-align: center;
-        margin-top: -50px;
+        margin: -50px auto 0;
 		@include mobile{
-			@include setCont(300px, auto);
+			@include setCont(85%, auto);
+			min-width: 290px;
+			max-width: 350px;
 		}
 	}
 	.icon {
@@ -1280,8 +1282,8 @@ h6{
 		}
 	}
 	.btn {
-		margin-top: 30px;
 		background: linear-gradient(90deg, #a78bfa, #c084fc);
+		margin: 30px auto 0;
 		// 	border: none;
 		// 	border-radius: 4px;
 			color: #121212;
@@ -1308,8 +1310,13 @@ h6{
 			letter-spacing: 0.1rem;
 			margin-bottom: 20px;
 		}
-		.notice_txt {
+		.txt_notice {
 			@include font(14, 22, #a78bfa);
+			margin-bottom: 10px;
+			word-break: break-all;
+		}
+		.txt_alert {
+			@include font(12, 20, #ccc);
 			margin-bottom: 24px;
 			word-break: break-all;
 		}
