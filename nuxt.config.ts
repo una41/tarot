@@ -41,18 +41,37 @@ export default defineNuxtConfig({
 					additionalData: '@use "@/assets/scss/_reset.scss" as *;'
 				}
 			}
-		}
+		},
+		esbuild: {
+			// 빌드 시 console, debugger를 제거하지 않도록 설정
+			drop: [] 
+		},
+		build: {
+		// 압축 과정에서 로그를 보존함
+			terserOptions: {
+				compress: {
+				drop_console: false,
+				drop_debugger: false,
+				},
+			},
+		},
 	},
-
 	// 5. ★ 중요: 빌드 결과물을 docs 폴더로 변경하는 설정 ★
 	ssr: false,// 서버 측 렌더링 비활성화
 	nitro: {
 		preset: 'static',
 		output: {
 			publicDir: 'docs' // 빌드된 정적 파일들이 프로젝트 루트의 /docs 폴더로 들어갑니다.
+		},
+    	// Cloudflare Pages에서 SPA 라우팅이 깨지지 않게 강제로 설정
+		prerender: {
+		crawlLinks: true,
+		routes: ['/']
 		}
 	},
-
+	routeRules: {
+		'/**': { ssr: false } // 모든 경로를 클라이언트 사이드 렌더링으로 강제
+	},
 	// 6. 런타임 설정
 	runtimeConfig: {
 		apiSecret: 'my-secret',
