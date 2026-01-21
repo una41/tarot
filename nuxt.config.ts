@@ -65,7 +65,7 @@ export default defineNuxtConfig({
 		},
     	// Cloudflare Pages에서 SPA 라우팅이 깨지지 않게 강제로 설정
 		prerender: {
-			crawlLinks: true,
+			crawlLinks: false,
 			routes: ['/']
 		},
 		hooks: {
