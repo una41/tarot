@@ -32,10 +32,11 @@
 					<section class="pdf_section1">
 						<div class="col2">
 							<div class="left">
-								<div class="bx_img" :style="{ background: 'url(\'https://una41.github.io/tarot/img/card/card' + store.result + '.jpg\') no-repeat 50% -4px' }">
+								<div class="bx_img" :style="{ background: 'url(\'/img/card/majors/' + store.result + '.jpg\') no-repeat 50% -4px'}">
+								<!-- <div class="bx_img" :style="{ background: 'url(\'https://una41.github.io/tarot/img/card/card' + store.result + '.jpg\') no-repeat 50% -4px' }"> -->
 									<span class="blind">{{ store.result }}번 {{ data.list[store.result].name }} 이미지</span>
 								</div>
-								<button v-if="store.userGrade === '마스터'" class="btn" @click="goToWiki">고유 설명 보기</button>
+								<button v-if="store.userGrade === '마스터'" class="btn" @click="store.goToWiki(store.result, 'majors')">고유 설명 보기</button>
 							</div>
 							<div class="right">
 								<dl class="info_birth mt0">
@@ -257,11 +258,6 @@
 	const store = useTarotStore();
 	const router = useRouter();
 	const props = defineProps(['data']);
-
-	// 위키 페이지로 이동
-	const goToWiki = () => {
-		router.push('/tarot_wiki');
-	};
 
 	const birth = store.picked === 'r1' ? store.ipt_birth8 : store.ipt_year + store.ipt_birth4;
 	const f_Birth = birth.replace(/(\d{4})(\d{2})(\d{2})/, '$1년 $2월 $3일');

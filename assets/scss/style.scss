@@ -111,7 +111,7 @@ button{
 				// margin-bottom: 10px;
 				.user_grade{
 					@include font(11, 11, #fff, $bold);
-					padding: 3px 6px 4px;
+					padding: 4px 6px;
 					border-radius: 3px;
 					margin-left: 5px;
 					vertical-align: middle;
@@ -503,10 +503,13 @@ h6{
 			.left{
 				flex-shrink: 0;
 				.bx_img{
-					@include setCont(200px, 340px);
-					background-size: 103% !important;
+					@include setCont(200px, 353px);
+					background-size: 105% !important;
+					border: 3px solid #b1a8a1;
+					background-position: 50% 50% !important;
+					// background-size: 103% !important;
 					overflow: hidden;
-					border-radius: 5px;
+					border-radius: 7px;
 					box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 					@include mobile{
 						margin: 0 auto;
@@ -521,6 +524,10 @@ h6{
 					margin: 15px auto 0;
 					background-color:rgb(179, 173, 148, 0.85);
 					box-shadow: 0 2px 3px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+					&:hover{
+						box-shadow: 0 2px 3px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23) !important;
+						opacity: 0.8;
+					}
 					@include mobile{
 						max-width: 250px;
 					}
@@ -1506,4 +1513,31 @@ h6{
 }
 .pdf_info{
 	display: none;
+}
+
+// 위키 플로팅 버튼 (마스터 전용)
+.wiki-floating-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    &:active {
+        transform: translateY(0);
+    }
 }

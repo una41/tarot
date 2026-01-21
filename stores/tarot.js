@@ -582,5 +582,21 @@ export const useTarotStore = defineStore('tarot', {
                 alert('PDF 저장 중 오류가 발생했습니다.');
             }
         },
+
+        // 9. 위키 페이지로 이동 (새 탭에서 열기)
+        goToWiki(cardNum = null, category = 'majors') {
+            const num = cardNum ?? this.result;
+            if (num === null || num === undefined) return;
+            
+            const url = `/wiki/${category}/${num}`;
+            // 새 탭에서 열기
+            window.open(url, '_blank');
+        },
+
+        // 10. 위키 메인 페이지로 이동 (새 탭에서 열기)
+        goToWikiMain() {
+            const url = '/wiki';
+            window.open(url, '_blank');
+        },
 	}
 })

@@ -45,6 +45,10 @@
 		</transition>
 
 	</div>
+	<!-- 마스터 전용 위키 플로팅 버튼 -->
+	<div v-if="store.userGrade === '마스터'" class="wiki-floating-btn" @click="store.goToWikiMain">
+		<span>Wiki→</span>
+	</div>
 </template>
 <script setup>
 	//Store
