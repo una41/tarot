@@ -65,8 +65,22 @@ export default defineNuxtConfig({
 		},
     	// Cloudflare Pages에서 SPA 라우팅이 깨지지 않게 강제로 설정
 		prerender: {
-		crawlLinks: true,
-		routes: ['/']
+			crawlLinks: true,
+			routes: ['/']
+		},
+		hooks: {
+			// 빌드 완료 후 index.html을 404.html로 복사 (SPA fallback)
+			'close': async () => {
+				const fs = await import('fs')
+				const path = await import('path')
+				const docsDir = path.resolve('docs')
+				const indexPath = path.join(docsDir, 'index.html')
+				const notFoundPath = path.join(docsDir, '404.html')
+				if (fs.existsSync(indexPath)) {
+					fs.copyFileSync(indexPath, notFoundPath)
+					console.log('✅ Created 404.html for SPA fallback')
+				}
+			}
 		}
 	},
 	routeRules: {

@@ -6,7 +6,8 @@
       "Bash(npm install:*)",
       "Bash(npm uninstall:*)",
       "Bash(dir:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(del \"d:\\\\Yn\\\\01_project\\\\05_tarot\\\\public\\\\_redirects\")"
     ]
   }
 }
