@@ -100,7 +100,7 @@ The project is configured for GitHub Pages deployment ([nuxt.config.ts:48-54](nu
 - SSR disabled (`ssr: false`)
 - Nitro preset: `github-pages`
 - Build output: `/docs` folder
-- Base URL: `/tarot/`
+- Base URL: `/`
 - Build assets dir: `assets`
 
 After running `npm run build`, commit the `/docs` folder and configure GitHub Pages to serve from `/docs` on the main branch.

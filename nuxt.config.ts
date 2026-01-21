@@ -83,9 +83,9 @@ export default defineNuxtConfig({
 				// 2. 상세 설명
 				{ property: 'og:description', content: '부자사관학교 타로🔮' },
 				// 3. 이미지 URL (반드시 http/https로 시작하는 전체 경로여야 합니다)
-				{ property: 'og:image', content: 'https://una41.github.io/tarot/img/main.jpg?v=1' },
+				{ property: 'og:image', content: 'https://www.numerologytarot.uk/img/main.jpg?v=1' },
 				// 4. 클릭 시 이동할 주소
-				{ property: 'og:url', content: 'https://una41.github.io/tarot/' },
+				{ property: 'og:url', content: 'https://www.numerologytarot.uk/' },
 			],
 			link: [
 				{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
@@ -96,7 +96,7 @@ export default defineNuxtConfig({
 		},
     	// 본인의 깃허브 저장소 이름이 'Tarot'이라면 아래와 같이 설정
 		baseURL: '/', //cloudflare
-		// baseURL: '/tarot/', //git
+		// baseURL: '/', //git
 		buildAssetsDir: 'assets',
 	},
 })

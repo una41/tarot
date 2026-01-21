@@ -7,10 +7,10 @@
 
 <script setup>
 const goToWikiMain = () => {
-	location.href = '/tarot/wiki';
+	location.href = '/wiki';
 };
 
 const goToMain = () => {
-	window.open('/tarot/', '_blank');
+	window.open('/', '_blank');
 };
 </script>

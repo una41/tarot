@@ -29,7 +29,7 @@
                     </h3>
                     <div class="col2">
                         <div class="left">
-							<div class="bx_img" :style="{ background: 'url(\'/img/card/majors/' + store.result + '.jpg\') no-repeat 50% -4px'}">
+							<div class="bx_img" :style="{ background: 'url(\'https://www.numerologytarot.uk/img/card/majors/' + store.result + '.jpg\') no-repeat 50% -4px'}">
                             <!-- <div class="bx_img" :style="{ background: 'url(\'https://una41.github.io/tarot/img/card/card' + store.result + '.jpg\') no-repeat 50% -4px' }"> -->
                                 <span class="blind">{{ store.result }}번 {{ data.list[store.result].name }} 이미지</span>
                             </div>
