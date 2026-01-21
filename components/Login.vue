@@ -44,15 +44,6 @@
 						</div>
 						<input v-if="isSignUp" class="ipt" v-model="userName" type="text" placeholder="이름" @keyup.enter="handleSubmit" />
 						<input v-if="isSignUp" class="ipt" v-model="userPhone" type="tel" placeholder="연락처 (010-0000-0000)" @keyup.enter="handleSubmit" />
-						<div v-if="isSignUp" ref="slctRef" class="slct" :class="{ on: isSlctOpen, selected: isStartup }">
-							<button type="button" class="slct_tit" @click="isSlctOpen = !isSlctOpen">
-								{{ isStartup || '창업반' }}
-							</button>
-							<div class="slct_cont">
-								<button type="button" @click="selectStartup('Y')">Y</button>
-								<button type="button" @click="selectStartup('N')">N</button>
-							</div>
-						</div>
 						<button class="btn" @click="handleSubmit" :disabled="store.authLoading">
 							{{ store.authLoading ? '처리 중...' : (isSignUp ? '가입하기' : '운명 확인하기') }}
 						</button>
@@ -72,19 +63,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useTarotStore } from '~/stores/tarot';
 
 const store = useTarotStore();
-const slctRef = ref(null);
 
 const email = ref('');
 const pw = ref('');
 const pwConfirm = ref('');
 const userName = ref('');
 const userPhone = ref('');
-const isStartup = ref('');
-const isSlctOpen = ref(false);
 const isSignUp = ref(false);
 const isForgotPassword = ref(false);
 const showPw = ref(false);
@@ -100,34 +88,12 @@ const modeTitle = computed(() => {
 	return isSignUp.value ? 'Join' : 'Login';
 });
 
-const selectStartup = (value) => {
-	isStartup.value = value;
-	isSlctOpen.value = false;
-};
-
-// 셀렉트 박스 바깥 클릭 시 닫기
-const handleClickOutside = (event) => {
-	if (slctRef.value && !slctRef.value.contains(event.target)) {
-		isSlctOpen.value = false;
-	}
-};
-
-onMounted(() => {
-	document.addEventListener('click', handleClickOutside);
-});
-
-onUnmounted(() => {
-	document.removeEventListener('click', handleClickOutside);
-});
-
 const toggleMode = () => {
 	isSignUp.value = !isSignUp.value;
 	pw.value = '';
 	pwConfirm.value = '';
 	userName.value = '';
 	userPhone.value = '';
-	isStartup.value = '';
-	isSlctOpen.value = false;
 	showPw.value = false;
 	showPwConfirm.value = false;
 };
@@ -140,8 +106,6 @@ const goToLogin = () => {
 	pwConfirm.value = '';
 	userName.value = '';
 	userPhone.value = '';
-	isStartup.value = '';
-	isSlctOpen.value = false;
 	showPw.value = false;
 	showPwConfirm.value = false;
 };
@@ -191,7 +155,7 @@ const handleSubmit = async () => {
 
 	if (isSignUp.value) {
 		// 회원가입
-		if (!userName.value || !userPhone.value || !isStartup.value) {
+		if (!userName.value || !userPhone.value) {
 			store.showAlert({
 				title: '',
 				message: '모든 항목을 입력해주세요.',
@@ -220,7 +184,7 @@ const handleSubmit = async () => {
 			return;
 		}
 
-		const result = await store.fnSignUp(email.value, pw.value, userName.value, userPhone.value, isStartup.value);
+		const result = await store.fnSignUp(email.value, pw.value, userName.value, userPhone.value);
 		if (!result.success) {
 			store.showAlert({
 				title: '회원가입 실패',

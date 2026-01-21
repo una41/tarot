@@ -280,6 +280,20 @@ watch(searchQuery, (newQuery) => {
 	}
 });
 
+// 인증 상태 확인 완료 감지 (URL 직접 접근 또는 새 탭으로 열었을 때)
+watch(() => store.authChecked, (checked) => {
+	if (checked && isMaster.value && wikiList.value.length === 0) {
+		loadWikiData();
+	}
+});
+
+// 마스터 권한 변경 감지 (새 탭으로 열었을 때 인증 로드 후 데이터 로드)
+watch(isMaster, (newValue) => {
+	if (newValue && wikiList.value.length === 0) {
+		loadWikiData();
+	}
+});
+
 // 데이터 로드
 onMounted(() => {
 	loadWikiData();

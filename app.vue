@@ -17,7 +17,7 @@
 		<!-- 전역 로더 -->
 		<GlobalLoader />
 
-		<div v-show="!store.loader.isAppLoading">
+		<div v-show="!store.loader.isAppLoading && store.authChecked">
 			<NuxtLayout v-if="store.isLoggedIn">
 				<NuxtPage />
 			</NuxtLayout>
