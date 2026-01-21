@@ -12,6 +12,7 @@ html, body {
   line-height: normal;
   color: $gray700;
   min-width: $mobile;
+  word-break: keep-all;
 }
 html,body,div,ul,li,dl,dt,dd,ol,p,h1,h2,h3,h4,h5,h6,form,fieldset {
   margin: 0;

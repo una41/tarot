@@ -32,10 +32,11 @@
 					<section class="pdf_section1">
 						<div class="col2">
 							<div class="left">
-								<div class="bx_img" :style="{ background: 'url(\'https://una41.github.io/tarot/img/card/card' + store.result + '.jpg\') no-repeat 50% -4px' }">
+								<div class="bx_img" :style="{ background: 'url(\'/img/card/majors/' + store.result + '.jpg\') no-repeat 50% -4px'}">
+								<!-- <div class="bx_img" :style="{ background: 'url(\'https://una41.github.io/tarot/img/card/card' + store.result + '.jpg\') no-repeat 50% -4px' }"> -->
 									<span class="blind">{{ store.result }}번 {{ data.list[store.result].name }} 이미지</span>
 								</div>
-								<!-- <button class="btn" @click="store.fnComingSoon">고유 설명 보기</button> -->
+								<button v-if="store.userGrade === '마스터'" class="btn" @click="store.goToWiki(store.result, 'majors')">고유 설명 보기</button>
 							</div>
 							<div class="right">
 								<dl class="info_birth mt0">
@@ -249,11 +250,13 @@
 
 <script setup>
 	import { ref, computed } from 'vue';
+	import { useRouter } from 'vue-router';
 	import { useTarotStore } from '~/stores/tarot';
 	import html2canvas from 'html2canvas';
 	import { jsPDF } from 'jspdf';
 
 	const store = useTarotStore();
+	const router = useRouter();
 	const props = defineProps(['data']);
 
 	const birth = store.picked === 'r1' ? store.ipt_birth8 : store.ipt_year + store.ipt_birth4;

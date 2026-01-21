@@ -29,10 +29,11 @@
 					</h3>
 					<div class="col2">
 						<div class="left">
-							<div class="bx_img" :style="{ background: 'url(\'https://una41.github.io/tarot/img/card/card' + store.result + '.jpg\') no-repeat 50% -4px' }">
+							<div class="bx_img" :style="{ background: 'url(\'/img/card/majors/' + store.result + '.jpg\') no-repeat 50% -4px'}">
+							<!-- <div class="bx_img" :style="{ background: 'url(\'https://una41.github.io/tarot/img/card/card' + store.result + '.jpg\') no-repeat 50% -4px' }"> -->
 								<span class="blind">{{ store.result }}번 {{ data.list[store.result].name }} 이미지</span>
 							</div>
-							<!-- <button class="btn" @click="store.fnComingSoon">고유 설명 보기</button> -->
+							<button v-if="store.userGrade === '마스터'" class="btn" @click="store.goToWiki(store.result, 'majors')">고유 설명 보기</button>
 						</div>
 						<div class="right">
 							<div class="r_colb" v-if="data.list[store.result].lucky_group">
