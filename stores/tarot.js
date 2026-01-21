@@ -509,6 +509,17 @@ export const useTarotStore = defineStore('tarot', {
             this.confirmData.isVisible = false;
         },
 
+        // 인증 상태 초기화 및 쿠키 삭제
+        resetAndClear() {
+            this.user = null;
+            this.userGrade = null;
+            this.token = null;
+            this.isLoggedIn = false;
+            Cookies.remove('user_token');
+            Cookies.remove('user_info');
+            Cookies.remove('user_grade');
+        },
+
         // 7. 로더 제어
         setAppLoading(status) {
             this.loader.isAppLoading = status;
