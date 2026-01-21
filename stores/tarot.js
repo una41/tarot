@@ -351,110 +351,101 @@ export const useTarotStore = defineStore('tarot', {
         },
 
         // 4. 인증 상태 체크 (앱 시작 시 호출)
-        checkAuth() {
-    const { $auth, $db } = useNuxtApp();
+       checkAuth() {
+            // 1. 서버 사이드 렌더링(SSR) 중에는 실행 방지
+            if (!process.client) return;
 
-    // 1. [수정] 이제 쿠키 대신 localStorage에서 데이터를 가져옵니다.
-    const savedToken = localStorage.getItem('user_token');
-    const savedUserInfo = localStorage.getItem('user_info');
-    const savedGrade = localStorage.getItem('user_grade');
+            const { $auth, $db } = useNuxtApp();
 
-    // 유효성 체크 헬퍼
-    const isValid = (val) => val && val !== 'undefined' && val !== 'false' && val !== 'null';
+            // [변경] 쿠키에서 데이터 가져오기
+            const savedToken = Cookies.get('user_token');
+            const savedUserInfo = Cookies.get('user_info');
+            const savedGrade = Cookies.get('user_grade');
 
-    console.group('📦 [로컬 스토리지] 복원 시도');
-    console.log('데이터 확인:', { savedToken: !!savedToken, savedUserInfo: !!savedUserInfo, savedGrade });
+            // 유효성 체크 헬퍼
+            const isValid = (val) => val && val !== 'undefined' && val !== 'false' && val !== 'null';
 
-    // 2. 초기 복원 로직
-    if (isValid(savedToken) && isValid(savedUserInfo)) {
-        try {
-            this.user = JSON.parse(savedUserInfo);
-            this.userGrade = savedGrade || '일반';
-            this.token = savedToken;
-            this.isLoggedIn = true;
-            this.authChecked = true; // 여기서 true를 해줘야 '검정 화면'이 사라집니다.
-            console.log('✅ 로컬 데이터 복원 성공');
-        } catch (e) {
-            console.error('❌ 데이터 파싱 실패:', e);
-        }
-    } else {
-        // 복원할 데이터가 없더라도 일단 체크는 끝났다고 알려야 화면이 나옵니다.
-        console.log('ℹ️ 복원할 데이터 없음');
-    }
-    console.groupEnd();
+            console.group('🍪 [Auth] 쿠키 복원 프로세스');
+            console.log('데이터 확인:', { savedToken: !!savedToken, savedUserInfo: !!savedUserInfo, savedGrade });
 
-    // 3. Firebase 인증 상태 감시
-    onAuthStateChanged($auth, async (user) => {
-        if (this.pendingVerificationEmail) return;
-
-        if (user) {
-            // 이메일 인증 확인
-            if (!user.emailVerified) {
-                this.resetAndClear();
-                return;
-            }
-
-            try {
-                const userDoc = await getDoc(doc($db, 'users', user.uid));
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
+            // 2. [즉시 복원] Firebase 응답 전, 쿠키가 있다면 즉시 로그인 상태로 표시
+            if (isValid(savedToken) || isValid(savedUserInfo)) {
+                try {
+                    if (isValid(savedUserInfo)) {
+                        this.user = JSON.parse(savedUserInfo);
+                    }
+                    this.userGrade = isValid(savedGrade) ? savedGrade : '일반';
+                    this.token = savedToken;
+                    this.isLoggedIn = true;
                     
-                    // 미승인 유저 처리
-                    if (!userData.isApproved) {
-                        await signOut($auth);
+                    // 핵심: 쿠키 데이터가 있다면 즉시 true로 설정하여 '검정 화면' 방지
+                    this.authChecked = true; 
+                    console.log('✅ [Step 1] 쿠키 데이터로 즉시 복원 성공');
+                } catch (e) {
+                    console.error('❌ 쿠키 데이터 파싱 실패:', e);
+                }
+            } else {
+                console.log('ℹ️ 쿠키 데이터 없음: Firebase 인증 대기 중...');
+            }
+            console.groupEnd();
+
+            // 3. [Firebase 검증] 백그라운드에서 실제 세션 확인
+            onAuthStateChanged($auth, async (user) => {
+                if (this.pendingVerificationEmail) return;
+
+                if (user) {
+                    if (!user.emailVerified) {
                         this.resetAndClear();
                         return;
                     }
 
-                    // 최신 상태로 업데이트
-                    this.user = {
-                        uid: user.uid,
-                        email: user.email,
-                        name: userData.name || '',
-                        emailVerified: user.emailVerified,
-                        loginAt: new Date().toLocaleString()
-                    };
-                    this.userGrade = userData.grade || '일반';
-                    this.token = await user.getIdToken();
-                    this.isLoggedIn = true;
+                    try {
+                        const userDoc = await getDoc(doc($db, 'users', user.uid));
+                        if (userDoc.exists()) {
+                            const userData = userDoc.data();
+                            
+                            if (!userData.isApproved) {
+                                await signOut($auth);
+                                this.resetAndClear();
+                                return;
+                            }
 
-                    // localStorage 저장
-                    localStorage.setItem('user_token', this.token);
-                    localStorage.setItem('user_info', JSON.stringify(this.user));
-                    localStorage.setItem('user_grade', this.userGrade);
+                            // 상태 업데이트
+                            this.user = {
+                                uid: user.uid,
+                                email: user.email,
+                                name: userData.name || '',
+                                emailVerified: user.emailVerified,
+                                loginAt: new Date().toLocaleString()
+                            };
+                            this.userGrade = userData.grade || '일반';
+                            this.token = await user.getIdToken();
+                            this.isLoggedIn = true;
+
+                            // [변경] 쿠키 저장 (path: '/' 필수 설정)
+                            const cookieOptions = { expires: 1, path: '/' };
+                            Cookies.set('user_token', this.token, cookieOptions);
+                            Cookies.set('user_info', JSON.stringify(this.user), cookieOptions);
+                            Cookies.set('user_grade', this.userGrade, cookieOptions);
+                            
+                            console.log('💾 [Step 2] Firebase 인증 및 쿠키 갱신 완료');
+                        }
+                    } catch (error) {
+                        console.error('Firestore 확인 오류:', error);
+                    }
+                } else {
+                    console.log('📢 Firebase: 인증 세션 없음');
                     
-                    console.log('💾 Firebase 세션 확인 및 스토리지 갱신 완료');
+                    // [방어 로직] 쿠키로 이미 복원된 상태라면 Firebase가 늦게 응답해도 유지
+                    if (!this.isLoggedIn) {
+                        this.resetAndClear();
+                    }
                 }
-            } catch (error) {
-                console.error('Firestore 확인 오류:', error);
-            }
-        } else {
-            // Firebase에 세션이 없을 때
-            console.log('📢 Firebase: 세션 없음');
-            
-            // 만약 로컬 스토리지로 이미 복원해서 로그인 상태라면, 
-            // 굳이 여기서 즉시 지우지 않고 유지합니다 (새 탭 방어).
-            if (!this.isLoggedIn) {
-                this.resetAndClear();
-            }
-        }
-        
-        // 어떤 경우든 마지막엔 authChecked를 true로 만들어 화면을 보여줍니다.
-        this.authChecked = true; 
-    });
-},
-
-// 초기화 헬퍼 함수
-resetAndClear() {
-    this.user = null;
-    this.userGrade = null;
-    this.token = null;
-    this.isLoggedIn = false;
-    this.authChecked = true;
-    localStorage.removeItem('user_token');
-    localStorage.removeItem('user_info');
-    localStorage.removeItem('user_grade');
-},
+                
+                // 최종적으로 체크 완료 처리
+                this.authChecked = true; 
+            });
+        },
         // 5. Firebase 에러 메시지 변환
         getFirebaseErrorMessage(code) {
             const messages = {
