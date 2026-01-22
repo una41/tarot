@@ -12,7 +12,8 @@
       "Bash(powershell:*)",
       "Bash(ls:*)",
       "Bash(git config:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git push:*)"
     ]
   }
 }
