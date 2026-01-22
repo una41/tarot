@@ -10,7 +10,9 @@
       "Bash(del \"d:\\\\Yn\\\\01_project\\\\05_tarot\\\\public\\\\_redirects\")",
       "Bash(powershell -Command \"\\(Get-ChildItem -Path docs -Recurse | Measure-Object -Property Length -Sum\\).Sum / 1MB\")",
       "Bash(powershell:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git config:*)",
+      "Bash(git add:*)"
     ]
   }
 }
