@@ -232,8 +232,6 @@
 	import { ref, computed } from 'vue';
 	import { useRouter } from 'vue-router';
 	import { useTarotStore } from '~/stores/tarot';
-	import html2canvas from 'html2canvas';
-	import { jsPDF } from 'jspdf';
 
 	const store = useTarotStore();
 	const router = useRouter();
@@ -247,10 +245,14 @@
 		'추천 할일': 'todo',
 	};
 
-	// PDF 관련
+	// PDF 관련 - 동적 import로 초기 로딩 최적화
 	const pdfContent = ref(null);
-	const downloadPDF = () => {
+	const downloadPDF = async () => {
 		if (!pdfContent.value) return;
+		const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+			import('html2canvas'),
+			import('jspdf')
+		]);
 		store.downloadPDF({
 			pdfContent: pdfContent.value,
 			html2canvas,

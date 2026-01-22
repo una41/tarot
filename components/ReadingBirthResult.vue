@@ -216,8 +216,6 @@
 <script setup>
 	import { ref, computed } from 'vue';
 	import { useTarotStore } from '~/stores/tarot';
-	import html2canvas from 'html2canvas';
-	import { jsPDF } from 'jspdf';
 
 	const store = useTarotStore();
 	defineProps(['data']);
@@ -239,6 +237,12 @@
 		if (!pdfContent.value) return;
 
 		try {
+			// PDF 라이브러리 동적 로딩
+			const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+				import('html2canvas'),
+				import('jspdf')
+			]);
+
 			const element = pdfContent.value;
 
 			// PDF 전용 요소 표시

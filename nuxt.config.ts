@@ -43,17 +43,19 @@ export default defineNuxtConfig({
 			}
 		},
 		esbuild: {
-			// 빌드 시 console, debugger를 제거하지 않도록 설정
-			drop: [] 
+			// 프로덕션 빌드 시 console, debugger 제거
+			drop: ['console', 'debugger']
 		},
 		build: {
-		// 압축 과정에서 로그를 보존함
-			terserOptions: {
-				compress: {
-				drop_console: false,
-				drop_debugger: false,
-				},
-			},
+			// 청크 크기 경고 임계값
+			chunkSizeWarningLimit: 600,
+			// CSS 코드 분할
+			cssCodeSplit: true,
+			// 소스맵 비활성화 (프로덕션)
+			sourcemap: false,
+			// minify 최적화
+			minify: 'esbuild',
+			target: 'es2020',
 		},
 	},
 	// 5. ★ 중요: 빌드 결과물을 docs 폴더로 변경하는 설정 ★
