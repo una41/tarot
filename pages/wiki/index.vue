@@ -62,9 +62,9 @@ const searchQuery = ref('');
 const isMenuOpen = ref(false);
 const openCategories = ref(new Set()); // 아코디언 상태 관리
 
-// 마스터 권한 체크
+// 마스터/프로 권한 체크
 const isMaster = computed(() => {
-	return store.userGrade === '마스터';
+	return ['마스터', '프로'].includes(store.userGrade);
 });
 
 // 카테고리별 그룹핑
