@@ -16,7 +16,7 @@
 			<div class="body">
 				<!-- 모바일 오버레이 -->
 				<div class="overlay" :class="{ on: isMenuOpen }" @click="closeMenu"></div>
-
+    
 				<!-- 사이드바 -->
 				<WikiSidebar
 					:filtered-grouped-list="filteredGroupedList"
