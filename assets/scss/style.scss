@@ -2,7 +2,9 @@
 @use 'mixin' as *;
 @use 'svg' as *;
 @use 'pdf' as *;
+@use 'common' as *;
 @use 'wiki' as *;
+@use 'admin' as *;
 
 h3{
 	@include font(18, 25);

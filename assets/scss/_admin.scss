@@ -1,0 +1,288 @@
+@use 'variable' as *;
+@use 'mixin' as *;
+
+// Admin 전용 스타일
+.admin {
+	// 사이드바 너비 오버라이드
+	.sidebar {
+		@include setCont(320px, 100%, flex, relative, #fff);
+		min-width: 320px;
+		@include mobile {
+			@include setCont(300px, 100%, flex, fixed, #fff);
+		}
+	}
+
+	// 필터 영역
+	.filter {
+		padding: 16px;
+		border-bottom: 1px solid #e5e5e5;
+		.filter_header {
+			@include font(12, 12, #666, $bold);
+			margin-bottom: 12px;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+		.filter_selects {
+			display: flex;
+			gap: 10px;
+			@include mobile {
+				flex-direction: column;
+			}
+		}
+	}
+
+	// 회원 목록
+	.nav_list {
+		li {
+			padding: 14px 16px;
+			&.active {
+				border-left: 3px solid #6a4e9c;
+			}
+		}
+	}
+
+	.user_info {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin-bottom: 4px;
+	}
+
+	.user_name {
+		@include font(15, 20, #333, $medi);
+	}
+
+	.user_grade {
+		@include font(11, 11, #fff, $bold);
+		padding: 3px 8px;
+		border-radius: 10px;
+		&.normal {
+			background: #6b7280;
+		}
+		&.pro {
+			background: #7c3aed;
+		}
+		&.master {
+			background: linear-gradient(90deg, #f59e0b, #ef4444);
+		}
+	}
+
+	.user_email {
+		@include font(12, 16, #888);
+		margin-bottom: 4px;
+	}
+
+	.user_status {
+		.status_badge {
+			@include font(11, 11, #ef4444, $medi);
+			padding: 3px 8px;
+			background: rgba(239, 68, 68, 0.1);
+			border-radius: 4px;
+			&.approved {
+				color: #10b981;
+				background: rgba(16, 185, 129, 0.1);
+			}
+		}
+	}
+
+	// 컨텐츠
+	.wrap_admin {
+		flex: 1;
+		padding: 24px;
+		overflow-y: auto;
+		background: #fafafa;
+		@include scroll;
+		@include mobile {
+			padding: 16px;
+		}
+	}
+
+	// 정보 섹션
+	.info_section {
+		margin-bottom: 32px;
+		h3 {
+			@include font(18, 24, #333, $bold);
+			margin-bottom: 16px;
+			padding-left: 12px;
+			border-left: 3px solid #6a4e9c;
+		}
+	}
+
+	.info_list {
+		background: #f9f9f9;
+		border-radius: 8px;
+		padding: 20px;
+	}
+
+	.info_item {
+		display: flex;
+		align-items: center;
+		padding: 12px 0;
+		border-bottom: 1px solid #eee;
+		&:last-child {
+			border-bottom: none;
+		}
+		&.memo {
+			align-items: flex-start;
+			dt {
+				padding-top: 12px;
+			}
+		}
+		dt {
+			@include font(14, 20, #666, $medi);
+			width: 100px;
+			flex-shrink: 0;
+		}
+		dd {
+			@include font(14, 20, #333);
+			word-break: break-all;
+			flex: 1;
+		}
+	}
+
+	// 정보 인풋
+	.ipt_info {
+		@include setCont(100%, 36px);
+		padding: 0 12px;
+		border: 1px solid #ddd;
+		border-radius: 6px;
+		background: #fff;
+		@include font(14, 36, #333);
+		transition: all 200ms;
+		&:focus {
+			border-color: #6a4e9c;
+			outline: none;
+		}
+		&:disabled {
+			background: #f0f0f0;
+			color: #999;
+			cursor: not-allowed;
+		}
+		&::placeholder {
+			color: #aaa;
+		}
+	}
+
+	// 메모 텍스트에리어
+	.txa_info {
+		@include setCont(100%, 100px);
+		padding: 12px;
+		border: 1px solid #ddd;
+		border-radius: 6px;
+		background: #fff;
+		@include font(14, 20, #333);
+		resize: vertical;
+		transition: all 200ms;
+		&:focus {
+			border-color: #6a4e9c;
+			outline: none;
+		}
+		&::placeholder {
+			color: #aaa;
+		}
+	}
+
+	// 권한 설정
+	.control_group {
+		background: #f9f9f9;
+		border-radius: 8px;
+		padding: 20px;
+	}
+
+	.control_item {
+		margin-bottom: 24px;
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	.control_label {
+		@include font(14, 20, #666, $medi);
+		display: block;
+		margin-bottom: 12px;
+	}
+
+	// 토글 스위치
+	.toggle_wrap {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.toggle_btn {
+		@include setCont(52px, 28px, block, relative);
+		background: #ddd;
+		border-radius: 14px;
+		border: none;
+		cursor: pointer;
+		transition: background 200ms;
+		&.active {
+			background: #10b981;
+			.toggle_slider {
+				transform: translateX(24px);
+			}
+		}
+	}
+
+	.toggle_slider {
+		@include setCont(24px, 24px, block, absolute, #fff);
+		top: 2px;
+		left: 2px;
+		border-radius: 50%;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+		transition: transform 200ms;
+	}
+
+	.toggle_text {
+		@include font(14, 20, #333);
+	}
+
+	// 등급 버튼
+	.grade_btns {
+		display: flex;
+		gap: 10px;
+		button {
+			padding: 10px 24px;
+			border: 2px solid #ddd;
+			border-radius: 8px;
+			background: #fff;
+			@include font(14, 14, #666, $medi);
+			cursor: pointer;
+			transition: all 200ms;
+			&:hover {
+				border-color: #6a4e9c;
+				color: #6a4e9c;
+			}
+			&.active {
+				background: #6a4e9c;
+				border-color: #6a4e9c;
+				color: #fff;
+			}
+		}
+	}
+
+	// 저장 버튼
+	.btn_wrap {
+		margin-top: 24px;
+		text-align: right;
+	}
+
+	.btn_save {
+		padding: 14px 32px;
+		background: #6a4e9c;
+		color: #fff;
+		border: none;
+		border-radius: 8px;
+		@include font(15, 15, #fff, $bold);
+		cursor: pointer;
+		transition: all 300ms;
+		&:hover:not(:disabled) {
+			// background: darken(#6a4e9c, 10%);
+			background: #372a4e;
+		}
+		&:disabled {
+			background: #ccc;
+			cursor: not-allowed;
+		}
+	}
+}

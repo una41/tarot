@@ -1,5 +1,5 @@
 <template>
-	<div class="wiki">
+	<div class="com wiki">
 		<!-- 마스터 권한 체크 -->
 		<div v-if="!isMaster" class="denied">
 			<p class="icon">🔒</p>

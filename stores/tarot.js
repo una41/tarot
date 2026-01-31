@@ -624,5 +624,44 @@ export const useTarotStore = defineStore('tarot', {
             const url = '/wiki';
             window.open(url, '_blank');
         },
+
+        // ========== 회원 관리 함수 (Admin 전용) ==========
+
+        // 11. 전체 회원 목록 조회
+        async fetchAllUsers() {
+            const { $db } = useNuxtApp();
+            try {
+                const { collection, getDocs, query, orderBy } = await import('firebase/firestore');
+                const usersRef = collection($db, 'users');
+                const q = query(usersRef, orderBy('createdAt', 'desc'));
+                const snapshot = await getDocs(q);
+
+                const users = [];
+                snapshot.forEach(doc => {
+                    users.push({
+                        uid: doc.id,
+                        ...doc.data()
+                    });
+                });
+                return users;
+            } catch (error) {
+                console.error('회원 목록 조회 실패:', error);
+                return [];
+            }
+        },
+
+        // 12. 회원 정보 수정 (등급, 승인 상태)
+        async updateUserInfo(uid, updateData) {
+            const { $db } = useNuxtApp();
+            try {
+                const { doc, updateDoc } = await import('firebase/firestore');
+                const userRef = doc($db, 'users', uid);
+                await updateDoc(userRef, updateData);
+                return { success: true };
+            } catch (error) {
+                console.error('회원 정보 수정 실패:', error);
+                return { success: false, error: error.message };
+            }
+        },
 	}
 })
