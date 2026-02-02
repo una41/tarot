@@ -645,6 +645,8 @@ export const useTarotStore = defineStore('tarot', {
                 });
                 return users;
             } catch (error) {
+                // 프로덕션 디버깅용 (console이 제거되므로 alert 사용)
+                alert('회원 목록 조회 실패: ' + error.message);
                 console.error('회원 목록 조회 실패:', error);
                 return [];
             }
