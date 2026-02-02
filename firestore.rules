@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // [함수] 로그인했는지 확인
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // [함수] 관리자(마스터)인지 확인
+    function isAdmin() {
+      return isSignedIn() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.grade == '마스터';
+    }
+
+    match /users/{userId} {
+      // 1. 읽기: 인증된 사용자는 모두 조회 가능 (앱에서 마스터 권한 체크)
+      //    - 컬렉션 쿼리(getDocs)가 작동하려면 단순한 규칙 필요
+      allow read: if isSignedIn();
+
+      // 2. 생성: 처음 가입할 때 딱 한 번만 허용하되, '일반'과 'false'로만 생성 가능
+      allow create: if isSignedIn() && request.auth.uid == userId
+                    && request.resource.data.grade == '일반'
+                    && request.resource.data.isApproved == false;
+
+      // 3. 수정: 관리자는 마음대로, 일반 사용자는 등급/승인 변경 불가
+      allow update: if isAdmin()
+                    || (
+                      isSignedIn() && request.auth.uid == userId
+                      && request.resource.data.grade == resource.data.grade
+                      && request.resource.data.isApproved == resource.data.isApproved
+                    );
+    }
+
+    // 타로 콘텐츠 등급별 접근 제한
+    match /tarot_contents/{document=**} {
+      allow read: if isSignedIn() &&
+                  get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isApproved == true;
+    }
+  }
+}
