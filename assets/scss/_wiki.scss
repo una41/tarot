@@ -130,7 +130,7 @@
 		}
 	}
 
-	.txt_bg, .tag {
+	.txt_bg, .tag, .tag_luck {
 		@include font(12, normal, #fff, $medi);
 		padding: 4px 6px 5px;
 		border-radius: 5px;
@@ -146,7 +146,12 @@
 			background: #aaa;
 		}
 	}
-
+	.tag_luck{
+		@include font(10);
+		background-color: #6a4e9c;
+		color: #fff;
+		margin-right: 5px;
+	}
 	.bx_img {
 		@include setCont(200px, 353px);
 		background-size: 105% !important;
