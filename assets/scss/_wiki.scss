@@ -187,4 +187,22 @@
 			}
 		}
 	}
+	.swords, .pentacles{
+		.u7, .u8, .u9, .u10, .u11, .u12 {
+			dl {
+				display: block;
+				dt {
+					display: block;
+				}
+				dd {
+					display: block;
+				}
+			}
+		}
+		.u1, .u11, .u12 {
+			dt {
+				display: none !important;
+			}
+		}
+	}
 }
