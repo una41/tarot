@@ -31,6 +31,7 @@
 	}
 	.sidebar{
 		@include scroll;
+		overflow: unset !important;
 	}
 	// 아코디언 카테고리 헤더
 	.nav_category_header {
