@@ -1,27 +1,68 @@
 @use 'variable' as *;
 @use 'mixin' as *;
 
+$a_point: #3638a9;
+$a_point_light: #394390;
 // Admin 전용 스타일
 .admin {
 	// 사이드바 너비 오버라이드
-	.sidebar {
-		@include setCont(320px, 100%, flex, relative, #fff);
-		min-width: 320px;
-		@include mobile {
-			@include setCont(300px, 100%, flex, fixed, #fff);
+	.header {
+    	border-bottom: 3px solid $a_point;
+		.logo{
+			color: $a_point;
+		}
+		.btn_back{
+			color: $a_point;
+			border-color: $a_point;
+			&:hover {
+				background: $a_point_light;
+			}
 		}
 	}
-
-	// 필터 영역
-	.filter {
-		padding: 16px;
-		border-bottom: 1px solid #e5e5e5;
-		.filter_header {
+	.side_header{
+		padding: 16px 16px 16px;
+		.tit {
 			@include font(12, 12, #666, $bold);
 			margin-bottom: 12px;
 			text-transform: uppercase;
 			letter-spacing: 0.5px;
 		}
+	}
+	h2{
+		border-color: $a_point !important;
+	}
+	.sidebar {
+		.btn_toggle{
+			background-color: $a_point;
+		}
+	}
+	// 검색
+	.search {
+		padding: 7px 0 0;
+		// border-bottom: 1px solid #e5e5e5;
+		.ipt_search {
+			@include setCont(100%, 42px);
+			padding: 0 14px;
+			background: #fff;
+			border: 1px solid #ddd;
+			border-radius: 8px;
+			@include font(14, 42, #333);
+			transition: all 300ms;
+			&::placeholder {
+				color: #aaa;
+			}
+			&:focus {
+				border-color: $a_point;
+				box-shadow: 0 0 0 3px rgba(106, 78, 156, 0.1);
+				outline: none;
+			}
+		}
+	}
+
+	// 필터 영역
+	.filter {
+		padding: 0;
+		// border-bottom: 1px solid #e5e5e5;
 		.filter_selects {
 			display: flex;
 			gap: 10px;
@@ -36,7 +77,11 @@
 		li {
 			padding: 14px 16px;
 			&.active {
-				border-left: 3px solid #6a4e9c;
+				border-left: 3px solid $a_point;
+				background-color: #c4d2ff;
+			}
+			&:hover {
+				background-color: #dfe6ff;
 			}
 		}
 	}
@@ -104,7 +149,7 @@
 			@include font(18, 24, #333, $bold);
 			margin-bottom: 16px;
 			padding-left: 12px;
-			border-left: 3px solid #6a4e9c;
+			border-left: 3px solid $a_point;
 		}
 	}
 
@@ -150,7 +195,7 @@
 		@include font(14, 36, #333);
 		transition: all 200ms;
 		&:focus {
-			border-color: #6a4e9c;
+			border-color: $a_point;
 			outline: none;
 		}
 		&:disabled {
@@ -174,7 +219,7 @@
 		resize: vertical;
 		transition: all 200ms;
 		&:focus {
-			border-color: #6a4e9c;
+			border-color: $a_point;
 			outline: none;
 		}
 		&::placeholder {
@@ -250,12 +295,12 @@
 			cursor: pointer;
 			transition: all 200ms;
 			&:hover {
-				border-color: #6a4e9c;
-				color: #6a4e9c;
+				border-color: $a_point;
+				color: $a_point;
 			}
 			&.active {
-				background: #6a4e9c;
-				border-color: #6a4e9c;
+				background: $a_point;
+				border-color: $a_point;
 				color: #fff;
 			}
 		}
@@ -266,10 +311,9 @@
 		margin-top: 24px;
 		text-align: right;
 	}
-
 	.btn_save {
 		padding: 14px 32px;
-		background: #6a4e9c;
+		background: $a_point;
 		color: #fff;
 		border: none;
 		border-radius: 8px;
@@ -277,7 +321,7 @@
 		cursor: pointer;
 		transition: all 300ms;
 		&:hover:not(:disabled) {
-			// background: darken(#6a4e9c, 10%);
+			// background: darken($a_point, 10%);
 			background: #372a4e;
 		}
 		&:disabled {

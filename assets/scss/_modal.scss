@@ -1,0 +1,294 @@
+@use 'variable' as *;
+@use 'mixin' as *;
+
+// ========== 모달 공통 ==========
+.modal{
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.7);
+	backdrop-filter: blur(5px);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 10000;
+	/* 모달 컨테이너 */
+	.m_container {
+		width: 90%;
+		max-width: 400px;
+		padding: 40px 45px;
+		background: linear-gradient(135deg, rgba(18, 18, 18, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
+		border: 1px solid rgba(192, 132, 252, 0.3);
+		border-radius: 16px;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+					0 0 40px rgba(192, 132, 252, 0.2);
+		text-align: center;
+		animation: m_appear 0.3s ease-out;
+		@include mobile{
+			padding: 30px 40px;
+			min-width: 300px;
+		}
+	}
+
+	/* 모달 아이콘 */
+	.m_icon {
+		font-size: 30px;
+		margin-bottom: 30px;
+		animation: icon-pulse 2s ease-in-out infinite;
+		filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.6));
+	}
+
+	/* 모달 제목 */
+	.m_title {
+		font-size: 16px;
+		color: #ddd6fe;
+		font-weight: 400;
+		letter-spacing: 0.1rem;
+
+	}
+
+	/* 모달 메시지 */
+	.m_message {
+		font-size: 14px;
+		color: rgba(255, 255, 255, 0.7);
+		line-height: 1.6;
+		margin: 15px 0 0;
+		white-space: pre-line;
+	}
+
+	/* 버튼 영역 */
+	.m_buttons {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+		margin-top: 30px;
+	}
+
+	/* 공통 버튼 스타일 */
+	.m_buttons button {
+		flex: 1;
+		padding: 0.9rem 1.5rem;
+		border: none;
+		border-radius: 8px;
+		font-size: 1rem;
+		font-weight: $bold;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		letter-spacing: 0.05rem;
+		@include mobile{
+			font-size: 14px;
+			font-weight: $bold;
+		}
+	}
+
+	/* 취소 버튼 */
+	.btn-cancel {
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		color: rgba(255, 255, 255, 0.7);
+
+		&:hover {
+			background: rgba(255, 255, 255, 0.1);
+			border-color: rgba(255, 255, 255, 0.4);
+			color: #fff;
+			transform: translateY(-2px);
+		}
+
+		&:active {
+			transform: translateY(0);
+		}
+	}
+
+	/* 확인 버튼 */
+	.btn-confirm {
+		background: linear-gradient(135deg, #a78bfa 0%, #c084fc 100%);
+		color: #121212;
+		box-shadow: 0 4px 15px rgba(192, 132, 252, 0.4);
+
+		&:hover {
+			box-shadow: 0 6px 25px rgba(192, 132, 252, 0.6);
+			transform: translateY(-2px);
+		}
+
+		&:active {
+			transform: translateY(0);
+		}
+
+		&:disabled{
+			opacity: 0.5;
+			cursor: not-allowed;
+			transform: none;
+			box-shadow: none;
+		}
+	}
+}
+
+// ========== 모달 애니메이션 ==========
+@keyframes m_appear {
+	from {
+		opacity: 0;
+		transform: scale(0.9) translateY(-20px);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
+}
+
+@keyframes icon-pulse {
+	0%, 100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.1);
+		filter: drop-shadow(0 0 30px rgba(167, 139, 250, 0.8));
+	}
+}
+
+// ========== 모달 트랜지션 ==========
+.m_fade-enter-active,
+.m_fade-leave-active {
+	transition: opacity 0.3s ease;
+}
+
+.m_fade-enter-active .m_container,
+.m_fade-leave-active .m_container {
+	transition: all 0.3s ease;
+}
+
+.m_fade-enter-from,
+.m_fade-leave-to {
+	opacity: 0;
+}
+
+.m_fade-enter-from .m_container,
+.m_fade-leave-to .m_container {
+	transform: scale(0.9) translateY(-20px);
+	opacity: 0;
+}
+
+// ========== 옵션 모달 (복사/PDF/프로필 등 공통) ==========
+.copy_modal{
+	.m_container{
+		max-width: 360px;
+		padding: 15px 20px 20px;
+		text-align: left;
+		@include mobile{
+			width: 300px;
+		}
+		.m_title{
+			text-align: center;
+			margin-bottom: 20px;
+		}
+	}
+	.copy_check_list{
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		max-height: 40vh;
+		overflow-y: auto;
+		padding-right: 5px;
+		@include scroll(#a78bfa, 6px, 8px);
+		label{
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			padding: 5px 12px;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: background 0.2s;
+			&:hover{
+				background: rgba(255,255,255,0.05);
+			}
+			input[type="checkbox"]{
+				width: 15px;
+				height: 15px;
+				accent-color: #a78bfa;
+				cursor: pointer;
+				flex-shrink: 0;
+				margin: 0;
+			}
+			span{
+				font-size: 14px;
+				color: rgba(255,255,255,0.85);
+			}
+		}
+		.copy_check_all{
+			border-bottom: 1px solid rgba(255,255,255,0.1);
+			padding-bottom: 10px;
+			margin-bottom: 4px;
+			span{
+				font-weight: 600;
+				color: #ddd6fe;
+			}
+		}
+		.copy_check_sub{
+			padding-left: 28px;
+			span{ font-size: 13px; }
+		}
+	}
+	// 옵션 입력 영역 (PDF 옵션, 프로필 수정 등 공통)
+	.pdf_options{
+		margin-top: 15px;
+		padding-top: 15px;
+		border-top: 1px solid rgba(255,255,255,0.1);
+		.pdf_opt_row{
+			margin-bottom: 12px;
+			&:last-child{ margin-bottom: 0; }
+			label{
+				display: block;
+				font-size: 13px;
+				font-weight: 600;
+				color: #aaa;
+				margin-bottom: 15px;
+			}
+			.ipt{
+				width: 100%;
+				padding: 8px 12px;
+				background: rgba(255,255,255,0.05);
+				border: 1px solid rgba(255,255,255,0.15);
+				border-radius: 6px;
+				font-size: 14px;
+				color: #fff;
+				outline: none;
+				transition: border-color 0.2s;
+				&:focus{ border-color: #a78bfa; }
+				&::placeholder{ color: rgba(255,255,255,0.3); }
+			}
+		}
+		.pdf_opt_info{
+			font-size: 12px;
+			color: rgba(255,255,255,0.4);
+			line-height: 1.5;
+			margin-bottom: 12px;
+		}
+		.color_palette{
+			display: flex;
+			gap: 8px;
+			// flex-wrap: wrap;
+			display: flex;
+			justify-content: space-between;
+			.color_chip{
+				width: 30px;
+				height: 30px;
+				border-radius: 50%;
+				border: 2px solid transparent;
+				cursor: pointer;
+				transition: all 0.15s;
+				&:hover{ transform: scale(1.15); }
+				&.active{
+					border-color: #fff;
+					box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 0 0 4px #a78bfa;
+				}
+				&.rainbow{
+					background: conic-gradient(red, orange, yellow, green, cyan, blue, violet, red) !important;
+				}
+			}
+		}
+	}
+	.m_buttons{
+		margin-top: 20px;
+	}
+}

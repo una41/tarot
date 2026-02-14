@@ -18,7 +18,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 	};
 
 	// 동적 import로 Firebase 모듈 로드
-	const [{ initializeApp }, { getAuth, browserSessionPersistence, setPersistence }, { getFirestore }] = await Promise.all([
+	const [{ initializeApp }, { getAuth, browserLocalPersistence, setPersistence }, { getFirestore }] = await Promise.all([
 		import('firebase/app'),
 		import('firebase/auth'),
 		import('firebase/firestore')
@@ -28,8 +28,8 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 	firebaseApp = initializeApp(firebaseConfig);
 	auth = getAuth(firebaseApp);
 
-	// 모든 서버에서 브라우저 닫으면 로그아웃
-	await setPersistence(auth, browserSessionPersistence);
+	// 쿠키(1일)와 동일하게 브라우저 닫아도 인증 유지
+	await setPersistence(auth, browserLocalPersistence);
 
 	db = getFirestore(firebaseApp);
 

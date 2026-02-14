@@ -44,6 +44,7 @@
 						</div>
 						<input v-if="isSignUp" class="ipt" v-model="userName" type="text" placeholder="이름" @keyup.enter="handleSubmit" />
 						<input v-if="isSignUp" class="ipt" v-model="userPhone" type="tel" placeholder="연락처 (010-0000-0000)" @keyup.enter="handleSubmit" />
+						<input v-if="isSignUp" class="ipt" v-model="userCorpName" type="text" placeholder="상호명 (선택사항)" @keyup.enter="handleSubmit" />
 						<button class="btn" @click="handleSubmit" :disabled="store.authLoading">
 							{{ store.authLoading ? '처리 중...' : (isSignUp ? '가입하기' : '운명 확인하기') }}
 						</button>
@@ -73,6 +74,7 @@ const pw = ref('');
 const pwConfirm = ref('');
 const userName = ref('');
 const userPhone = ref('');
+const userCorpName = ref('');
 const isSignUp = ref(false);
 const isForgotPassword = ref(false);
 const showPw = ref(false);
@@ -94,6 +96,7 @@ const toggleMode = () => {
 	pwConfirm.value = '';
 	userName.value = '';
 	userPhone.value = '';
+	userCorpName.value = '';
 	showPw.value = false;
 	showPwConfirm.value = false;
 };
@@ -106,6 +109,7 @@ const goToLogin = () => {
 	pwConfirm.value = '';
 	userName.value = '';
 	userPhone.value = '';
+	userCorpName.value = '';
 	showPw.value = false;
 	showPwConfirm.value = false;
 };
@@ -184,7 +188,7 @@ const handleSubmit = async () => {
 			return;
 		}
 
-		const result = await store.fnSignUp(email.value, pw.value, userName.value, userPhone.value);
+		const result = await store.fnSignUp(email.value, pw.value, userName.value, userPhone.value, userCorpName.value);
 		if (!result.success) {
 			store.showAlert({
 				title: '회원가입 실패',

@@ -10,6 +10,7 @@
 					<button type="button" class="btn_user" @click="isUserMenuOpen = !isUserMenuOpen"></button>
 					<div class="user_dropdown">
 						<div class="user_info">{{ userName }}님 <span class="user_grade" :class="gradeClass">{{ store.userGrade }}</span></div>
+						<button type="button" class="btn_modi_myinfo" @click.stop="openProfileModal">내정보 수정</button>
 						<button type="button" class="btn_logout" @click.stop="showLogoutModal">로그아웃</button>
 					</div>
 				</div>
@@ -24,11 +25,19 @@
 		<!-- <TarotProResult v-if="store.result !== null && !store.isReading" :data="store.picked === 'r1'? proBirthData : proYearData"/> -->
 		<!-- <ReadingBirthResult v-else-if="store.result !== null" :data="store.picked === 'r1'? birthData : yearData"/> -->
 		<transition name="fade">
-			<ProBirthResult
-				v-if="store.result !== null && store.picked === 'r1' && !store.isReading"
+			<TalkBirthResult
+				v-if="store.result !== null && store.picked === 'r1' && store.isTalk"
 				:data="proBirthData"
 			/>
+			<TalkYearResult
+				v-else-if="store.result !== null && store.picked === 'r2' && store.isTalk"
+				:data="proYearData"
+			/>
 
+			<ProBirthResult
+				v-else-if="store.result !== null && store.picked === 'r1' && !store.isReading"
+				:data="proBirthData"
+			/>
 			<ReadingBirthResult
 				v-else-if="store.result !== null && store.picked === 'r1' && store.isReading"
 				:data="birthData"
@@ -49,6 +58,37 @@
 	<div v-if="['마스터', '프로'].includes(store.userGrade)" class="wiki-floating-btn" @click="store.goToWikiMain">
 		<span>Wiki→</span>
 	</div>
+
+	<!-- 내정보 수정 모달 -->
+	<Transition name="m_fade">
+		<div v-if="showProfileModal" class="modal copy_modal" @click="showProfileModal = false">
+			<div class="m_container" @click.stop>
+				<h2 class="m_title">내정보 수정</h2>
+				<div class="pdf_options">
+					<div class="pdf_opt_row">
+						<label>이메일</label>
+						<span class="email">{{ store.user?.email || '' }}</span>
+					</div>
+					<div class="pdf_opt_row">
+						<label>이름</label>
+						<span class="name">{{ store.user?.name || '' }}</span>
+					</div>
+					<div class="pdf_opt_row">
+						<label>핸드폰 번호</label>
+						<input type="tel" class="ipt" v-model="editPhone" placeholder="010-0000-0000" />
+					</div>
+					<div class="pdf_opt_row">
+						<label>상호명 (PDF 워터마크/헤더에 사용)</label>
+						<input type="text" class="ipt" v-model="editCorpName" placeholder="상호명을 입력하세요" />
+					</div>
+				</div>
+				<div class="m_buttons">
+					<button class="btn-confirm" @click="saveProfile" :disabled="profileSaving">{{ profileSaving ? '저장 중...' : '저장' }}</button>
+					<button class="btn-cancel" @click="showProfileModal = false">취소</button>
+				</div>
+			</div>
+		</div>
+	</Transition>
 </template>
 <script setup>
 	//Store
@@ -94,6 +134,35 @@
 	onUnmounted(() => {
 		document.removeEventListener('click', closeUserMenu);
 	});
+
+	// 내정보 수정 모달
+	const showProfileModal = ref(false);
+	const editPhone = ref('');
+	const editCorpName = ref('');
+	const profileSaving = ref(false);
+
+	const openProfileModal = () => {
+		isUserMenuOpen.value = false;
+		editPhone.value = store.user?.phone || '';
+		editCorpName.value = store.userCorpName || '';
+		showProfileModal.value = true;
+	};
+
+	const saveProfile = async () => {
+		profileSaving.value = true;
+		const result = await store.updateMyProfile({
+			phone: editPhone.value,
+			corpName: editCorpName.value
+		});
+		profileSaving.value = false;
+
+		if (result.success) {
+			showProfileModal.value = false;
+			store.showAlert({ title: '저장 완료', message: '내정보가 수정되었습니다.', icon: '✅' });
+		} else {
+			store.showAlert({ title: '저장 실패', message: result.error || '다시 시도해주세요.', icon: '❌' });
+		}
+	};
 
 	// 로그아웃 모달 표시
 	const showLogoutModal = () => {

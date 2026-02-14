@@ -1,52 +1,63 @@
 <template>
 	<aside class="sidebar" :class="{ on: isMenuOpen }">
 		<button class="btn_toggle" @click="$emit('toggle-menu')"></button>
-
 		<!-- 필터 영역 -->
-		<div class="filter">
-			<div class="filter_header">필터</div>
-			<div class="filter_selects">
-				<!-- 등급 셀렉트박스 -->
-				<div class="slct" :class="{ on: isGradeOpen, selected: selectedGrade !== '전체' }">
-					<button class="slct_tit" @click="toggleGradeSelect">
-						{{ selectedGrade }} ({{ getGradeCount(selectedGrade) }})
-					</button>
-					<div class="slct_cont">
-						<button
-							v-for="grade in grades"
-							:key="grade"
-							@click="selectGrade(grade)"
-						>
-							{{ grade }} ({{ getGradeCount(grade) }})
+		<div class="side_header">
+			<div class="tit">필터 & 검색</div>
+			<div class="filter">
+				<div class="filter_selects">
+					<!-- 등급 셀렉트박스 -->
+					<div class="slct" :class="{ on: isGradeOpen, selected: selectedGrade !== '전체' }">
+						<button class="slct_tit" @click="toggleGradeSelect">
+							{{ selectedGrade }} ({{ getGradeCount(selectedGrade) }})
 						</button>
+						<div class="slct_cont">
+							<button
+								v-for="grade in grades"
+								:key="grade"
+								@click="selectGrade(grade)"
+							>
+								{{ grade }} ({{ getGradeCount(grade) }})
+							</button>
+						</div>
 					</div>
-				</div>
 
-				<!-- 승인 상태 셀렉트박스 -->
-				<div class="slct" :class="{ on: isApprovalOpen, selected: selectedApproval !== '전체' }">
-					<button class="slct_tit" @click="toggleApprovalSelect">
-						{{ selectedApproval }}
-					</button>
-					<div class="slct_cont">
-						<button
-							v-for="status in approvalStatuses"
-							:key="status"
-							@click="selectApproval(status)"
-						>
-							{{ status }}
+					<!-- 승인 상태 셀렉트박스 -->
+					<div class="slct" :class="{ on: isApprovalOpen, selected: selectedApproval !== '전체' }">
+						<button class="slct_tit" @click="toggleApprovalSelect">
+							{{ selectedApproval }}
 						</button>
+						<div class="slct_cont">
+							<button
+								v-for="status in approvalStatuses"
+								:key="status"
+								@click="selectApproval(status)"
+							>
+								{{ status }}
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+			<!-- 검색 -->
+			<div class="search">
+				<input
+					type="text"
+					:value="searchQuery"
+					@input="$emit('update:search-query', $event.target.value)"
+					placeholder="이름, 이메일, 업체명, 전화번호 검색"
+					class="ipt_search"
+				/>
+			</div>
 
+		</div>
 		<!-- 회원 목록 -->
 		<nav class="nav">
 			<div v-if="loading" class="nav_loading">
 				<span>로딩 중...</span>
 			</div>
 			<div v-else-if="users.length === 0" class="nav_empty">
-				<p>회원이 없습니다.</p>
+				<p>{{ searchQuery.trim() ? '검색 결과가 없습니다.' : '회원이 없습니다.' }}</p>
 			</div>
 			<ul v-else class="nav_list">
 				<li
@@ -95,6 +106,10 @@ const props = defineProps({
 		type: String,
 		default: '전체'
 	},
+	searchQuery: {
+		type: String,
+		default: ''
+	},
 	isMenuOpen: {
 		type: Boolean,
 		default: false
@@ -105,7 +120,7 @@ const props = defineProps({
 	}
 });
 
-const emit = defineEmits(['select-user', 'filter-grade', 'filter-approval', 'toggle-menu', 'close-menu']);
+const emit = defineEmits(['select-user', 'filter-grade', 'filter-approval', 'update:search-query', 'toggle-menu', 'close-menu']);
 
 const grades = ['전체', '일반', '프로', '마스터'];
 const approvalStatuses = ['전체', '승인', '미승인'];

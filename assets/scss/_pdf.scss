@@ -55,11 +55,19 @@
     }
 	
     .bx_img {
-        /* 배경 이미지가 잘린다면 크기를 고정 */
-        // width: 250px !important;
-        // height: 400px !important;
-        background-size: contain !important;
-		margin: 0 auto;
+		display: flex;
+		justify-content: center;
+		align-content: center;
+		overflow: hidden;
+		margin: 0 auto 15px;
+		background-size: cover !important;
+		background-position: center !important;
+		img{
+			width: 105% !important;
+			max-width: 105% !important;
+			height: auto !important;
+			object-fit: contain !important;
+		}
     }
 
     /* 2. PDF 내에서 섹션별 페이지 잘림 방지 */
@@ -70,7 +78,7 @@
 	section{
 		position: relative;
 		&:before {
-			content: "npm install firebase";
+			content: var(--watermark-text, "Numerology Tarot");
 			position: absolute;
 			top: 50%;
 			left: 50%;
@@ -130,9 +138,17 @@
 
 .pdf_only_header {
 	padding: 37px 0;
-	border-bottom: 2px solid #e4ca65;
-	background-color: #fbdf70;
+	border-bottom: 2px solid var(--pdf-header-color, #fbdf70);
+	background-color: var(--pdf-header-color, #fbdf70);
 	position: relative;
+	.corp{
+		position: absolute;
+		right: 20px;
+		top: 10px;
+		font-size: 10px;
+		font-weight: normal;
+		color: #454545;
+	}
 	.logo{
 		font-size: 16px;
 		margin-bottom: 10px;
@@ -142,6 +158,13 @@
 		top: 20px;
 		margin: 0;
 		color: #010101;
+	}
+	.txt_sm{
+		font-size: 13px;
+		color: #555;
+		text-align: center;
+		line-height: 1.4;
+		margin-bottom: 4px;
 	}
 	h2 {
 		font-size: 19px;

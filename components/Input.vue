@@ -1,8 +1,14 @@
 <template>
 	<div>
-		<div class="bx_chk">
-			<input type="checkbox" id="chk1" class="chk" v-model="store.isReading">
-			<label for="chk1">리딩용</label>
+		<div class="wrap_chk">
+				<div class="bx_chk">
+					<input type="checkbox" id="chk1" class="chk" v-model="store.isReading" @change="store.isReading && (store.isTalk = false)">
+					<label for="chk1">리딩용</label>
+				</div>
+				<div class="bx_chk">
+					<input type="checkbox" id="chk2" class="chk" v-model="store.isTalk" @change="store.isTalk && (store.isReading = false)">
+					<label for="chk2">톡상담</label>
+				</div>
 		</div>
 		<div class="c_wrap" v-if="'r1' == store.picked">
 			<form @submit.prevent="store.fnBirthCalc">

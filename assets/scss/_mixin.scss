@@ -209,26 +209,26 @@
 //   width: $min;
 //   margin: 0 auto;
 // }
-@mixin scroll {
+@mixin scroll($color: #a2a2a2, $width: 7px, $radius: 10px) {
   overflow-x: hidden;
   overflow-y: auto;
   &::-webkit-scrollbar {
-    width: 7px;
-    height: 7px;
+    width:  width;
+    height: width;
   } /* 스크롤 바 */
   &::-webkit-scrollbar-track {
-    background-color: #d9d9d9;
-    border-radius: 10px;
+    background-color: #a2a2a2;
+    border-radius: $radius;
   } /* 스크롤 바 밑의 배경 */
   &::-webkit-scrollbar-thumb {
-    background: #a2a2a2;
+    background: $color;
     border-radius: 10px;
   } /* 실질적 스크롤 바 */
   &::-webkit-scrollbar-thumb:hover {
-    background: #999;
+    background: #a2a2a2;
   } /* 실질적 스크롤 바 위에 마우스를 올려다 둘 때 */
   &::-webkit-scrollbar-thumb:active {
-    background: #999;
+    background: #a2a2a2;
   } 
 }
 

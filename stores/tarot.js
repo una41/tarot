@@ -1,7 +1,18 @@
 import { defineStore } from 'pinia'
 import Cookies from 'js-cookie';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+
+// 휴대폰 번호 인코딩/디코딩 (Base64)
+const encodePhone = (phone) => {
+	if (!phone) return '';
+	try { return btoa(phone); } catch { return phone; }
+};
+const decodePhone = (encoded) => {
+	if (!encoded) return '';
+	try { return atob(encoded); } catch { return encoded; }
+};
+
 export const useTarotStore = defineStore('tarot', {
 	state: () => ({
 		ipt_birth8: '',
@@ -13,6 +24,7 @@ export const useTarotStore = defineStore('tarot', {
 		y_calc: ['', '', ''],
 		picked: 'r1',
         isReading: false,
+        isTalk: false,
 		radio: [
 			{ text: '생일카드', id: 'r1' },
 			{ text: '해운카드', id: 'r2' },
@@ -29,6 +41,8 @@ export const useTarotStore = defineStore('tarot', {
         // Firebase 인증 상태
         user: null,
         userGrade: null, // 회원 등급 (일반, 프로, 마스터)
+        userCorpName: '', // 상호명
+        isLeading: false, // leading 컬렉션에 이메일 존재 여부
         isLoggedIn: false,
         token: null,
         authLoading: false, // 인증 처리 중 로딩 상태
@@ -60,15 +74,14 @@ export const useTarotStore = defineStore('tarot', {
 	}),
 	actions: {
         setReading(status) {
-            this.isReading = status
+            this.isReading = status;
+            if (status) this.isTalk = false;
         },
-        
+
         // 페이지 이동 함수 추가
         fnGo(data) {
-            // 이 함수가 컴포넌트 내부가 아니므로 useRouter() 대신 
-            // 프로젝트 설정에 맞는 라우터 이동 방식을 사용합니다.
-            // Nuxt라면 바로 navigateTo(`/${pathName}`) 등을 사용할 수 있습니다.
-            data == 'result' ? this.setReading(false) : this.setReading(true);
+            this.isReading = (data === 'reading');
+            this.isTalk = (data === 'talk');
         },
         fnBirthCalc() {
             this.calc = ['', '', ''];
@@ -199,7 +212,7 @@ export const useTarotStore = defineStore('tarot', {
         // ========== Firebase 인증 함수 ==========
 
         // 1. Firebase 회원가입 (이메일 인증 포함)
-        async fnSignUp(email, password, userName, userPhone) {
+        async fnSignUp(email, password, userName, userPhone, userCorpName = '') {
             const { $auth, $db } = useNuxtApp();
             this.authLoading = true;
 
@@ -218,7 +231,8 @@ export const useTarotStore = defineStore('tarot', {
                 await setDoc(doc($db, 'users', user.uid), {
                     email: email,
                     name: userName,
-                    phone: userPhone,
+                    phone: encodePhone(userPhone),
+                    corpName: userCorpName || '',
                     isApproved: false, // 기본값: 승인 대기
                     grade: '일반',      // 기본값: 일반 등급 일반, 프로, 마스터
                     createdAt: new Date()
@@ -307,10 +321,12 @@ export const useTarotStore = defineStore('tarot', {
                     uid: user.uid,
                     email: user.email,
                     name: userData.name || '',
+                    phone: decodePhone(userData.phone),
                     emailVerified: user.emailVerified,
                     loginAt: new Date().toLocaleString()
                 };
                 this.userGrade = userData.grade || '일반';
+                this.userCorpName = userData.corpName || '';
                 this.token = await user.getIdToken();
                 this.isLoggedIn = true;
 
@@ -318,6 +334,10 @@ export const useTarotStore = defineStore('tarot', {
                 Cookies.set('user_token', this.token, { expires: 1 });
                 Cookies.set('user_info', JSON.stringify(this.user), { expires: 1 });
                 Cookies.set('user_grade', this.userGrade, { expires: 1 });
+                Cookies.set('user_corp', this.userCorpName, { expires: 1 });
+
+                // leading 컬렉션 체크
+                this.checkLeading(user.email);
 
                 // 로그인 성공 시 로더 표시 (메인 페이지 로드 동안)
                 this.setAppLoading(true);
@@ -343,11 +363,14 @@ export const useTarotStore = defineStore('tarot', {
             }
             this.user = null;
             this.userGrade = null;
+            this.userCorpName = '';
+            this.isLeading = false;
             this.token = null;
             this.isLoggedIn = false;
             Cookies.remove('user_token');
             Cookies.remove('user_info');
             Cookies.remove('user_grade');
+            Cookies.remove('user_corp');
         },
 
         // 4. 인증 상태 체크 (앱 시작 시 호출)
@@ -361,6 +384,7 @@ export const useTarotStore = defineStore('tarot', {
             const savedToken = Cookies.get('user_token');
             const savedUserInfo = Cookies.get('user_info');
             const savedGrade = Cookies.get('user_grade');
+            const savedCorp = Cookies.get('user_corp');
 
             // 유효성 체크 헬퍼
             const isValid = (val) => val && val !== 'undefined' && val !== 'false' && val !== 'null';
@@ -375,17 +399,18 @@ export const useTarotStore = defineStore('tarot', {
                         this.user = JSON.parse(savedUserInfo);
                     }
                     this.userGrade = isValid(savedGrade) ? savedGrade : '일반';
+                    this.userCorpName = isValid(savedCorp) ? savedCorp : '';
                     this.token = savedToken;
                     this.isLoggedIn = true;
                     
                     // 핵심: 쿠키 데이터가 있다면 즉시 true로 설정하여 '검정 화면' 방지
                     this.authChecked = true; 
-                    console.log('✅ [Step 1] 쿠키 데이터로 즉시 복원 성공');
+                    // console.log('✅ [Step 1] 쿠키 데이터로 즉시 복원 성공');
                 } catch (e) {
                     console.error('❌ 쿠키 데이터 파싱 실패:', e);
                 }
             } else {
-                console.log('ℹ️ 쿠키 데이터 없음: Firebase 인증 대기 중...');
+                // console.log('ℹ️ 쿠키 데이터 없음: Firebase 인증 대기 중...');
             }
             console.groupEnd();
 
@@ -415,10 +440,12 @@ export const useTarotStore = defineStore('tarot', {
                                 uid: user.uid,
                                 email: user.email,
                                 name: userData.name || '',
+                                phone: decodePhone(userData.phone),
                                 emailVerified: user.emailVerified,
                                 loginAt: new Date().toLocaleString()
                             };
                             this.userGrade = userData.grade || '일반';
+                            this.userCorpName = userData.corpName || '';
                             this.token = await user.getIdToken();
                             this.isLoggedIn = true;
 
@@ -427,14 +454,16 @@ export const useTarotStore = defineStore('tarot', {
                             Cookies.set('user_token', this.token, cookieOptions);
                             Cookies.set('user_info', JSON.stringify(this.user), cookieOptions);
                             Cookies.set('user_grade', this.userGrade, cookieOptions);
-                            
-                            console.log('💾 [Step 2] Firebase 인증 및 쿠키 갱신 완료');
+                            Cookies.set('user_corp', this.userCorpName, cookieOptions);
+
+                            // leading 컬렉션 체크
+                            this.checkLeading(user.email);
                         }
                     } catch (error) {
                         console.error('Firestore 확인 오류:', error);
                     }
                 } else {
-                    console.log('📢 Firebase: 인증 세션 없음');
+                    // console.log('📢 Firebase: 인증 세션 없음');
                     
                     // [방어 로직] 쿠키로 이미 복원된 상태라면 Firebase가 늦게 응답해도 유지
                     if (!this.isLoggedIn) {
@@ -513,11 +542,14 @@ export const useTarotStore = defineStore('tarot', {
         resetAndClear() {
             this.user = null;
             this.userGrade = null;
+            this.userCorpName = '';
+            this.isLeading = false;
             this.token = null;
             this.isLoggedIn = false;
             Cookies.remove('user_token');
             Cookies.remove('user_info');
             Cookies.remove('user_grade');
+            Cookies.remove('user_corp');
         },
 
         // 7. 로더 제어
@@ -528,14 +560,48 @@ export const useTarotStore = defineStore('tarot', {
             this.loader.isPdfLoading = status;
         },
 
+        // 8-1. PDF 캡처 전 이미지 처리 (img → background-image 임시 전환)
+        prepareImagesForPDF(element) {
+            const imgElements = element.querySelectorAll('.bx_img img');
+            const saved = [];
+            imgElements.forEach(img => {
+                const parent = img.parentElement;
+                saved.push({
+                    img,
+                    parent,
+                    parentBg: parent.style.backgroundImage,
+                    parentBgSize: parent.style.backgroundSize,
+                    parentBgPos: parent.style.backgroundPosition,
+                    imgDisplay: img.style.display
+                });
+                parent.style.backgroundImage = `url(${img.src})`;
+                parent.style.backgroundSize = 'cover';
+                parent.style.backgroundPosition = 'center';
+                img.style.display = 'none';
+            });
+            return saved;
+        },
+
+        // 8-2. PDF 캡처 후 이미지 복원
+        restoreImagesAfterPDF(saved) {
+            if (!saved) return;
+            saved.forEach(({ img, parent, parentBg, parentBgSize, parentBgPos, imgDisplay }) => {
+                parent.style.backgroundImage = parentBg;
+                parent.style.backgroundSize = parentBgSize;
+                parent.style.backgroundPosition = parentBgPos;
+                img.style.display = imgDisplay;
+            });
+        },
+
         // 8. PDF 다운로드
         async downloadPDF(options) {
             const { pdfContent, html2canvas, jsPDF, filename } = options;
             if (!pdfContent) return;
 
+            const element = pdfContent;
+            const savedImgs = this.prepareImagesForPDF(element);
             try {
                 this.setPdfLoading(true);
-                const element = pdfContent;
                 element.classList.add('pdf_print');
                 const pdf = new jsPDF('p', 'mm', 'a4');
                 const imgWidth = 210;
@@ -557,6 +623,7 @@ export const useTarotStore = defineStore('tarot', {
                     });
                     return {
                         data: canvas.toDataURL('image/jpeg', 1.0),
+                        width: canvas.width,
                         height: (canvas.height * imgWidth) / canvas.width
                     };
                 };
@@ -566,16 +633,30 @@ export const useTarotStore = defineStore('tarot', {
                 const headerImg = await captureElement(headerEl);
                 headerEl.style.display = 'none';
 
+                let pageCount = 0;
                 for (let i = 0; i < sectionSelectors.length; i++) {
                     const target = element.querySelector(sectionSelectors[i]);
                     if (!target) continue;
+
+                    // 숨겨진 섹션 건너뛰기
+                    if (target.style.display === 'none') continue;
+
+                    // 섹션 내 보이는 .item이 없으면 건너뛰기
+                    const visibleItems = target.querySelectorAll('.item');
+                    if (visibleItems.length > 0) {
+                        const hasVisible = Array.from(visibleItems).some(item => item.style.display !== 'none');
+                        if (!hasVisible) continue;
+                    }
 
                     const originalDisplay = target.style.display;
                     target.style.display = 'block';
                     const sectionImg = await captureElement(target);
                     target.style.display = originalDisplay;
 
-                    if (i > 0) pdf.addPage();
+                    // 캔버스가 유효하지 않으면 건너뛰기
+                    if (!sectionImg.width || sectionImg.height <= 0) continue;
+
+                    if (pageCount > 0) pdf.addPage();
 
                     const sideMargin = 20;
                     const contentWidth = imgWidth - (sideMargin * 2);
@@ -583,7 +664,7 @@ export const useTarotStore = defineStore('tarot', {
 
                     let currentY = 0;
 
-                    if (i === 0) {
+                    if (pageCount === 0) {
                         pdf.addImage(headerImg.data, 'JPEG', 0, 0, imgWidth, headerImg.height);
                         currentY = headerImg.height + 5;
                     } else {
@@ -594,16 +675,19 @@ export const useTarotStore = defineStore('tarot', {
 
                     pdf.setFontSize(10);
                     pdf.setTextColor(150);
-                    pdf.text('- ' + String(i + 1) + ' -', 105, 287, { align: 'center' });
+                    pdf.text('- ' + String(pageCount + 1) + ' -', 105, 287, { align: 'center' });
+                    pageCount++;
                 }
 
                 pdf.save(filename);
                 element.classList.remove('pdf_print');
+                this.restoreImagesAfterPDF(savedImgs);
                 this.setPdfLoading(false);
 
             } catch (error) {
                 console.error('PDF 생성 에러:', error);
                 element.classList.remove('pdf_print');
+                this.restoreImagesAfterPDF(savedImgs);
                 this.setPdfLoading(false);
                 alert('PDF 저장 중 오류가 발생했습니다.');
             }
@@ -625,12 +709,67 @@ export const useTarotStore = defineStore('tarot', {
             window.open(url, '_blank');
         },
 
+        // ========== leading 컬렉션 체크 ==========
+        async checkLeading(email) {
+            if (!email) { this.isLeading = false; return; }
+            try {
+                const { $db } = useNuxtApp();
+                const { collection, query, where, getDocs } = await import('firebase/firestore');
+                const q = query(collection($db, 'leading'), where('email', '==', email));
+                const snapshot = await getDocs(q);
+                this.isLeading = !snapshot.empty;
+            } catch (error) {
+                console.error('leading 체크 실패:', error);
+                this.isLeading = false;
+            }
+        },
+
+        // ========== 내정보 수정 ==========
+
+        // 13. 내 프로필 수정 (핸드폰, 상호명)
+        async updateMyProfile({ phone, corpName }) {
+            const { $db } = useNuxtApp();
+            if (!this.user?.uid) return { success: false, error: '로그인이 필요합니다.' };
+            try {
+                const userRef = doc($db, 'users', this.user.uid);
+                await updateDoc(userRef, { phone: encodePhone(phone), corpName });
+
+                // 스토어 업데이트 (디코딩된 값 유지)
+                this.user.phone = phone;
+                this.userCorpName = corpName;
+
+                // 쿠키 갱신
+                const cookieOptions = { expires: 1, path: '/' };
+                Cookies.set('user_info', JSON.stringify(this.user), cookieOptions);
+                Cookies.set('user_corp', corpName, cookieOptions);
+
+                return { success: true };
+            } catch (error) {
+                console.error('프로필 수정 실패:', error);
+                return { success: false, error: error.message };
+            }
+        },
+
         // ========== 회원 관리 함수 (Admin 전용) ==========
 
         // 11. 전체 회원 목록 조회
         async fetchAllUsers() {
-            const { $db } = useNuxtApp();
+            const { $auth, $db } = useNuxtApp();
             try {
+                // Firebase Auth 초기화 대기 (쿠키 복원 후 바로 호출 시 auth가 아직 null일 수 있음)
+                if (!$auth.currentUser) {
+                    const user = await new Promise((resolve) => {
+                        const unsubscribe = onAuthStateChanged($auth, (user) => {
+                            unsubscribe();
+                            resolve(user);
+                        });
+                    });
+                    if (!user) {
+                        this.resetAndClear();
+                        return [];
+                    }
+                }
+
                 const { collection, getDocs, query, orderBy } = await import('firebase/firestore');
                 const usersRef = collection($db, 'users');
                 const q = query(usersRef, orderBy('createdAt', 'desc'));
