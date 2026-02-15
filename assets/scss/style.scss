@@ -1272,6 +1272,35 @@ h6{
 				}
 			}
 		}
+		.add_section_area {
+			margin: 20px 0 0;
+			padding: 16px;
+			border: 1px dashed #ddd;
+			border-radius: 8px;
+			background: #fafafa;
+			.add_label {
+				@include font(13, normal, #999, $medi);
+				margin-bottom: 10px;
+			}
+			.add_btns {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px;
+			}
+			.btn_add_section {
+				padding: 6px 14px;
+				border: 1px solid #ddd;
+				border-radius: 20px;
+				@include font(13, normal, #666, $medi);
+				background: #fff;
+				transition: all 200ms;
+				&:hover {
+					border-color: #b08d57;
+					color: #b08d57;
+					background: rgba(176, 141, 87, 0.05);
+				}
+			}
+		}
 		.btn_add_item {
 			width: 100%;
 			padding: 12px;

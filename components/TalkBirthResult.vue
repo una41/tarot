@@ -72,28 +72,37 @@
 					</section> -->
 					<div class="detail">
 						<template v-for="section in talkSections" :key="section.key">
-							<div class="item" v-if="card[section.key] && !hiddenSections.has(section.key)">
+							<div class="item" v-if="activeSections.has(section.key) && !hiddenSections.has(section.key)">
 								<input class="talk_title" v-model="editTitle[section.key]" :readonly="!editMode[section.key]" :class="{ editing: editMode[section.key] }" />
-								<textarea class="talk_textarea" v-model="editData[section.key]" :readonly="!editMode[section.key]" :class="{ editing: editMode[section.key] }" @input="autoResize"></textarea>
+								<textarea class="talk_textarea" v-model="editData[section.key]" :readonly="!editMode[section.key]" :class="{ editing: editMode[section.key] }" @input="autoResize" placeholder="내용을 입력하세요"></textarea>
 								<div class="talk_btns">
 									<button v-if="editMode[section.key]" class="btn_cancel_item" @click="cancelEdit(section.key)">↩️취소</button>
 									<button class="btn_edit_item" @click="toggleEdit(section.key)">{{ editMode[section.key] ? '✅완료' : '✏️수정' }}</button>
-									<button class="btn_copy_item" @click="copyItem(section.key)">📋복사</button>
 									<button class="btn_delete_item" @click="deleteItem(section.key)">🗑️삭제</button>
+									<button class="btn_copy_item" @click="copyItem(section.key)">📋복사</button>
 								</div>
 							</div>
 						</template>
 						<template v-for="item in customSections" :key="'custom-' + item.id">
 							<div class="item">
-								<input class="talk_title editing" v-model="item.title" />
-								<textarea class="talk_textarea editing" v-model="item.content" @input="autoResize"></textarea>
+								<input class="talk_title" v-model="item.title" :readonly="!item.editing" :class="{ editing: item.editing }" />
+								<textarea class="talk_textarea" v-model="item.content" :readonly="!item.editing" :class="{ editing: item.editing }" @input="autoResize" placeholder="내용을 입력하세요"></textarea>
 								<div class="talk_btns">
+									<button v-if="item.editing" class="btn_cancel_item" @click="cancelCustomEdit(item)">↩️취소</button>
+									<button class="btn_edit_item" @click="toggleCustomEdit(item)">{{ item.editing ? '✅완료' : '✏️수정' }}</button>
+									<button class="btn_delete_item" @click="deleteCustom(item.id)">🗑️삭제</button>
 									<button class="btn_copy_item" @click="copyCustom(item)">📋복사</button>
-									<button class="btn_cancel_item" @click="deleteCustom(item.id)">↩️취소</button>
 								</div>
 							</div>
 						</template>
-						<button class="btn_add_item" @click="addSection">+ 항목 추가</button>
+						<!-- 섹션 추가 버튼 영역 -->
+						<div class="add_section_area" v-if="availableSections.length > 0">
+							<p class="add_label">항목 추가</p>
+							<div class="add_btns">
+								<button v-for="s in availableSections" :key="s.key" class="btn_add_section" @click="addTalkSection(s.key)">+ {{ s.label }}</button>
+							</div>
+						</div>
+						<button class="btn_add_item" @click="addSection">+ 커스텀 항목 추가</button>
 					</div>
 				</div>
 			</div>
@@ -178,64 +187,94 @@
 		return tmp.textContent || '';
 	};
 
-	// 톡상담 항목별 텍스트 생성
-	const buildContent = (c, key) => {
-		const val = c[key];
-		if (!val) return '';
-		const lines = [];
-		if (val.sub_title) lines.push(val.sub_title);
-		if (val.cont) lines.push(stripHtml(val.cont));
-		else if (typeof val === 'string') lines.push(stripHtml(val));
+	// 추가된 섹션 키 관리 (DB에 저장된 것 또는 사용자가 추가한 것만 표시)
+	const activeSections = reactive(new Set());
 
-		if (key === 'total' && c.soul?.cont) {
-			lines.push('');
-			lines.push(`소울카드 - ${c.soul.card}`);
-			lines.push(stripHtml(c.soul.cont));
-		}
-		if (key === 'wealth' && c.rich?.cont) {
-			lines.push('');
-			lines.push('경매 및 투자운');
-			lines.push(stripHtml(c.rich.cont));
-		}
-		if (key === 'career' && val.recommend) {
-			lines.push('');
-			lines.push(`추천직업: ${val.recommend.join(', ')}`);
-		}
-		if (key === 'love') {
-			if (val.solo) { lines.push(''); lines.push(`솔로: ${stripHtml(val.solo)}`); }
-			if (val.couple) { lines.push(''); lines.push(`커플: ${stripHtml(val.couple)}`); }
-			if (val.married) { lines.push(''); lines.push(`결혼: ${stripHtml(val.married)}`); }
-		}
-		return lines.join('\n');
+	// 섹션 추가 함수
+	const addTalkSection = (key) => {
+		activeSections.add(key);
+		if (!editData[key]) editData[key] = '';
+		if (!editTitle[key]) editTitle[key] = talkSections.find(s => s.key === key)?.label || '';
+		editMode[key] = true;
+		originalData[key] = '';
 	};
 
-	// 톡상담 항목 초기화
-	if (card.value) {
-		talkSections.forEach(s => {
-			const content = buildContent(card.value, s.key);
-			editData[s.key] = content;
-			editTitle[s.key] = s.label;
-			originalData[s.key] = content;
-			editMode[s.key] = false;
-		});
-	}
+	// 아직 추가되지 않은 섹션 목록
+	const availableSections = computed(() =>
+		talkSections.filter(s => !activeSections.has(s.key) && !hiddenSections.has(s.key))
+	);
 
-	// Firestore 저장/로드
+	// 커스텀 항목
+	const customSections = reactive([]);
+	let customId = 0;
+
+	// Firestore 저장/로드 - leading 문서에 talk_birth 필드로 저장
 	const { $db } = useNuxtApp();
-	const docId = `birth_${store.result}`;
 	let saveTimer = null;
+	let leadingDocId = null;
+	let createDate = null; // 최초 생성일 유지
+
+	// 이메일로 leading 문서 ID 조회
+	const getLeadingDocId = async () => {
+		if (leadingDocId) return leadingDocId;
+		if (!store.user?.email) return null;
+		const { collection, query, where, getDocs } = await import('firebase/firestore');
+		const q = query(collection($db, 'leading'), where('email', '==', store.user.email));
+		const snapshot = await getDocs(q);
+		if (snapshot.empty) return null;
+		leadingDocId = snapshot.docs[0].id;
+		return leadingDocId;
+	};
+
+	// activeSections + customSections → contents 배열로 변환
+	const buildContents = () => {
+		const contents = [];
+		talkSections.forEach(s => {
+			if (activeSections.has(s.key) && !hiddenSections.has(s.key)) {
+				contents.push({
+					tit: editTitle[s.key] || s.label,
+					content: editData[s.key] || ''
+				});
+			}
+		});
+		customSections.forEach(item => {
+			contents.push({
+				tit: item.title || '',
+				content: item.content || ''
+			});
+		});
+		return contents;
+	};
 
 	const saveToFirestore = async () => {
-		if (!store.user?.uid) return;
+		const docId = await getLeadingDocId();
+		if (!docId) return;
 		try {
-			const { doc, setDoc } = await import('firebase/firestore');
-			await setDoc(doc($db, 'leading', store.user.uid, 'talk_edits', docId), {
-				editData: { ...editData },
-				editTitle: { ...editTitle },
-				hidden: [...hiddenSections],
-				custom: customSections.map(s => ({ ...s })),
-				updatedAt: new Date()
-			});
+			const { doc, getDoc, setDoc } = await import('firebase/firestore');
+			const now = new Date();
+			const cardKey = String(store.result);
+
+			// 기존 talk_birth 맵 로드
+			const snap = await getDoc(doc($db, 'leading', docId));
+			let talkBirth = {};
+			if (snap.exists() && snap.data().talk_birth) {
+				talkBirth = snap.data().talk_birth;
+			}
+
+			// 기존 항목의 t_id, createDate 유지
+			const existing = talkBirth[cardKey];
+			talkBirth[cardKey] = {
+				t_id: existing?.t_id ?? Object.keys(talkBirth).length,
+				card_num: store.result,
+				contents: buildContents(),
+				createDate: createDate || now,
+				modiDate: now
+			};
+
+			await setDoc(doc($db, 'leading', docId), {
+				talk_birth: talkBirth
+			}, { merge: true });
+			if (!createDate) createDate = now;
 		} catch (e) {
 			console.error('톡상담 저장 실패:', e);
 		}
@@ -246,19 +285,43 @@
 		saveTimer = setTimeout(saveToFirestore, 1000);
 	};
 
+	// talk_birth 맵에서 현재 카드 번호에 해당하는 항목 복원
 	const loadFromFirestore = async () => {
-		if (!store.user?.uid) return;
+		const docId = await getLeadingDocId();
+		if (!docId) return;
 		try {
 			const { doc, getDoc } = await import('firebase/firestore');
-			const snap = await getDoc(doc($db, 'leading', store.user.uid, 'talk_edits', docId));
+			const snap = await getDoc(doc($db, 'leading', docId));
 			if (!snap.exists()) return;
-			const saved = snap.data();
-			if (saved.editData) Object.assign(editData, saved.editData);
-			if (saved.editTitle) Object.assign(editTitle, saved.editTitle);
-			if (saved.hidden) saved.hidden.forEach(k => hiddenSections.add(k));
-			if (saved.custom) {
-				customSections.splice(0, customSections.length, ...saved.custom);
-				customId = Math.max(0, ...saved.custom.map(s => s.id || 0));
+			const data = snap.data();
+			if (!data.talk_birth) return;
+
+			const saved = data.talk_birth[String(store.result)];
+			if (!saved) return;
+
+			createDate = saved.createDate?.toDate?.() || saved.createDate || null;
+
+			if (saved.contents && Array.isArray(saved.contents)) {
+				const labelToKey = {};
+				talkSections.forEach(s => { labelToKey[s.label] = s.key; });
+
+				saved.contents.forEach(item => {
+					const key = labelToKey[item.tit];
+					if (key) {
+						activeSections.add(key);
+						editData[key] = item.content || '';
+						editTitle[key] = item.tit;
+						editMode[key] = false;
+						originalData[key] = item.content || '';
+					} else {
+						customSections.push({
+							id: ++customId,
+							title: item.tit || '',
+							content: item.content || '',
+							editing: false
+						});
+					}
+				});
 			}
 		} catch (e) {
 			console.error('톡상담 로드 실패:', e);
@@ -300,6 +363,9 @@
 	const toggleEdit = (key) => {
 		if (!editMode[key]) {
 			originalData[key] = editData[key];
+		} else {
+			// 완료 시 저장
+			debouncedSave();
 		}
 		editMode[key] = !editMode[key];
 	};
@@ -308,17 +374,20 @@
 	const cancelEdit = (key) => {
 		editData[key] = originalData[key];
 		editMode[key] = false;
+		// 원본 데이터가 비어있으면 아직 저장 전이므로 섹션 제거
+		if (!originalData[key]) {
+			activeSections.delete(key);
+			delete editData[key];
+			delete editTitle[key];
+		}
 	};
 
 	// 항목 삭제
 	const deleteItem = (key) => {
+		activeSections.delete(key);
 		hiddenSections.add(key);
 		debouncedSave();
 	};
-
-	// 커스텀 항목 추가
-	const customSections = reactive([]);
-	let customId = 0;
 
 	const addSection = () => {
 		customSections.push({
@@ -337,6 +406,26 @@
 		} catch (e) {
 			alert('복사에 실패했습니다.');
 		}
+	};
+
+	const toggleCustomEdit = (item) => {
+		if (!item.editing) {
+			item._backupTitle = item.title;
+			item._backupContent = item.content;
+		}
+		item.editing = !item.editing;
+		debouncedSave();
+	};
+
+	const cancelCustomEdit = (item) => {
+		// 백업이 없으면 새로 추가한 항목이므로 삭제
+		if (item._backupTitle == null) {
+			deleteCustom(item.id);
+			return;
+		}
+		item.title = item._backupTitle;
+		item.content = item._backupContent;
+		item.editing = false;
 	};
 
 	const deleteCustom = (id) => {

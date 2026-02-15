@@ -5,7 +5,7 @@
 					<input type="checkbox" id="chk1" class="chk" v-model="store.isReading" @change="store.isReading && (store.isTalk = false)">
 					<label for="chk1">리딩용</label>
 				</div>
-				<div class="bx_chk">
+				<div class="bx_chk"  v-if="store.isLeading">
 					<input type="checkbox" id="chk2" class="chk" v-model="store.isTalk" @change="store.isTalk && (store.isReading = false)">
 					<label for="chk2">톡상담</label>
 				</div>

@@ -32,9 +32,11 @@ service cloud.firestore {
                     );
     }
 
-    // leading 컬렉션: 로그인 사용자 읽기 허용
+    // leading 컬렉션: 로그인 사용자 읽기 허용, 본인 이메일 문서 쓰기 허용
     match /leading/{docId} {
       allow read: if isSignedIn();
+      allow write: if isSignedIn()
+                   && resource.data.email == request.auth.token.email;
     }
 
     // 타로 콘텐츠 등급별 접근 제한
