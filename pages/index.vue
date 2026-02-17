@@ -3,7 +3,7 @@
 		<header class="header">
 			<div class="left">
 				<h1 class="l_logo">numerologyTarot</h1>
-				<p>수비학으로 보는 타로카드</p>
+				<p>부자사관학교</p>
 			</div>
 			<div class="right">
 				<div class="user_menu" :class="{ on: isUserMenuOpen }">
