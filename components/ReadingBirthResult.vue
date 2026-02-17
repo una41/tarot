@@ -304,11 +304,19 @@
 				pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
 				heightLeft -= (pdfHeight - margin);
 			}
-
 			const cardType = store.picked === 'r1' ? '생일카드' : `${store.ipt_year}년_해운카드`;
 			const filename = `타로_${cardType}_리딩_${f_Birth}.pdf`;
-			pdf.save(filename);
 
+			if (window.ReactNativeWebView) {
+				var pdfBase64 = pdf.output('datauristring');
+				window.ReactNativeWebView.postMessage(JSON.stringify({
+					type: 'download',
+					data: pdfBase64,
+					filename: filename
+				}));
+			} else {
+				pdf.save(filename);
+			}
 			// 원래 상태로 복원
 			pdfOnlyElements.forEach(el => el.style.display = 'none');
 			screenOnlyElements.forEach(el => el.style.display = '');
