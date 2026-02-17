@@ -637,8 +637,12 @@ export const useTarotStore = defineStore('tarot', {
 
         // 11. 전체 회원 목록 조회
         async fetchAllUsers() {
-            const { $db } = useNuxtApp();
+            const { $auth, $db } = useNuxtApp();
             try {
+                // Firebase Auth 토큰 강제 갱신 (만료 방지)
+                if ($auth.currentUser) {
+                    await $auth.currentUser.getIdToken(true);
+                }
                 const { collection, getDocs, query, orderBy } = await import('firebase/firestore');
                 const usersRef = collection($db, 'users');
                 const q = query(usersRef, orderBy('createdAt', 'desc'));
