@@ -421,7 +421,15 @@ export const useTarotStore = defineStore('tarot', {
                             this.userGrade = userData.grade || '일반';
                             this.token = await user.getIdToken();
                             this.isLoggedIn = true;
-
+                            // 하이브리드 앱으로 인증 정보 전달
+                            if (window.ReactNativeWebView) {
+                            window.ReactNativeWebView.postMessage(JSON.stringify({
+                                type: 'auth',
+                                uid: user.uid,
+                                email: user.email || '',
+                                token: this.token
+                            }));
+                            }
                             // [변경] 쿠키 저장 (path: '/' 필수 설정)
                             const cookieOptions = { expires: 1, path: '/' };
                             Cookies.set('user_token', this.token, cookieOptions);
