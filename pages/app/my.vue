@@ -248,24 +248,24 @@ const fnLogout = () => {
 	width: 100%;
 	min-height: 100dvh;
 	background: #f5f0e8;
-	padding: 55px 20px 50px;
+	padding: 35px 20px 50px;
 	margin: 0 auto;
 
 	.my_profile {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 0 0 40px;
+		padding: 0 0 30px;
 
 		.avatar {
-			width: 90px;
-			height: 90px;
+			width: 80px;
+			height: 80px;
 			border-radius: 50%;
 			background: #fbdf70;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			margin-bottom: 18px;
+			margin-bottom: 13px;
 		}
 
 		.my_name {
@@ -299,11 +299,11 @@ const fnLogout = () => {
 	.my_info_card {
 		background: #fff;
 		border-radius: 16px;
-		padding: 30px 28px;
+		padding: 25px 28px;
 		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 
 		.my_info_item {
-			padding: 18px 0;
+			padding: 13px 0;
 			border-bottom: 1px solid #e8e2d8;
 
 			&:first-child {
@@ -328,7 +328,7 @@ const fnLogout = () => {
 			}
 
 			dd {
-				font-size: 1rem;
+				font-size: 15px;
 				color: #2d2015;
 				font-weight: 500;
 				padding-left: 32px;
