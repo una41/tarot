@@ -6,6 +6,7 @@
 @use 'common' as *;
 @use 'wiki' as *;
 @use 'admin' as *;
+@use 'app' as *;
 
 h3{
 	@include font(18, 25);

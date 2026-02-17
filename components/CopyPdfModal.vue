@@ -17,7 +17,7 @@
 					<div class="pdf_opt_row">
 						<input type="text" class="ipt" v-model="clientName" placeholder="내담자 이름을 입력하세요" />
 					</div>
-					<p class="pdf_opt_info">* 상호명을 변경하려면 상단 오른쪽 사람 아이콘에서 내정보 수정을 이용해주세요</p>
+					<p class="pdf_opt_info">* {{ isAppRoute ? '상호명을 변경하려면 앱 마이페이지에서 정보 수정을 부탁드려요' : '상호명을 변경하려면 상단 오른쪽 사람 아이콘에서 내정보 수정을 이용해주세요' }}</p>
 					<div class="pdf_opt_row">
 						<label>헤더 배경 색상</label>
 						<div class="color_palette">
@@ -44,6 +44,9 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:show', 'confirm']);
+
+const route = useRoute();
+const isAppRoute = computed(() => route.path.startsWith('/app'));
 
 const clientName = ref('');
 const headerColor = ref('#fbdf70');

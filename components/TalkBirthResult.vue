@@ -3,17 +3,6 @@
 		<div class="result" @click.stop>
 			<div class="bg" @click="store.fnClose"></div>
 			<div v-if="store.result !== null" class="r_wrap result_talk" ref="pdfContent">
-				<!-- PDF 전용 헤더 (화면에는 안보임) -->
-				<div class="pdf_only_header" style="display: none;">
-					<p class="corp">{{ (store.userCorpName || '').trim() || 'Numerology Tarot' }}</p>
-					<p class="txt_sm">수비학으로 보는 나의운명</p>
-					<h2>
-						{{ clientName.trim() || '00' }}님 생일카드 해석 리포트
-					</h2>
-					<div class="sub_tit">
-						{{ store.result }}번 - <span v-html="data.list[store.result].name"></span>
-					</div>
-				</div>
 				<div class="r_top colb">
 					<div class="c_left">
 						<h3>생일카드 결과 <span>(톡상담)</span></h3>
@@ -33,43 +22,6 @@
 					<h3 class="main_card_tit">
 						{{ store.result }}번 - <div class="tit" v-html="data.list[store.result].name"></div>
 					</h3>
-					<!-- <section class="pdf_section1">
-						<div class="col2">
-							<div class="left">
-								<div class="bx_img">
-									<img :src="'/img/card/majors/' + store.result + '.jpg'" :alt="store.result + '번 ' + data.list[store.result].name" crossorigin="anonymous" />
-								</div>
-								<button v-if="['마스터', '프로'].includes(store.userGrade)" class="btn" @click="store.goToWiki(store.result, 'majors')">고유 설명 보기</button>
-							</div>
-							<div class="right">
-								<dl class="info_birth mt0">
-									<dt>생년월일</dt>
-									<dd>{{ f_Birth }}</dd>
-								</dl>
-								<div class="lucky_group" v-if="data.list[store.result].lucky_group">
-									<dl v-for="(val, key) in luckyMap" :key="key">
-										<dt>행운의 {{ key }}</dt>
-										<dd>{{ data.list[store.result].lucky_group[val] }}</dd>
-									</dl>
-								</div>
-								<div class="summary_box" v-if="data.list[store.result].summary">
-									<h5 class="sub_tit">{{ data.list[store.result].summary.sub_title }}</h5>
-									<p class="cont" v-html="data.list[store.result].summary.cont"></p>
-								</div>
-								<div class="bx_key">
-									<span class="tag" v-for="word in data.list[store.result].keyword" :key="word">{{ '#' + word +" "}}</span>
-								</div>
-							</div>
-						</div>
-						<div class="pdf_info">
-							<h4 class="d_tit">🪄수비학 타로란?</h4>
-							<div class="d_cont">
-								숫자가 가진 유한 에너지의 성질과 타로의 상징을 결합하여 인생의 흐름을 논리적이고 체계적으로 분석합니다. <br/>
-								생년월일을 계산해 타고난 기질과 운명적 주기를 파악하며, 삶의 목적을 더욱 선명하게 드러냅니다. <br/>
-								단순한 우연을 넘어 수(數)의 질서 속에 숨겨진 명확한 삶의 이정표를 제시하는 현대적인 분석 기법입니다.
-							</div>
-						</div>
-					</section> -->
 					<div class="detail">
 						<template v-for="section in talkSections" :key="section.key">
 							<div class="item" v-if="activeSections.has(section.key) && !hiddenSections.has(section.key)">

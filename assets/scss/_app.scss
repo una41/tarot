@@ -1,0 +1,67 @@
+.app_down_wrap {
+  min-height: 100vh;
+  background-color: #fff;
+}
+.no_data {
+  text-align: center;
+  padding-top: 50px;
+  color: #999;
+}
+
+/* 앱 웹뷰 전용 플로팅 바 */
+.app_cover_down {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 0;
+  background: #fff;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.12);
+  z-index: 9999;
+  padding: 0;
+  justify-content: center;
+  align-items: center;
+}
+.app_contentr{
+    display: block;
+    width: 100%;
+    padding: 0 20px;
+}
+.btn_down {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px 0;
+  border: none;
+  background: #fbdf70;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-radius: 5px !important;
+}
+.btn_down:hover{
+  opacity: 0.8;
+}
+.btn_down +.btn_down {
+    margin-top: 15px;
+}
+
+.btn_down:active {
+  background: #f5f5f5;
+}
+
+.btn_down.copy {
+  border-right: 1px solid #eee;
+}
+
+.btn_down .ico {
+  font-size: 18px;
+}

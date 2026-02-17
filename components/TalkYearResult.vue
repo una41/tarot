@@ -2,16 +2,18 @@
 	<Transition name="fade">
 		<div class="result result_talk result_year" @click.stop>
 			<div class="bg" @click="store.fnClose"></div>
-			<div v-if="store.result !== null" class="r_wrap">
+			<div v-if="store.result !== null" class="r_wrap result_talk" ref="pdfContent">
 				<div class="r_top colb">
 					<div class="c_left">
-						<h3>{{ store.ipt_year + '년 해운카드' }} <b class="pc">결과</b> <span>(톡상담)</span></h3>
+						<h3>{{ store.ipt_year + '년 해운카드' }} <b>결과</b> <span>(톡상담)</span></h3>
 					</div>
 					<div class="c_right">
 						<button class="btn_close" @click="store.fnClose"><span>닫기</span></button>
 					</div>
 					<div class="gnb">
-						<button class="btn_copy" @click="doCopy">📋복사</button>
+						<button class="btn_copy" @click="openModal('copy')">📋복사</button>
+						<!-- <button class="btn_pdf" @click="openModal('pdf')">💾PDF</button> -->
+						<button class="link blue" @click="store.fnGo('reading')">🔗리딩</button>
 						<button class="link" @click="store.fnGo('result')">🔗해석</button>
 					</div>
 				</div>
@@ -19,85 +21,61 @@
 					<h3 class="main_card_tit">
 						{{ store.result }}번 - <div class="tit" v-html="data.list[store.result].name"></div>
 					</h3>
-					<div class="talk_card">
-						<div class="bx_img">
-							<img :src="'/img/card/majors/' + store.result + '.jpg'" :alt="store.result + '번 ' + data.list[store.result].name" />
-						</div>
-						<div class="r_colb" v-if="data.list[store.result].lucky_group">
-							<dl class="info_birth mt0">
-								<dt>해운년도</dt>
-								<dd>{{ store.ipt_year }}</dd>
-							</dl>
-							<dl class="mt0">
-								<dt>운</dt>
-								<dd><span :class="'txt_bg ' + data.list[store.result].lucky_group.grade">{{ data.list[store.result].lucky_group.grade }}</span></dd>
-							</dl>
-						</div>
-						<div class="r_colb" v-if="data.list[store.result].lucky_group">
-							<dl>
-								<dt>생일</dt>
-								<dd>{{ f_BirthMD }}</dd>
-							</dl>
-							<dl>
-								<dt>좋은 분기</dt>
-								<dd>{{ data.list[store.result].lucky_group.lucky_timing }}</dd>
-							</dl>
-						</div>
-						<div class="summary_box hr" v-for="(val, key) in luckyMap" :key="key">
-							<h5 class="sub_tit">{{ key }}</h5>
-							<p class="cont" v-html="data.list[store.result].lucky_group[val]"></p>
-						</div>
-						<div class="summary_box" v-if="data.list[store.result].summary">
-							<h5 class="sub_tit">{{ data.list[store.result].summary.sub_title }}</h5>
-							<p class="cont" v-html="data.list[store.result].summary.cont"></p>
-						</div>
-						<div class="bx_key">
-							<span class="tag" v-for="word in data.list[store.result].keywords" :key="word">{{ word + " " }}</span>
-						</div>
-					</div>
 					<div class="detail">
 						<template v-for="section in talkSections" :key="section.key">
-							<div class="item" v-if="card[section.key] && !hiddenSections.has(section.key)">
+							<div class="item" v-if="activeSections.has(section.key) && !hiddenSections.has(section.key)">
 								<input class="talk_title" v-model="editTitle[section.key]" :readonly="!editMode[section.key]" :class="{ editing: editMode[section.key] }" />
-								<textarea class="talk_textarea" v-model="editData[section.key]" :readonly="!editMode[section.key]" :class="{ editing: editMode[section.key] }" @input="autoResize"></textarea>
+								<textarea class="talk_textarea" v-model="editData[section.key]" :readonly="!editMode[section.key]" :class="{ editing: editMode[section.key] }" @input="autoResize" placeholder="내용을 입력하세요"></textarea>
 								<div class="talk_btns">
 									<button v-if="editMode[section.key]" class="btn_cancel_item" @click="cancelEdit(section.key)">↩️취소</button>
 									<button class="btn_edit_item" @click="toggleEdit(section.key)">{{ editMode[section.key] ? '✅완료' : '✏️수정' }}</button>
-									<button class="btn_copy_item" @click="copyItem(section.key)">📋복사</button>
 									<button class="btn_delete_item" @click="deleteItem(section.key)">🗑️삭제</button>
+									<button class="btn_copy_item" @click="copyItem(section.key)">📋복사</button>
 								</div>
 							</div>
 						</template>
 						<template v-for="item in customSections" :key="'custom-' + item.id">
 							<div class="item">
-								<input class="talk_title editing" v-model="item.title" />
-								<textarea class="talk_textarea editing" v-model="item.content" @input="autoResize"></textarea>
+								<input class="talk_title" v-model="item.title" :readonly="!item.editing" :class="{ editing: item.editing }" />
+								<textarea class="talk_textarea" v-model="item.content" :readonly="!item.editing" :class="{ editing: item.editing }" @input="autoResize" placeholder="내용을 입력하세요"></textarea>
 								<div class="talk_btns">
+									<button v-if="item.editing" class="btn_cancel_item" @click="cancelCustomEdit(item)">↩️취소</button>
+									<button class="btn_edit_item" @click="toggleCustomEdit(item)">{{ item.editing ? '✅완료' : '✏️수정' }}</button>
+									<button class="btn_delete_item" @click="deleteCustom(item.id)">🗑️삭제</button>
 									<button class="btn_copy_item" @click="copyCustom(item)">📋복사</button>
-									<button class="btn_cancel_item" @click="deleteCustom(item.id)">↩️취소</button>
 								</div>
 							</div>
 						</template>
-						<button class="btn_add_item" @click="addSection">+ 항목 추가</button>
+						<!-- 섹션 추가 버튼 영역 -->
+						<div class="add_section_area" v-if="availableSections.length > 0">
+							<p class="add_label">항목 추가</p>
+							<div class="add_btns">
+								<button v-for="s in availableSections" :key="s.key" class="btn_add_section" @click="addTalkSection(s.key)">+ {{ s.label }}</button>
+							</div>
+						</div>
+						<button class="btn_add_item" @click="addSection">+ 커스텀 항목 추가</button>
 					</div>
 				</div>
 			</div>
 		</div>
 	</Transition>
+
+	<!-- 복사/PDF 모달 -->
+	<CopyPdfModal v-model:show="showCopyModal" :mode="modalMode" :sections="copySections" @confirm="handleModalConfirm" />
 </template>
 
 <script setup>
-	import { reactive, computed, nextTick, watch } from 'vue';
+	import { ref, reactive, computed, nextTick, watch } from 'vue';
 	import { useTarotStore } from '~/stores/tarot';
 
 	const store = useTarotStore();
 	const props = defineProps(['data']);
+	const clientName = ref('');
+	const headerColor = ref('#fbdf70');
 
 	const birth = store.ipt_year + store.ipt_birth4;
 	const f_Birth = birth.replace(/(\d{4})(\d{2})(\d{2})/, '$1년 $2월 $3일');
 	const f_BirthMD = store.ipt_birth4.replace(/(\d{2})(\d{2})/, '$1월 $2일');
-
-	const card = computed(() => props.data?.list?.[store.result]);
 
 	const luckyMap = {
 		'추천 할일': 'todo',
@@ -122,6 +100,28 @@
 	const originalData = reactive({});
 	const hiddenSections = reactive(new Set());
 
+	// 복사/PDF 모달
+	const showCopyModal = ref(false);
+	const modalMode = ref('copy');
+	const copySections = reactive([
+		{ key: 'basic', label: '기본 정보', checked: true },
+		{ key: 'roadmap', label: '연간 로드맵', checked: true },
+		{ key: 'total', label: '내 삶의 전반적 흐름', checked: true },
+		{ key: 'wealth', label: '재물 흐름', checked: true },
+		{ key: 'study', label: '학업 및 자기개발', checked: true },
+		{ key: 'career', label: '직업과 사회적 성공', checked: true },
+		{ key: 'health', label: '건강과 에너지', checked: true },
+		{ key: 'love', label: '사랑과 인연', checked: true },
+		{ key: 'advice', label: '당신을 위한 조언', checked: true },
+		{ key: 'lucky_tips', label: '운명의 가이드', checked: true },
+	]);
+
+	const openModal = (mode) => {
+		copySections.forEach(s => s.checked = true);
+		modalMode.value = mode;
+		showCopyModal.value = true;
+	};
+
 	const stripHtml = (html) => {
 		if (!html) return '';
 		const tmp = document.createElement('div');
@@ -129,65 +129,95 @@
 		return tmp.textContent || '';
 	};
 
-	// 톡상담 항목별 텍스트 생성
-	const buildContent = (c, key) => {
-		const val = c[key];
-		if (!val) return '';
-		const lines = [];
+	// 추가된 섹션 키 관리 (DB에 저장된 것 또는 사용자가 추가한 것만 표시)
+	const activeSections = reactive(new Set());
 
-		if (key === 'roadmap') {
-			if (val.intro) lines.push(stripHtml(val.intro));
-			if (val.q1) lines.push(`1분기 (1~3월): ${stripHtml(val.q1)}`);
-			if (val.q2) lines.push(`2분기 (4~6월): ${stripHtml(val.q2)}`);
-			if (val.q3) lines.push(`3분기 (7~9월): ${stripHtml(val.q3)}`);
-			if (val.q4) lines.push(`4분기 (10~12월): ${stripHtml(val.q4)}`);
-			return lines.join('\n');
-		}
-
-		if (val.sub_title) lines.push(val.sub_title);
-		if (val.cont) lines.push(stripHtml(val.cont));
-		else if (typeof val === 'string') lines.push(stripHtml(val));
-
-		if (key === 'total' && c.soul?.cont) {
-			lines.push('');
-			lines.push(`소울카드 - ${c.soul.card}`);
-			lines.push(stripHtml(c.soul.cont));
-		}
-		if (key === 'love') {
-			if (val.solo) { lines.push(''); lines.push(`솔로: ${stripHtml(val.solo)}`); }
-			if (val.couple) { lines.push(''); lines.push(`커플: ${stripHtml(val.couple)}`); }
-			if (val.married) { lines.push(''); lines.push(`결혼: ${stripHtml(val.married)}`); }
-		}
-		return lines.join('\n');
+	// 섹션 추가 함수
+	const addTalkSection = (key) => {
+		activeSections.add(key);
+		if (!editData[key]) editData[key] = '';
+		if (!editTitle[key]) editTitle[key] = talkSections.find(s => s.key === key)?.label || '';
+		editMode[key] = true;
+		originalData[key] = '';
 	};
 
-	// 톡상담 항목 초기화
-	if (card.value) {
-		talkSections.forEach(s => {
-			const content = buildContent(card.value, s.key);
-			editData[s.key] = content;
-			editTitle[s.key] = s.label;
-			originalData[s.key] = content;
-			editMode[s.key] = false;
-		});
-	}
+	// 아직 추가되지 않은 섹션 목록
+	const availableSections = computed(() =>
+		talkSections.filter(s => !activeSections.has(s.key) && !hiddenSections.has(s.key))
+	);
 
-	// Firestore 저장/로드
+	// 커스텀 항목
+	const customSections = reactive([]);
+	let customId = 0;
+
+	// Firestore 저장/로드 - leading 문서에 talk_year 필드로 저장 (talk_birth와 동일 구조)
 	const { $db } = useNuxtApp();
-	const docId = `year_${store.result}_${store.ipt_year}`;
 	let saveTimer = null;
+	let leadingDocId = null;
+	let createDate = null;
+
+	// 이메일로 leading 문서 ID 조회
+	const getLeadingDocId = async () => {
+		if (leadingDocId) return leadingDocId;
+		if (!store.user?.email) return null;
+		const { collection, query, where, getDocs } = await import('firebase/firestore');
+		const q = query(collection($db, 'leading'), where('email', '==', store.user.email));
+		const snapshot = await getDocs(q);
+		if (snapshot.empty) return null;
+		leadingDocId = snapshot.docs[0].id;
+		return leadingDocId;
+	};
+
+	// activeSections + customSections → contents 배열로 변환
+	const buildContents = () => {
+		const contents = [];
+		talkSections.forEach(s => {
+			if (activeSections.has(s.key) && !hiddenSections.has(s.key)) {
+				contents.push({
+					tit: editTitle[s.key] || s.label,
+					content: editData[s.key] || ''
+				});
+			}
+		});
+		customSections.forEach(item => {
+			contents.push({
+				tit: item.title || '',
+				content: item.content || ''
+			});
+		});
+		return contents;
+	};
 
 	const saveToFirestore = async () => {
-		if (!store.user?.uid) return;
+		const docId = await getLeadingDocId();
+		if (!docId) return;
 		try {
-			const { doc, setDoc } = await import('firebase/firestore');
-			await setDoc(doc($db, 'leading', store.user.uid, 'talk_edits', docId), {
-				editData: { ...editData },
-				editTitle: { ...editTitle },
-				hidden: [...hiddenSections],
-				custom: customSections.map(s => ({ ...s })),
-				updatedAt: new Date()
-			});
+			const { doc, getDoc, setDoc } = await import('firebase/firestore');
+			const now = new Date();
+			const cardKey = `${store.result}_${store.ipt_year}`;
+
+			// 기존 talk_year 맵 로드
+			const snap = await getDoc(doc($db, 'leading', docId));
+			let talkYear = {};
+			if (snap.exists() && snap.data().talk_year) {
+				talkYear = snap.data().talk_year;
+			}
+
+			// 기존 항목의 t_id, createDate 유지
+			const existing = talkYear[cardKey];
+			talkYear[cardKey] = {
+				t_id: existing?.t_id ?? Object.keys(talkYear).length,
+				card_num: store.result,
+				year: store.ipt_year,
+				contents: buildContents(),
+				createDate: createDate || now,
+				modiDate: now
+			};
+
+			await setDoc(doc($db, 'leading', docId), {
+				talk_year: talkYear
+			}, { merge: true });
+			if (!createDate) createDate = now;
 		} catch (e) {
 			console.error('톡상담 저장 실패:', e);
 		}
@@ -198,19 +228,43 @@
 		saveTimer = setTimeout(saveToFirestore, 1000);
 	};
 
+	// talk_year 맵에서 현재 카드 번호+년도에 해당하는 항목 복원
 	const loadFromFirestore = async () => {
-		if (!store.user?.uid) return;
+		const docId = await getLeadingDocId();
+		if (!docId) return;
 		try {
 			const { doc, getDoc } = await import('firebase/firestore');
-			const snap = await getDoc(doc($db, 'leading', store.user.uid, 'talk_edits', docId));
+			const snap = await getDoc(doc($db, 'leading', docId));
 			if (!snap.exists()) return;
-			const saved = snap.data();
-			if (saved.editData) Object.assign(editData, saved.editData);
-			if (saved.editTitle) Object.assign(editTitle, saved.editTitle);
-			if (saved.hidden) saved.hidden.forEach(k => hiddenSections.add(k));
-			if (saved.custom) {
-				customSections.splice(0, customSections.length, ...saved.custom);
-				customId = Math.max(0, ...saved.custom.map(s => s.id || 0));
+			const data = snap.data();
+			if (!data.talk_year) return;
+
+			const saved = data.talk_year[`${store.result}_${store.ipt_year}`];
+			if (!saved) return;
+
+			createDate = saved.createDate?.toDate?.() || saved.createDate || null;
+
+			if (saved.contents && Array.isArray(saved.contents)) {
+				const labelToKey = {};
+				talkSections.forEach(s => { labelToKey[s.label] = s.key; });
+
+				saved.contents.forEach(item => {
+					const key = labelToKey[item.tit];
+					if (key) {
+						activeSections.add(key);
+						editData[key] = item.content || '';
+						editTitle[key] = item.tit;
+						editMode[key] = false;
+						originalData[key] = item.content || '';
+					} else {
+						customSections.push({
+							id: ++customId,
+							title: item.tit || '',
+							content: item.content || '',
+							editing: false
+						});
+					}
+				});
 			}
 		} catch (e) {
 			console.error('톡상담 로드 실패:', e);
@@ -252,6 +306,9 @@
 	const toggleEdit = (key) => {
 		if (!editMode[key]) {
 			originalData[key] = editData[key];
+		} else {
+			// 완료 시 저장
+			debouncedSave();
 		}
 		editMode[key] = !editMode[key];
 	};
@@ -260,17 +317,20 @@
 	const cancelEdit = (key) => {
 		editData[key] = originalData[key];
 		editMode[key] = false;
+		// 원본 데이터가 비어있으면 아직 저장 전이므로 섹션 제거
+		if (!originalData[key]) {
+			activeSections.delete(key);
+			delete editData[key];
+			delete editTitle[key];
+		}
 	};
 
 	// 항목 삭제
 	const deleteItem = (key) => {
+		activeSections.delete(key);
 		hiddenSections.add(key);
 		debouncedSave();
 	};
-
-	// 커스텀 항목 추가
-	const customSections = reactive([]);
-	let customId = 0;
 
 	const addSection = () => {
 		customSections.push({
@@ -291,6 +351,26 @@
 		}
 	};
 
+	const toggleCustomEdit = (item) => {
+		if (!item.editing) {
+			item._backupTitle = item.title;
+			item._backupContent = item.content;
+		}
+		item.editing = !item.editing;
+		debouncedSave();
+	};
+
+	const cancelCustomEdit = (item) => {
+		// 백업이 없으면 새로 추가한 항목이므로 삭제
+		if (item._backupTitle == null) {
+			deleteCustom(item.id);
+			return;
+		}
+		item.title = item._backupTitle;
+		item.content = item._backupContent;
+		item.editing = false;
+	};
+
 	const deleteCustom = (id) => {
 		const idx = customSections.findIndex(s => s.id === id);
 		if (idx !== -1) customSections.splice(idx, 1);
@@ -300,43 +380,51 @@
 		const card = props.data.list[store.result];
 		const lines = [];
 
-		lines.push(`[${store.result}번 - ${stripHtml(card.name)}]`);
-		lines.push(`해운년도: ${store.ipt_year}`);
-		lines.push(`생일: ${f_BirthMD}`);
-		if (card.lucky_group) {
-			if (card.lucky_group.grade) lines.push(`운: ${card.lucky_group.grade}`);
-			if (card.lucky_group.lucky_timing) lines.push(`좋은 분기: ${card.lucky_group.lucky_timing}`);
-			if (card.lucky_group.todo) lines.push(`추천 할일: ${stripHtml(card.lucky_group.todo)}`);
-		}
-		if (card.keywords) lines.push(`키워드: ${card.keywords.join(' ')}`);
-		if (card.summary) {
-			if (card.summary.sub_title) lines.push(card.summary.sub_title);
-			if (card.summary.cont) lines.push(stripHtml(card.summary.cont));
-		}
-		lines.push('');
+		for (const section of copySections) {
+			if (!section.checked) continue;
 
-		const sections = [
-			{ key: 'total', label: '내 삶의 전반적 흐름' },
-			{ key: 'wealth', label: '재물 흐름' },
-			{ key: 'study', label: '학업 및 자기개발' },
-			{ key: 'career', label: '직업과 사회적 성공' },
-			{ key: 'health', label: '건강과 에너지' },
-			{ key: 'advice', label: '당신을 위한 조언' },
-			{ key: 'lucky_tips', label: '운명의 가이드' },
-		];
+			if (section.key === 'basic') {
+				lines.push(`[${store.result}번 - ${stripHtml(card.name)}]`);
+				lines.push(`해운년도: ${store.ipt_year}`);
+				lines.push(`생일: ${f_BirthMD}`);
+				if (card.lucky_group) {
+					if (card.lucky_group.grade) lines.push(`운: ${card.lucky_group.grade}`);
+					if (card.lucky_group.lucky_timing) lines.push(`좋은 분기: ${card.lucky_group.lucky_timing}`);
+					if (card.lucky_group.todo) lines.push(`추천 할일: ${stripHtml(card.lucky_group.todo)}`);
+				}
+				if (card.keywords) lines.push(`키워드: ${card.keywords.join(' ')}`);
+				if (card.summary) {
+					if (card.summary.sub_title) lines.push(card.summary.sub_title);
+					if (card.summary.cont) lines.push(stripHtml(card.summary.cont));
+				}
+				lines.push('');
+				continue;
+			}
 
-		// 로드맵
-		if (card.roadmap) {
-			lines.push(`[연간 로드맵]`);
-			if (card.roadmap.intro) lines.push(stripHtml(card.roadmap.intro));
-			if (card.roadmap.q1) lines.push(`1분기 (1~3월): ${stripHtml(card.roadmap.q1)}`);
-			if (card.roadmap.q2) lines.push(`2분기 (4~6월): ${stripHtml(card.roadmap.q2)}`);
-			if (card.roadmap.q3) lines.push(`3분기 (7~9월): ${stripHtml(card.roadmap.q3)}`);
-			if (card.roadmap.q4) lines.push(`4분기 (10~12월): ${stripHtml(card.roadmap.q4)}`);
-			lines.push('');
-		}
+			if (section.key === 'roadmap') {
+				if (!card.roadmap) continue;
+				lines.push(`[연간 로드맵]`);
+				if (card.roadmap.intro) lines.push(stripHtml(card.roadmap.intro));
+				if (card.roadmap.q1) lines.push(`1분기 (1~3월): ${stripHtml(card.roadmap.q1)}`);
+				if (card.roadmap.q2) lines.push(`2분기 (4~6월): ${stripHtml(card.roadmap.q2)}`);
+				if (card.roadmap.q3) lines.push(`3분기 (7~9월): ${stripHtml(card.roadmap.q3)}`);
+				if (card.roadmap.q4) lines.push(`4분기 (10~12월): ${stripHtml(card.roadmap.q4)}`);
+				lines.push('');
+				continue;
+			}
 
-		for (const section of sections) {
+			if (section.key === 'love') {
+				if (!card.love) continue;
+				lines.push(`[사랑과 인연]`);
+				if (card.love.sub_title) lines.push(card.love.sub_title);
+				if (card.love.cont) lines.push(stripHtml(card.love.cont));
+				if (card.love.solo) lines.push(`\n솔로: ${stripHtml(card.love.solo)}`);
+				if (card.love.couple) lines.push(`\n커플: ${stripHtml(card.love.couple)}`);
+				if (card.love.married) lines.push(`\n결혼: ${stripHtml(card.love.married)}`);
+				lines.push('');
+				continue;
+			}
+
 			if (!card[section.key]) continue;
 			lines.push(`[${section.label}]`);
 			const val = card[section.key];
@@ -349,22 +437,84 @@
 			lines.push('');
 		}
 
-		if (card.love) {
-			lines.push(`[사랑과 인연]`);
-			if (card.love.sub_title) lines.push(card.love.sub_title);
-			if (card.love.cont) lines.push(stripHtml(card.love.cont));
-			if (card.love.solo) lines.push(`\n솔로: ${stripHtml(card.love.solo)}`);
-			if (card.love.couple) lines.push(`\n커플: ${stripHtml(card.love.couple)}`);
-			if (card.love.married) lines.push(`\n결혼: ${stripHtml(card.love.married)}`);
-			lines.push('');
-		}
-
 		try {
 			await navigator.clipboard.writeText(lines.join('\n'));
-			alert('전체 내용이 복사되었습니다.');
+			showCopyModal.value = false;
+			alert('선택한 항목이 복사되었습니다.');
 		} catch (e) {
 			console.error('복사 실패:', e);
 			alert('복사에 실패했습니다.');
 		}
+	};
+
+	const handleModalConfirm = ({ clientName: name, headerColor: color }) => {
+		clientName.value = name;
+		headerColor.value = color;
+		showCopyModal.value = false;
+		if (modalMode.value === 'copy') doCopy();
+		else downloadPDFWithSelection();
+	};
+
+	// PDF 관련 - 동적 import로 초기 로딩 최적화
+	const pdfContent = ref(null);
+
+	const titleToKey = {
+		'연간 로드맵': 'roadmap',
+		'내 삶의 전반적 흐름': 'total',
+		'재물 흐름': 'wealth',
+		'학업 및 자기개발': 'study',
+		'직업과 사회적 성공': 'career',
+		'건강과 에너지': 'health',
+		'사랑과 인연': 'love',
+		'당신을 위한 조언': 'advice',
+		'운명의 가이드': 'lucky_tips',
+	};
+
+	const downloadPDFWithSelection = async () => {
+		if (!pdfContent.value) return;
+		showCopyModal.value = false;
+
+		const checked = (key) => copySections.find(s => s.key === key)?.checked;
+		const el = pdfContent.value;
+		const hiddenEls = [];
+
+		// 각 .item 요소를 타이틀로 매칭하여 숨김
+		el.querySelectorAll('.detail .item').forEach(item => {
+			const tit = item.querySelector('.d_tit');
+			if (!tit) return;
+			const key = titleToKey[tit.textContent.trim()];
+			if (!key) return;
+
+			if (!checked(key)) {
+				item.style.display = 'none';
+				hiddenEls.push(item);
+			}
+		});
+
+		// CSS 변수 설정 (워터마크, 헤더 색상)
+		const corpName = (store.userCorpName || '').trim();
+		if (corpName) {
+			el.style.setProperty('--watermark-text', `"${corpName}"`);
+		}
+		el.style.setProperty('--pdf-header-color', headerColor.value);
+
+		// PDF 라이브러리를 필요할 때만 로드
+		const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+			import('html2canvas'),
+			import('jspdf')
+		]);
+
+		await store.downloadPDF({
+			pdfContent: el,
+			html2canvas,
+			jsPDF,
+			filename: `타로_${store.ipt_year}년_해운카드_리포트_${f_Birth}.pdf`
+		});
+
+		// CSS 변수 제거
+		el.style.removeProperty('--watermark-text');
+		el.style.removeProperty('--pdf-header-color');
+		// 숨김 복원
+		hiddenEls.forEach(e => e.style.display = '');
 	};
 </script>
