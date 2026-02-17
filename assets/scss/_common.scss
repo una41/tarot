@@ -168,11 +168,6 @@ $com_primary_light: #a78bfa;
 					transform: rotate(180deg); // ← (사이드바 닫기)
 				}
 			}
-<<<<<<< Updated upstream
-			// 모바일 기본: → (사이드바 열기)
-			.btn_toggle::after {
-				transform: rotate(0deg);
-=======
 			.btn_toggle {
 				@include setCont(24px, 60px, flex, absolute, $com_primary);
 				top: 50%;
@@ -193,7 +188,6 @@ $com_primary_light: #a78bfa;
 					border-left: 8px solid #fff;
 					transition: transform 300ms;
 				}
->>>>>>> Stashed changes
 			}
 		}
 	}
