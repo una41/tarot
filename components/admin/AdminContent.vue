@@ -39,6 +39,17 @@
 								</dd>
 							</div>
 							<div class="info_item">
+								<dt>상호명</dt>
+								<dd>
+									<input
+										type="text"
+										class="ipt_info"
+										v-model="editData.corpName"
+										placeholder="상호명 입력 (PDF 워터마크/헤더에 사용)"
+									/>
+								</dd>
+							</div>
+							<div class="info_item">
 								<dt>가입일</dt>
 								<dd>{{ formatDate(selectedUser.createdAt) }}</dd>
 							</div>
@@ -145,6 +156,7 @@ const editData = ref({
 	isApproved: false,
 	grade: '일반',
 	class: '',
+	corpName: '',
 	memo: ''
 });
 
@@ -155,6 +167,7 @@ watch(() => props.selectedUser, (newUser) => {
 			isApproved: newUser.isApproved || false,
 			grade: newUser.grade || '일반',
 			class: newUser.class || '',
+			corpName: newUser.corpName || '',
 			memo: newUser.memo || ''
 		};
 	}
@@ -167,6 +180,7 @@ const hasChanges = computed(() => {
 		editData.value.isApproved !== props.selectedUser.isApproved ||
 		editData.value.grade !== props.selectedUser.grade ||
 		editData.value.class !== (props.selectedUser.class || '') ||
+		editData.value.corpName !== (props.selectedUser.corpName || '') ||
 		editData.value.memo !== (props.selectedUser.memo || '')
 	);
 });
@@ -187,6 +201,7 @@ const saveChanges = () => {
 		isApproved: editData.value.isApproved,
 		grade: editData.value.grade,
 		class: editData.value.class,
+		corpName: editData.value.corpName,
 		memo: editData.value.memo
 	});
 };

@@ -1,6 +1,9 @@
 @use 'variable' as *;
 @use 'mixin' as *;
 
+$com_primary: #6a4e9c;
+$com_primary_light: #a78bfa;
+
 // 위키 전용 스타일
 .wiki {
 	// 검색
@@ -74,6 +77,42 @@
 				color: #2f165b;
 				font-weight: $medi;
 				border-left: none;
+			}
+		}
+	}
+
+	.wiki_com_top{
+		@include setCont(100%, auto, flex);
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 24px;
+		padding-bottom: 16px;
+		border-bottom: 2px solid $com_primary;
+		h2 {
+			margin-bottom: 0;
+			padding-bottom: 0;
+			border-bottom: none;
+			flex-shrink: 1;
+		}
+	}
+	.wiki_gnb {
+		display: flex;
+		position: absolute;
+		right: 10px;
+		top: 10px;
+		gap: 6px;
+		button {
+			padding: 4px 7px;
+			border-radius: 4px;
+			border: 1px solid #6a4e9c;
+			background: #fff;
+			@include font(10, normal, #6a4e9c, $medi);
+			cursor: pointer;
+			white-space: nowrap;
+			transition: all 200ms;
+			&:hover {
+				background: #6a4e9c;
+				color: #fff;
 			}
 		}
 	}
@@ -205,7 +244,9 @@
 		margin-right: 5px;
 	}
 	.bx_img {
-		@include setCont(200px, 353px);
+		@include setCont(200px, 353px, flex, relative);
+		justify-content: center;
+		align-items: center;
 		background-size: 105% !important;
 		border: 3px solid #b1a8a1;
 		background-position: 50% 50% !important;
@@ -217,7 +258,8 @@
 			margin: 0 auto 40px;
 		}
 		.img {
-			width: 100%;
+			width: 105%;
+			max-width: 200%;
 		}
 	}
 
@@ -251,7 +293,7 @@
 				}
 			}
 		}
-		.u1, .u11, .u12 {
+		.u1, .u11, .u12, .u13 {
 			dt {
 				display: none !important;
 			}

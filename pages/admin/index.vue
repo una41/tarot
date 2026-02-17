@@ -1,5 +1,5 @@
 <template>
-	<div class="com admin">
+	<div class="common admin">
 		<!-- 마스터 권한 체크 -->
 		<div v-if="!isMaster" class="denied">
 			<p class="icon">🔒</p>
@@ -24,11 +24,13 @@
 					:selected-user="selectedUser"
 					:selected-grade="selectedGrade"
 					:selected-approval="selectedApproval"
+					:search-query="searchQuery"
 					:is-menu-open="isMenuOpen"
 					:loading="loading"
 					@select-user="selectUser"
 					@filter-grade="filterGrade"
 					@filter-approval="filterApproval"
+					@update:search-query="searchQuery = $event"
 					@toggle-menu="toggleMenu"
 					@close-menu="closeMenu"
 				/>
@@ -62,6 +64,7 @@ const users = ref([]);
 const selectedUser = ref(null);
 const selectedGrade = ref('전체');
 const selectedApproval = ref('전체');
+const searchQuery = ref('');
 const isMenuOpen = ref(false);
 const loading = ref(false);
 const saving = ref(false);
@@ -74,9 +77,20 @@ const isMaster = computed(() => {
 // 등급 우선순위 (마스터 > 프로 > 일반)
 const gradeOrder = { '마스터': 0, '프로': 1, '일반': 2 };
 
-// 등급 + 승인 상태 필터링 + 정렬
+// 등급 + 승인 상태 + 검색 필터링 + 정렬
 const filteredUsers = computed(() => {
 	let result = users.value;
+
+	// 검색 필터
+	if (searchQuery.value.trim()) {
+		const query = searchQuery.value.toLowerCase();
+		result = result.filter(user =>
+			(user.name || '').toLowerCase().includes(query) ||
+			(user.email || '').toLowerCase().includes(query) ||
+			(user.corpName || '').toLowerCase().includes(query) ||
+			(user.phone || '').toLowerCase().includes(query)
+		);
+	}
 
 	// 등급 필터
 	if (selectedGrade.value !== '전체') {

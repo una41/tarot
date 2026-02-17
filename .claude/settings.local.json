@@ -15,7 +15,9 @@
       "Bash(git add:*)",
       "Bash(git push:*)",
       "Bash(node:*)",
-      "Bash(npm run minify-json:*)"
+      "Bash(npm run minify-json:*)",
+      "Bash(wiki \")",
+      "Bash(firebase deploy:*)"
     ]
   }
 }

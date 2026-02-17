@@ -5,9 +5,10 @@
 			<div v-if="store.result !== null" class="r_wrap" ref="pdfContent">
 				<!-- PDF 전용 헤더 (화면에는 안보임) -->
 				<div class="pdf_only_header" style="display: none;">
-					<!-- <p class="logo"><b>numerology Tarot</b></p> -->
+					<p class="corp">{{ (store.userCorpName || '').trim() || 'Numerology Tarot' }}</p>
+					<p class="txt_sm">수비학으로 보는 나의 1년</p>
 					<h2>
-						{{ store.ipt_year }}년 해운카드 타로 해석 결과
+						{{ (clientName.trim()+'님') || '' }} {{ store.ipt_year }}년 해운카드 해석 리포트
 					</h2>
 					<div class="sub_tit">
 						{{ store.result }}번 - <span v-html="data.list[store.result].name"></span>
@@ -21,8 +22,10 @@
 						<button class="btn_close" @click="store.fnClose"><span>닫기</span></button>
 					</div>
 					<div class="gnb">
-						<button class="btn_pdf" @click="downloadPDF">💾PDF</button>
-						<button class="link" @click="store.fnGo('reading')">🔗리딩</button>
+						<button class="btn_copy" @click="openModal('copy')">📋복사</button>
+						<button class="btn_pdf" @click="openModal('pdf')">💾PDF</button>
+						<button class="link blue" @click="store.fnGo('reading')">🔗리딩</button>
+						<button v-if="store.isLeading" class="link talk" @click="store.fnGo('talk')">💬톡상담</button>
 					</div>
 				</div>
 				<div class="r_cont">
@@ -32,9 +35,8 @@
 					<section class="pdf_section1">
 						<div class="col2">
 							<div class="left">
-								<div class="bx_img" :style="{ background: 'url(\'https://www.numerologytarot.uk/img/card/majors/' + store.result + '.jpg?v=1\') no-repeat 50% -4px'}">
-								<!-- <div class="bx_img" :style="{ background: 'url(\'https://una41.github.io/tarot/img/card/majors/' + store.result + '.jpg\') no-repeat 50% -4px'}"> -->
-									<span class="blind">{{ store.result }}번 {{data.list[store.result].name}} 이미지</span>
+								<div class="bx_img">
+									<img :src="'/img/card/majors/' + store.result + '.jpg'" :alt="store.result + '번 ' + data.list[store.result].name" crossorigin="anonymous" />
 								</div>
 								<button v-if="['마스터', '프로'].includes(store.userGrade)" class="btn" @click="store.goToWiki(store.result, 'majors')">고유 설명 보기</button>
 							</div>
@@ -226,16 +228,19 @@
 			</div>
 		</div>
 	</Transition>
+
+	<!-- 복사/PDF 모달 -->
+	<CopyPdfModal v-model:show="showCopyModal" :mode="modalMode" :sections="copySections" @confirm="handleModalConfirm" />
 </template>
 
 <script setup>
-	import { ref, computed } from 'vue';
-	import { useRouter } from 'vue-router';
+	import { ref, reactive } from 'vue';
 	import { useTarotStore } from '~/stores/tarot';
 
 	const store = useTarotStore();
-	const router = useRouter();
 	const props = defineProps(['data']);
+	const clientName = ref('');
+	const headerColor = ref('#fbdf70');
 
 	const birth = store.picked === 'r1' ? store.ipt_birth8 : store.ipt_year + store.ipt_birth4;
 	const f_Birth = birth.replace(/(\d{4})(\d{2})(\d{2})/, '$1년 $2월 $3일');
@@ -245,19 +250,195 @@
 		'추천 할일': 'todo',
 	};
 
-	// PDF 관련 - 동적 import로 초기 로딩 최적화
+	// 복사/PDF 모달
+	const showCopyModal = ref(false);
+	const modalMode = ref('copy');
+	const copySections = reactive([
+		{ key: 'basic', label: '기본 정보', checked: true },
+		{ key: 'roadmap', label: '연간 로드맵', checked: true },
+		{ key: 'total', label: '내 삶의 전반적 흐름', checked: true },
+		{ key: 'wealth', label: '재물 흐름', checked: true },
+		{ key: 'study', label: '학업 및 자기개발', checked: true },
+		{ key: 'career', label: '직업과 사회적 성공', checked: true },
+		{ key: 'health', label: '건강과 에너지', checked: true },
+		{ key: 'love_solo', label: '사랑과 인연 - 솔로', checked: true, group: 'love' },
+		{ key: 'love_couple', label: '사랑과 인연 - 커플', checked: true, group: 'love' },
+		{ key: 'love_married', label: '사랑과 인연 - 결혼', checked: true, group: 'love' },
+		{ key: 'advice', label: '당신을 위한 조언', checked: true },
+		{ key: 'lucky_tips', label: '운명의 가이드', checked: true },
+	]);
+
+	const openModal = (mode) => {
+		copySections.forEach(s => s.checked = true);
+		modalMode.value = mode;
+		showCopyModal.value = true;
+	};
+
+	const handleModalConfirm = ({ clientName: name, headerColor: color }) => {
+		clientName.value = name;
+		headerColor.value = color;
+		showCopyModal.value = false;
+		if (modalMode.value === 'copy') doCopy();
+		else downloadPDFWithSelection();
+	};
+
+	const stripHtml = (html) => {
+		if (!html) return '';
+		const tmp = document.createElement('div');
+		tmp.innerHTML = html;
+		return tmp.textContent || '';
+	};
+
+	const doCopy = async () => {
+		const card = props.data.list[store.result];
+		const lines = [];
+		const checked = (key) => copySections.find(s => s.key === key)?.checked;
+
+		for (const section of copySections) {
+			if (!section.checked || section.group) continue;
+
+			if (section.key === 'basic') {
+				lines.push(`[${store.result}번 - ${stripHtml(card.name)}]`);
+				lines.push(`해운년도: ${store.ipt_year}`);
+				lines.push(`생일: ${f_BirthMD}`);
+				if (card.lucky_group) {
+					if (card.lucky_group.grade) lines.push(`운: ${card.lucky_group.grade}`);
+					if (card.lucky_group.lucky_timing) lines.push(`좋은 분기: ${card.lucky_group.lucky_timing}`);
+					if (card.lucky_group.todo) lines.push(`추천 할일: ${stripHtml(card.lucky_group.todo)}`);
+				}
+				if (card.keywords) lines.push(`키워드: ${card.keywords.join(' ')}`);
+				if (card.summary) {
+					if (card.summary.sub_title) lines.push(card.summary.sub_title);
+					if (card.summary.cont) lines.push(stripHtml(card.summary.cont));
+				}
+				lines.push('');
+				continue;
+			}
+
+			if (!card[section.key]) continue;
+
+			lines.push(`[${section.label}]`);
+			const val = card[section.key];
+
+			if (section.key === 'roadmap') {
+				if (val.intro) lines.push(stripHtml(val.intro));
+				if (val.q1) lines.push(`1분기 (1~3월): ${stripHtml(val.q1)}`);
+				if (val.q2) lines.push(`2분기 (4~6월): ${stripHtml(val.q2)}`);
+				if (val.q3) lines.push(`3분기 (7~9월): ${stripHtml(val.q3)}`);
+				if (val.q4) lines.push(`4분기 (10~12월): ${stripHtml(val.q4)}`);
+			} else {
+				if (val.sub_title) lines.push(val.sub_title);
+				if (val.cont) lines.push(stripHtml(val.cont));
+			}
+
+			if (section.key === 'total' && card.soul?.cont) {
+				lines.push(`\n소울카드 - ${card.soul.card}`);
+				lines.push(stripHtml(card.soul.cont));
+			}
+			if (section.key === 'wealth' && card.rich?.cont) {
+				lines.push(`\n경매 및 투자운`);
+				lines.push(stripHtml(card.rich.cont));
+			}
+			lines.push('');
+		}
+
+		// 사랑과 인연
+		const loveAny = checked('love_solo') || checked('love_couple') || checked('love_married');
+		if (loveAny && card.love) {
+			lines.push(`[사랑과 인연]`);
+			if (card.love.sub_title) lines.push(card.love.sub_title);
+			if (card.love.cont) lines.push(stripHtml(card.love.cont));
+			if (checked('love_solo') && card.love.solo) lines.push(`\n솔로: ${stripHtml(card.love.solo)}`);
+			if (checked('love_couple') && card.love.couple) lines.push(`\n커플: ${stripHtml(card.love.couple)}`);
+			if (checked('love_married') && card.love.married) lines.push(`\n결혼: ${stripHtml(card.love.married)}`);
+			lines.push('');
+		}
+
+		try {
+			await navigator.clipboard.writeText(lines.join('\n'));
+			showCopyModal.value = false;
+			alert('선택한 항목이 복사되었습니다.');
+		} catch (e) {
+			console.error('복사 실패:', e);
+			alert('복사에 실패했습니다.');
+		}
+	};
+
+	// PDF 관련
 	const pdfContent = ref(null);
-	const downloadPDF = async () => {
+
+	const titleToKey = {
+		'연간 로드맵': 'roadmap',
+		'내 삶의 전반적 흐름': 'total',
+		'재물 흐름': 'wealth',
+		'학업 및 자기개발': 'study',
+		'직업과 사회적 성공': 'career',
+		'건강과 에너지': 'health',
+		'사랑과 인연': 'love',
+		'당신을 위한 조언': 'advice',
+		'운명의 가이드': 'lucky_tips',
+	};
+
+	const downloadPDFWithSelection = async () => {
 		if (!pdfContent.value) return;
+		showCopyModal.value = false;
+
+		const checked = (key) => copySections.find(s => s.key === key)?.checked;
+		const el = pdfContent.value;
+		const hiddenEls = [];
+
+		if (!checked('basic')) {
+			const s1 = el.querySelector('.pdf_section1');
+			if (s1) { s1.style.display = 'none'; hiddenEls.push(s1); }
+		}
+
+		el.querySelectorAll('.detail .item').forEach(item => {
+			const tit = item.querySelector('.d_tit');
+			if (!tit) return;
+			const key = titleToKey[tit.textContent.trim()];
+			if (!key) return;
+
+			if (key === 'love') {
+				const loveAny = checked('love_solo') || checked('love_couple') || checked('love_married');
+				if (!loveAny) {
+					item.style.display = 'none';
+					hiddenEls.push(item);
+				} else {
+					item.querySelectorAll('.love_item').forEach(li => {
+						const subTit = li.querySelector('.sub_tit')?.textContent || '';
+						if (subTit.includes('솔로') && !checked('love_solo')) { li.style.display = 'none'; hiddenEls.push(li); }
+						if (subTit.includes('커플') && !checked('love_couple')) { li.style.display = 'none'; hiddenEls.push(li); }
+						if (subTit.includes('결혼') && !checked('love_married')) { li.style.display = 'none'; hiddenEls.push(li); }
+					});
+				}
+			} else if (!checked(key)) {
+				item.style.display = 'none';
+				hiddenEls.push(item);
+			}
+		});
+
+		// CSS 변수 설정 (워터마크, 헤더 색상)
+		const corpName = (store.userCorpName || '').trim();
+		if (corpName) {
+			el.style.setProperty('--watermark-text', `"${corpName}"`);
+		}
+		el.style.setProperty('--pdf-header-color', headerColor.value);
+
 		const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
 			import('html2canvas'),
 			import('jspdf')
 		]);
-		store.downloadPDF({
-			pdfContent: pdfContent.value,
+
+		await store.downloadPDF({
+			pdfContent: el,
 			html2canvas,
 			jsPDF,
 			filename: `타로_${store.ipt_year}년_해운카드_해석_${f_BirthMD}.pdf`
 		});
+
+		// CSS 변수 제거
+		el.style.removeProperty('--watermark-text');
+		el.style.removeProperty('--pdf-header-color');
+		hiddenEls.forEach(e => e.style.display = '');
 	};
 </script>
