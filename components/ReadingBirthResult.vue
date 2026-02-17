@@ -306,7 +306,6 @@
 			}
 			const cardType = store.picked === 'r1' ? '생일카드' : `${store.ipt_year}년_해운카드`;
 			const filename = `타로_${cardType}_리딩_${f_Birth}.pdf`;
-			console.log('RNWebView: ' + !!window.ReactNativeWebView);
 			if (window.ReactNativeWebView) {
 				var pdfBase64 = pdf.output('datauristring');
 				window.ReactNativeWebView.postMessage(JSON.stringify({
