@@ -8,7 +8,7 @@
 					<p class="corp">{{ (store.userCorpName || '').trim() || 'Numerology Tarot' }}</p>
 					<p class="txt_sm">수비학으로 보는 나의 1년</p>
 					<h2>
-						{{ (clientName.trim()+'님') || '' }} {{ store.ipt_year }}년 해운카드 해석 리포트
+						<template v-if="clientName.trim()">{{ clientName.trim() }}님 </template><template v-if="store.ipt_year">{{ store.ipt_year }}년 </template>해운카드 해석 리포트
 					</h2>
 					<div class="sub_tit">
 						{{ store.result }}번 - <span v-html="data.list[store.result].name"></span>
@@ -16,14 +16,15 @@
 				</div>
 				<div class="r_top colb">
 					<div class="c_left">
-						<h3>{{ store.ipt_year + '년 해운카드'}} <b class="pc">결과</b> <span>(해석)</span></h3>
+						<h3>{{ store.ipt_year ? store.ipt_year + '년 해운카드' : '해운카드'}} <b class="pc">결과</b> <span>(해석)</span></h3>
 					</div>
 					<div class="c_right">
 						<button class="btn_close" @click="store.fnClose"><span>닫기</span></button>
 					</div>
 					<div class="gnb">
 						<button class="btn_copy" @click="openModal('copy')">📋복사</button>
-						<button class="btn_pdf" @click="openModal('pdf')">💾PDF</button>
+						<button v-if="!isAppView" class="btn_pdf" @click="openModal('pdf')">💾PDF</button>
+						<button v-if="isAppView" class="btn_pdf show_app blue2" @click="openAppPdf">💾PDF</button>
 						<button class="link blue" @click="store.fnGo('reading')">🔗리딩</button>
 						<button v-if="store.isLeading" class="link talk" @click="store.fnGo('talk')">💬톡상담</button>
 					</div>
@@ -42,7 +43,7 @@
 							</div>
 							<div class="right">
 								<div class="r_colb">
-									<dl class="info_birth mt0">
+									<dl class="info_birth mt0" v-if="store.ipt_year">
 										<dt>해운년도</dt>
 										<dd>{{ store.ipt_year }}</dd>
 									</dl>
@@ -52,7 +53,7 @@
 									</dl>
 								</div>
 								<div class="r_colb">
-									<dl>
+									<dl v-if="store.ipt_birth4">
 										<dt>생일</dt>
 										<dd>{{ f_BirthMD }}</dd>
 									</dl>
@@ -213,7 +214,7 @@
 							<div class="notice">
 								<h5>✏️Notice</h5>
 								<p>
-									해운 카드는 {{ store.ipt_year }}년 한 해 동안 당신에게 흐르는 시간의 흐름과 기회를 보여줍니다. <br/>
+									해운 카드는 {{ store.ipt_year ? store.ipt_year + '년' : '올' }} 한 해 동안 당신에게 흐르는 시간의 흐름과 기회를 보여줍니다. <br/>
 									하지만 같은 운세라도 어떤 마음가짐으로 맞이하느냐에 따라 결과는 크게 달라질 수 있죠.
 									자신의 노력과 선택에 따라 카드 속 에너지가 긍정적으로 발현될 수도, 또는 주의가 필요한 신호로 나타날 수도 있습니다.
 								</p>
@@ -234,17 +235,17 @@
 </template>
 
 <script setup>
-	import { ref, reactive } from 'vue';
+	import { ref, reactive, onMounted } from 'vue';
 	import { useTarotStore } from '~/stores/tarot';
 
 	const store = useTarotStore();
 	const props = defineProps(['data']);
 	const clientName = ref('');
 	const headerColor = ref('#fbdf70');
+	const isAppView = ref(false);
+	onMounted(() => { isAppView.value = !!window.ReactNativeWebView; });
 
-	const birth = store.picked === 'r1' ? store.ipt_birth8 : store.ipt_year + store.ipt_birth4;
-	const f_Birth = birth.replace(/(\d{4})(\d{2})(\d{2})/, '$1년 $2월 $3일');
-	const f_BirthMD = store.ipt_birth4.replace(/(\d{2})(\d{2})/, '$1월 $2일');
+	const f_BirthMD = store.ipt_birth4 ? store.ipt_birth4.replace(/(\d{2})(\d{2})/, '$1월 $2일') : '';
 
 	const luckyMap = {
 		'추천 할일': 'todo',
@@ -274,6 +275,10 @@
 		showCopyModal.value = true;
 	};
 
+	const openAppPdf = () => {
+		window.open(`/app/year/${store.result}`, '_blank');
+	};
+
 	const handleModalConfirm = ({ clientName: name, headerColor: color }) => {
 		clientName.value = name;
 		headerColor.value = color;
@@ -299,8 +304,8 @@
 
 			if (section.key === 'basic') {
 				lines.push(`[${store.result}번 - ${stripHtml(card.name)}]`);
-				lines.push(`해운년도: ${store.ipt_year}`);
-				lines.push(`생일: ${f_BirthMD}`);
+				if (store.ipt_year) lines.push(`해운년도: ${store.ipt_year}`);
+				if (store.ipt_birth4) lines.push(`생일: ${f_BirthMD}`);
 				if (card.lucky_group) {
 					if (card.lucky_group.grade) lines.push(`운: ${card.lucky_group.grade}`);
 					if (card.lucky_group.lucky_timing) lines.push(`좋은 분기: ${card.lucky_group.lucky_timing}`);
@@ -433,7 +438,7 @@
 			pdfContent: el,
 			html2canvas,
 			jsPDF,
-			filename: `타로_${store.ipt_year}년_해운카드_해석_${f_BirthMD}.pdf`
+			filename: `타로_${store.ipt_year ? store.ipt_year + '년_' : ''}해운카드_해석${f_BirthMD ? '_' + f_BirthMD : ''}.pdf`
 		});
 
 		// CSS 변수 제거

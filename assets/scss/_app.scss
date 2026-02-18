@@ -1,11 +1,28 @@
+@use 'variable' as *;
+@use 'mixin' as *;
+
 .app_down_wrap {
   min-height: 100vh;
   background-color: #fff;
-}
-.no_data {
-  text-align: center;
-  padding-top: 50px;
-  color: #999;
+  .gnb{
+    display: none;
+  }
+  .app_top{
+		@include setCont(100%, 50px, flex, fixed, #ffdd55);
+    top: 0;
+    right: 0;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 99999;
+    h3{
+      font-size: 14px;
+    }
+  }
+  .no_data {
+    text-align: center;
+    padding-top: 50px;
+    color: #999;
+  }
 }
 
 /* 앱 웹뷰 전용 플로팅 바 */

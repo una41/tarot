@@ -472,6 +472,9 @@ h6{
 							background-color: #9bb3e0;
 						}
 					}
+					&.blue2{
+						background-color: #515188
+					}
 				}
 				.link{
 					margin-left: -1px;
@@ -1614,4 +1617,7 @@ h6{
     &:active {
         transform: translateY(0);
     }
+}
+.show_app{
+	display: none !important;
 }

@@ -11,6 +11,9 @@
 
     <!-- 앱 웹뷰 전용 플로팅 버튼 -->
     <div v-if="proBirthData && isValidCard" class="app_cover_down">
+      <div class="app_top">
+        <h3>생일카드 해석 다운 or 복사</h3>
+      </div>
       <div class="app_contentr">
         <button class="btn_down copy" @click="handleCopy">
           <span class="ico">📋</span>

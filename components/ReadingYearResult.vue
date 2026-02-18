@@ -8,7 +8,7 @@
 					<p class="corp">{{ (store.userCorpName || '').trim() || 'Numerology Tarot' }}</p>
 					<p class="txt_sm">수비학 타로</p>
 					<h2>
-						{{ clientName.trim() || '00' }}님 {{ store.ipt_year }}년 해운카드 리딩 리포트
+						<template v-if="clientName.trim()">{{ clientName.trim() }}님 </template>{{ store.ipt_year }}년 해운카드 리딩 리포트
 					</h2>
 					<div class="sub_tit">
 						생년월일: {{ f_BirthMD }}

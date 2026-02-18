@@ -8,7 +8,7 @@
 					<p class="corp">{{ (store.userCorpName || '').trim() || 'Numerology Tarot' }}</p>
 					<p class="txt_sm">수비학으로 보는 나의운명</p>
 					<h2>
-						{{ clientName.trim() || '00' }}님 생일카드 해석 리포트
+						<template v-if="clientName.trim()">{{ clientName.trim() }}님 </template>생일카드 해석 리포트
 					</h2>
 					<div class="sub_tit">
 						{{ store.result }}번 - <span v-html="data.list[store.result].name"></span>
@@ -23,7 +23,8 @@
 					</div>
 					<div class="gnb">
 						<button class="btn_copy" @click="openModal('copy')">📋복사</button>
-						<button class="btn_pdf" @click="openModal('pdf')">💾PDF</button>
+						<button v-if="!isAppView" class="btn_pdf" @click="openModal('pdf')">💾PDF</button>
+						<button v-if="isAppView" class="btn_pdf show_app" @click="openAppPdf">💾PDF</button>
 						<button class="link blue" @click="store.fnGo('reading')">🔗리딩</button>
 						<button v-if="store.isLeading" class="link talk" @click="store.fnGo('talk')">💬톡상담</button>
 					</div>
@@ -41,7 +42,7 @@
 								<button v-if="['마스터', '프로'].includes(store.userGrade)" class="btn" @click="store.goToWiki(store.result, 'majors')">고유 설명 보기</button>
 							</div>
 							<div class="right">
-								<dl class="info_birth mt0">
+								<dl class="info_birth mt0" v-if="store.ipt_birth8">
 									<dt>생년월일</dt>
 									<dd>{{ f_Birth }}</dd>
 								</dl>
@@ -254,13 +255,15 @@
 </template>
 
 <script setup>
-	import { ref, reactive } from 'vue';
+	import { ref, reactive, onMounted } from 'vue';
 	import { useTarotStore } from '~/stores/tarot';
 
 	const store = useTarotStore();
 	const props = defineProps(['data']);
 	const clientName = ref('');
 	const headerColor = ref('#fbdf70');
+	const isAppView = ref(false);
+	onMounted(() => { isAppView.value = !!window.ReactNativeWebView; });
 
 	const birth = store.picked === 'r1' ? store.ipt_birth8 : store.ipt_year + store.ipt_birth4;
 	const f_Birth = birth.replace(/(\d{4})(\d{2})(\d{2})/, '$1년 $2월 $3일');
@@ -297,6 +300,10 @@
 		showCopyModal.value = true;
 	};
 
+	const openAppPdf = () => {
+		window.open(`/app/birth/${store.result}`, '_blank');
+	};
+
 	const stripHtml = (html) => {
 		if (!html) return '';
 		const tmp = document.createElement('div');
@@ -314,7 +321,7 @@
 
 			if (section.key === 'basic') {
 				lines.push(`[${store.result}번 - ${stripHtml(card.name)}]`);
-				lines.push(`생년월일: ${f_Birth}`);
+				if (store.ipt_birth8) lines.push(`생년월일: ${f_Birth}`);
 				if (card.lucky_group) {
 					lines.push(`행운의 컬러: ${card.lucky_group.color}`);
 					lines.push(`행운의 숫자: ${card.lucky_group.number}`);
@@ -458,7 +465,7 @@
 			pdfContent: el,
 			html2canvas,
 			jsPDF,
-			filename: `타로_결과_리포트_${f_Birth}.pdf`
+			filename: `타로_결과_리포트${f_Birth ? '_' + f_Birth : ''}.pdf`
 		});
 
 		// CSS 변수 제거
