@@ -1,6 +1,6 @@
 <template>
 	<Transition name="m_fade">
-		<div v-if="store.alertData.isVisible" class="modal" @click="handleClose">
+		<div v-if="store.alertData.isVisible" class="modal" :class="'modal_' + (store.alertData.type || 'default')" @click="handleClose">
 			<div class="m_container" @click.stop>
 				<div class="m_icon" v-if="store.alertData.icon !== ''" v-html="store.alertData.icon"></div>
 				<h2 class="m_title" v-if="store.alertData.title !== ''" v-html="store.alertData.title"></h2>

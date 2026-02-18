@@ -139,10 +139,10 @@ const doCopy = async () => {
 
 	try {
 		await navigator.clipboard.writeText(lines.join('\n'));
-		alert('선택한 항목이 복사되었습니다.');
+		store.showAlert({ message: '선택한 항목이 복사되었습니다.', icon: '✅', type: 'success' });
 	} catch (e) {
 		console.error('복사 실패:', e);
-		alert('복사에 실패했습니다.');
+		store.showAlert({ message: '복사에 실패했습니다.', icon: '❌', type: 'error' });
 	}
 };
 
@@ -223,7 +223,7 @@ const downloadPDFWithSelection = async () => {
 		window.scrollTo(0, originalScrollTop);
 	} catch (error) {
 		console.error('PDF 생성 오류:', error);
-		alert('PDF 생성 중 오류가 발생했습니다.');
+		store.showAlert({ message: 'PDF 생성 중 오류가 발생했습니다.', icon: '❌', type: 'error' });
 	}
 
 	// CSS 변수 제거 & 숨김 복원

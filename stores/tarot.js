@@ -54,7 +54,8 @@ export const useTarotStore = defineStore('tarot', {
             title: '',
             message: '',
             icon: '🔮',
-            confirmText: '확인'
+            confirmText: '확인',
+            type: '' // 'success' | 'error' | ''
         },
         confirmData: {
             isVisible: false,
@@ -380,6 +381,24 @@ export const useTarotStore = defineStore('tarot', {
 
             const { $auth, $db } = useNuxtApp();
 
+            // URL 쿼리 파라미터에서 인증 정보 복원 (앱 웹뷰 window.open 대응)
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlToken = urlParams.get('token');
+            const urlUser = urlParams.get('user');
+            const urlGrade = urlParams.get('grade');
+            const urlCorp = urlParams.get('corp');
+
+            if (urlToken) {
+                // 쿼리 파라미터로 전달된 인증 정보를 쿠키에 저장
+                const cookieOptions = { expires: 1, path: '/' };
+                Cookies.set('user_token', urlToken, cookieOptions);
+                if (urlUser) {
+                    try { Cookies.set('user_info', atob(urlUser), cookieOptions); } catch {}
+                }
+                if (urlGrade) Cookies.set('user_grade', urlGrade, cookieOptions);
+                if (urlCorp) Cookies.set('user_corp', urlCorp, cookieOptions);
+            }
+
             // [변경] 쿠키에서 데이터 가져오기
             const savedToken = Cookies.get('user_token');
             const savedUserInfo = Cookies.get('user_info');
@@ -515,7 +534,8 @@ export const useTarotStore = defineStore('tarot', {
                 title: options.title || '',
                 message: options.message || '',
                 icon: options.icon || '🔮',
-                confirmText: options.confirmText || '확인'
+                confirmText: options.confirmText || '확인',
+                type: options.type || ''
             };
         },
 

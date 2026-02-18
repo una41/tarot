@@ -15,10 +15,10 @@
         <h3>해운카드 해석 다운 or 복사</h3>
       </div>
       <div class="app_contentr">
-        <button class="btn_down copy" @click="handleCopy">
+        <!-- <button class="btn_down copy" @click="handleCopy">
           <span class="ico">📋</span>
           <span>복사</span>
-        </button>
+        </button> -->
         <button class="btn_down pdf" @click="handlePdf">
           <span class="ico">💾</span>
           <span>PDF</span>

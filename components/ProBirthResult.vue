@@ -39,7 +39,7 @@
 								<div class="bx_img">
 									<img :src="'/img/card/majors/' + store.result + '.jpg'" :alt="store.result + '번 ' + data.list[store.result].name" crossorigin="anonymous" />
 								</div>
-								<button v-if="['마스터', '프로'].includes(store.userGrade)" class="btn" @click="store.goToWiki(store.result, 'majors')">고유 설명 보기</button>
+								<button v-if="['마스터', '프로'].includes(store.userGrade)" class="btn hidden_app" @click="store.goToWiki(store.result, 'majors')">고유 설명 보기</button>
 							</div>
 							<div class="right">
 								<dl class="info_birth mt0" v-if="store.ipt_birth8">
@@ -301,7 +301,13 @@
 	};
 
 	const openAppPdf = () => {
-		window.open(`/app/birth/${store.result}`, '_blank');
+		const params = new URLSearchParams();
+		if (store.token) params.set('token', store.token);
+		if (store.user) params.set('user', btoa(JSON.stringify(store.user)));
+		if (store.userGrade) params.set('grade', store.userGrade);
+		if (store.userCorpName) params.set('corp', store.userCorpName);
+		const qs = params.toString();
+		window.open(`/app/birth/${store.result}${qs ? '?' + qs : ''}`, '_blank');
 	};
 
 	const stripHtml = (html) => {
@@ -375,10 +381,10 @@
 		try {
 			await navigator.clipboard.writeText(lines.join('\n'));
 			showCopyModal.value = false;
-			alert('선택한 항목이 복사되었습니다.');
+			store.showAlert({ message: '선택한 항목이 복사되었습니다.', icon: '✅', type: 'success' });
 		} catch (e) {
 			console.error('복사 실패:', e);
-			alert('복사에 실패했습니다.');
+			store.showAlert({ message: '복사에 실패했습니다.', icon: '❌', type: 'error' });
 		}
 	};
 

@@ -36,7 +36,7 @@
 							<div class="bx_img">
 								<img :src="'/img/card/majors/' + store.result + '.jpg'" :alt="store.result + '번 ' + data.list[store.result].name" crossorigin="anonymous" />
 							</div>
-							<button v-if="['마스터', '프로'].includes(store.userGrade)" class="btn" @click="store.goToWiki(store.result, 'majors')">고유 설명 보기</button>
+							<button v-if="['마스터', '프로'].includes(store.userGrade)" class="btn hidden_app" @click="store.goToWiki(store.result, 'majors')">고유 설명 보기</button>
 						</div>
 						<div class="right">
 							<div class="r_colb" v-if="data.list[store.result].lucky_group">
@@ -374,10 +374,10 @@
 		try {
 			await navigator.clipboard.writeText(lines.join('\n'));
 			showCopyModal.value = false;
-			alert('선택한 항목이 복사되었습니다.');
+			store.showAlert({ message: '선택한 항목이 복사되었습니다.', icon: '✅', type: 'success' });
 		} catch (e) {
 			console.error('복사 실패:', e);
-			alert('복사에 실패했습니다.');
+			store.showAlert({ message: '복사에 실패했습니다.', icon: '❌', type: 'error' });
 		}
 	};
 
@@ -483,7 +483,7 @@
 			window.scrollTo(0, originalScrollTop);
 		} catch (error) {
 			console.error('PDF 생성 오류:', error);
-			alert('PDF 생성 중 오류가 발생했습니다.');
+			store.showAlert({ message: 'PDF 생성 중 오류가 발생했습니다.', icon: '❌', type: 'error' });
 			const pdfOnlyElements = el.querySelectorAll('.pdf_only_header');
 			const screenOnlyElements = el.querySelectorAll('.r_top');
 			pdfOnlyElements?.forEach(e => e.style.display = 'none');

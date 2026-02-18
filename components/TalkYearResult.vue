@@ -295,10 +295,10 @@
 		const text = `[${title}]\n${editData[key]}`;
 		try {
 			await navigator.clipboard.writeText(text);
-			alert('복사되었습니다.');
+			store.showAlert({ message: '복사되었습니다.', icon: '✅', type: 'success' });
 		} catch (e) {
 			console.error('복사 실패:', e);
-			alert('복사에 실패했습니다.');
+			store.showAlert({ message: '복사에 실패했습니다.', icon: '❌', type: 'error' });
 		}
 	};
 
@@ -345,9 +345,9 @@
 		const text = `[${item.title}]\n${item.content}`;
 		try {
 			await navigator.clipboard.writeText(text);
-			alert('복사되었습니다.');
+			store.showAlert({ message: '복사되었습니다.', icon: '✅', type: 'success' });
 		} catch (e) {
-			alert('복사에 실패했습니다.');
+			store.showAlert({ message: '복사에 실패했습니다.', icon: '❌', type: 'error' });
 		}
 	};
 
@@ -440,10 +440,10 @@
 		try {
 			await navigator.clipboard.writeText(lines.join('\n'));
 			showCopyModal.value = false;
-			alert('선택한 항목이 복사되었습니다.');
+			store.showAlert({ message: '선택한 항목이 복사되었습니다.', icon: '✅', type: 'success' });
 		} catch (e) {
 			console.error('복사 실패:', e);
-			alert('복사에 실패했습니다.');
+			store.showAlert({ message: '복사에 실패했습니다.', icon: '❌', type: 'error' });
 		}
 	};
 

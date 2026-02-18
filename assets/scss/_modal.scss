@@ -288,3 +288,37 @@
 		margin-top: 20px;
 	}
 }
+
+// ========== Alert 타입별 스타일 ==========
+.modal_success{
+	.m_container{
+		border-color: rgba(74, 222, 128, 0.4);
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+					0 0 40px rgba(74, 222, 128, 0.15);
+	}
+	.m_title{ color: #86efac; }
+	.m_icon{ filter: drop-shadow(0 0 20px rgba(74, 222, 128, 0.6)); }
+	.btn-confirm{
+		background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%) !important;
+		box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4) !important;
+		&:hover{
+			box-shadow: 0 6px 25px rgba(74, 222, 128, 0.6) !important;
+		}
+	}
+}
+.modal_error{
+	.m_container{
+		border-color: rgba(248, 113, 113, 0.4);
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+					0 0 40px rgba(248, 113, 113, 0.15);
+	}
+	.m_title{ color: #fca5a5; }
+	.m_icon{ filter: drop-shadow(0 0 20px rgba(248, 113, 113, 0.6)); }
+	.btn-confirm{
+		background: linear-gradient(135deg, #f87171 0%, #ef4444 100%) !important;
+		box-shadow: 0 4px 15px rgba(248, 113, 113, 0.4) !important;
+		&:hover{
+			box-shadow: 0 6px 25px rgba(248, 113, 113, 0.6) !important;
+		}
+	}
+}
