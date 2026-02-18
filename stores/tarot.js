@@ -393,7 +393,7 @@ export const useTarotStore = defineStore('tarot', {
                 const cookieOptions = { expires: 1, path: '/' };
                 Cookies.set('user_token', urlToken, cookieOptions);
                 if (urlUser) {
-                    try { Cookies.set('user_info', atob(urlUser), cookieOptions); } catch {}
+                    try { Cookies.set('user_info', decodeURIComponent(urlUser), cookieOptions); } catch {}
                 }
                 if (urlGrade) Cookies.set('user_grade', urlGrade, cookieOptions);
                 if (urlCorp) Cookies.set('user_corp', urlCorp, cookieOptions);

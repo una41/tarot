@@ -24,7 +24,7 @@
 					<div class="gnb">
 						<button class="btn_copy" @click="openModal('copy')">📋복사</button>
 						<button v-if="!isAppView" class="btn_pdf" @click="openModal('pdf')">💾PDF</button>
-						<button v-if="isAppView" class="btn_pdf show_app blue2" @click="openAppPdf">💾PDF</button>
+						<button v-if="isAppView" class="btn_pdf show_app blue2" @click="openAppPdf">🔗PDF</button>
 						<button class="link blue" @click="store.fnGo('reading')">🔗리딩</button>
 						<button v-if="store.isLeading" class="link talk" @click="store.fnGo('talk')">💬톡상담</button>
 					</div>
