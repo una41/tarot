@@ -246,9 +246,9 @@ const fnLogout = () => {
 <style lang="scss" scoped>
 .mypage {
 	width: 100%;
-	min-height: 100dvh;
+	height: 100vh;
 	background: #f5f0e8;
-	padding: 30px 20px 0;
+	padding: 30px 20px 20px;
 	margin: 0 auto;
 
 	.my_profile {
