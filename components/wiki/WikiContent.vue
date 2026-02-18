@@ -21,7 +21,7 @@
 					<h2>{{ selectedItem.title }}</h2>
 				</div>
 				<div class="contents">
-					<div class="bx_img" v-if="selectedItem.card_num !== -1" :style="{ background: 'url(\'/img/card/'+(selectedItem?.category || '') + '/' + selectedItem.card_num + '.jpg?v=1\') no-repeat 50% -4px'}"></div>
+					<div class="bx_img" v-if="selectedItem.card_num !== -1" :style="{ background: 'url(\'https://img.numerologytarot.uk/web/img/card/'+(selectedItem?.category || '') + '/' + selectedItem.card_num + '.jpg?v=1\') no-repeat 50% -4px'}"></div>
 					<div class="content" v-html="formatContent(selectedItem.content)"></div>
 				</div>
 			</div>
