@@ -1,0 +1,186 @@
+@use 'variable' as *;
+@use 'mixin' as *;
+
+// ========== 약관/개인정보 공통 컨텐츠 ==========
+.legal_body {
+	section {
+		margin-bottom: 28px;
+		h2 {
+			@include font(14, 20, #c084fc, $bold);
+			padding-bottom: 8px;
+			border-bottom: 1px solid rgba(192, 132, 252, 0.2);
+			margin-bottom: 10px;
+			letter-spacing: 0.03em;
+		}
+		p {
+			@include font(13, 22, rgba(221, 214, 254, 0.8));
+			margin-bottom: 8px;
+			word-break: keep-all;
+		}
+		ul {
+			padding-left: 16px;
+			li {
+				@include font(13, 22, rgba(221, 214, 254, 0.7));
+				list-style: disc;
+				margin-bottom: 4px;
+				word-break: keep-all;
+			}
+		}
+		strong {
+			color: rgba(221, 214, 254, 0.95);
+			font-weight: $bold;
+		}
+	}
+}
+
+// ========== 약관 레이어 팝업 ==========
+.legal_modal {
+	@include setCont(100vw, 100vh, flex, fixed);
+	top: 0;
+	left: 0;
+	justify-content: center;
+	align-items: center;
+	z-index: 9000;
+	.bg {
+		@include setCont(100%, 100%, block, absolute, rgba(0, 0, 0, 0.85));
+		top: 0;
+		left: 0;
+		z-index: 0;
+	}
+	.lm_wrap {
+		@include setCont(90%, 80%, block, relative, #121212);
+		max-width: 770px;
+		border-radius: 10px;
+		overflow: hidden;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		border: 1px solid rgba(192, 132, 252, 0.25);
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(192, 132, 252, 0.1);
+		@include mobile {
+			@include setCont(100%, 100%);
+			border-radius: 0;
+			border: none;
+		}
+	}
+	.lm_top {
+		@include setCont(100%, 50px, flex, relative);
+		background: linear-gradient(90deg, rgba(167, 139, 250, 0.15), rgba(192, 132, 252, 0.1));
+		border-bottom: 1px solid rgba(192, 132, 252, 0.3);
+		padding: 0 20px 0 25px;
+		justify-content: space-between;
+		align-items: center;
+		flex-shrink: 0;
+		h2 {
+			@include font(15, 50, #ddd6fe, $bold);
+			letter-spacing: 0.05em;
+		}
+		.btn_close {
+			@include setCont(50px, 30px, flex);
+			@include font(11, 30, rgba(221, 214, 254, 0.5));
+			align-items: center;
+			justify-content: center;
+			border: 1px solid rgba(192, 132, 252, 0.3);
+			border-radius: 4px;
+			transition: all 300ms;
+			&:hover {
+				color: #c084fc;
+				border-color: #c084fc;
+			}
+		}
+	}
+	.lm_cont {
+		flex: 1;
+		overflow-y: auto;
+		padding: 25px 30px;
+		@include scroll(#a78bfa, 4px, 6px);
+		@include mobile {
+			padding: 20px calcPercent(20);
+		}
+	}
+}
+
+// 레이어 팝업 트랜지션
+.lm_fade-enter-active,
+.lm_fade-leave-active {
+	transition: opacity 0.25s ease;
+	.lm_wrap {
+		transition: opacity 0.25s ease, transform 0.25s ease;
+	}
+}
+.lm_fade-enter-from,
+.lm_fade-leave-to {
+	opacity: 0;
+	.lm_wrap {
+		opacity: 0;
+		transform: translateY(-12px) scale(0.98);
+	}
+}
+
+// ========== 약관 페이지 (standalone) ==========
+.legal_page {
+	min-height: 100dvh;
+	background: #121212;
+	color: #ddd6fe;
+	padding: 60px 20px 80px;
+	.legal_page_wrap {
+		max-width: 760px;
+		margin: 0 auto;
+	}
+	.lp_top {
+		margin-bottom: 36px;
+		.btn-back {
+			@include font(13, 13, #c084fc);
+			display: inline-block;
+			margin-bottom: 20px;
+			transition: opacity 300ms;
+			&:hover { opacity: 0.7; }
+		}
+		h1 {
+			@include font(22, 28, #fff, $bold);
+			margin-bottom: 8px;
+		}
+		.update_date {
+			@include font(12, 12, rgba(221, 214, 254, 0.4));
+		}
+	}
+	.lp_cont {
+		// .legal_body 공통 스타일 상속
+	}
+}
+
+// ========== 회원가입 약관 동의 문구 ==========
+.login .bx_terms {
+	margin-top: 12px;
+	p {
+		@include font(11, 17, rgba(221, 214, 254, 0.45));
+		text-align: center;
+	}
+	.link_terms {
+		@include font(11, 17, rgba(192, 132, 252, 0.8));
+		text-decoration: underline;
+		text-underline-offset: 2px;
+		transition: color 200ms;
+		&:hover { color: #c084fc; }
+	}
+}
+
+// ========== user_dropdown 약관 링크 ==========
+.user_dropdown .dropdown_legal {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	padding: 6px 0;
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	margin-bottom: 6px;
+	.link_legal {
+		@include font(10, 10, rgba(255, 255, 255, 0.4));
+		transition: color 300ms;
+		&:hover { color: rgba(255, 255, 255, 0.7); }
+	}
+	.legal_divider {
+		@include font(10, 10, rgba(255, 255, 255, 0.25));
+	}
+}

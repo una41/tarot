@@ -11,6 +11,11 @@
 					<div class="user_dropdown">
 						<div class="user_info">{{ userName }}님 <span class="user_grade" :class="gradeClass">{{ store.userGrade }}</span></div>
 						<button type="button" class="btn_modi_myinfo" @click.stop="openProfileModal">내정보 수정</button>
+						<div class="dropdown_legal">
+							<button type="button" class="link_legal" @click.stop="openLegal('terms')">이용약관</button>
+							<span class="legal_divider">·</span>
+							<button type="button" class="link_legal" @click.stop="openLegal('privacy')">개인정보처리방침</button>
+						</div>
 						<button type="button" class="btn_logout" @click.stop="showLogoutModal">로그아웃</button>
 					</div>
 				</div>
@@ -59,6 +64,9 @@
 		<span>Wiki→</span>
 	</div>
 
+	<!-- 약관 레이어 팝업 -->
+	<LegalModal :show="legalModal.show" :type="legalModal.type" @close="legalModal.show = false" />
+
 	<!-- 내정보 수정 모달 -->
 	<Transition name="m_fade">
 		<div v-if="showProfileModal" class="modal copy_modal" @click="showProfileModal = false">
@@ -103,6 +111,13 @@
 
 	// 유저 메뉴 토글
 	const isUserMenuOpen = ref(false);
+
+	// 약관 레이어 팝업
+	const legalModal = ref({ show: false, type: 'terms' });
+	const openLegal = (type) => {
+		isUserMenuOpen.value = false;
+		legalModal.value = { show: true, type };
+	};
 
 	// 유저 이름 (Firestore에서 가져온 이름)
 	const userName = computed(() => {

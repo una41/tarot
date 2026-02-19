@@ -49,6 +49,9 @@
 							{{ store.authLoading ? '처리 중...' : (isSignUp ? '가입하기' : '운명 확인하기') }}
 						</button>
 					</div>
+					<div v-if="isSignUp" class="bx_terms">
+						<p>가입하면 <button type="button" class="link_terms" @click="openLegal('terms')">이용약관</button> 및 <button type="button" class="link_terms" @click="openLegal('privacy')">개인정보 처리방침</button>에 동의하는 것으로 간주됩니다.</p>
+					</div>
 					<div v-if="isSignUp" class="bx_member">
 						<span>이미 계정이 있으신가요?</span> <button class="link_member" @click="toggleMode">로그인</button>
 					</div>
@@ -61,6 +64,7 @@
 			</Transition>
 		</div>
 	</div>
+	<LegalModal :show="legalModal.show" :type="legalModal.type" @close="closeLegal" />
 </template>
 
 <script setup>
@@ -68,6 +72,10 @@ import { ref, computed } from 'vue';
 import { useTarotStore } from '~/stores/tarot';
 
 const store = useTarotStore();
+
+const legalModal = ref({ show: false, type: 'terms' });
+const openLegal = (type) => { legalModal.value = { show: true, type }; };
+const closeLegal = () => { legalModal.value.show = false; };
 
 const email = ref('');
 const pw = ref('');

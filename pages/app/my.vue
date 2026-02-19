@@ -2,7 +2,7 @@
 	<div class="mypage">
 		<div class="my_profile">
 			<div class="avatar">
-				<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#6b5a3e" viewBox="0 0 16 16">
+				<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#6b5a3e" viewBox="0 0 16 16">
 					<path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
 				</svg>
 			</div>
@@ -258,8 +258,8 @@ const fnLogout = () => {
 		padding: 0 0 30px;
 
 		.avatar {
-			width: 80px;
-			height: 80px;
+			width: 60px;
+			height: 60px;
 			border-radius: 50%;
 			background: #fbdf70;
 			display: flex;
@@ -269,7 +269,7 @@ const fnLogout = () => {
 		}
 
 		.my_name {
-			font-size: 1.4rem;
+			font-size: 18px;
 			font-weight: 700;
 			color: #2d2015;
 			margin-bottom: 12px;
@@ -277,9 +277,9 @@ const fnLogout = () => {
 
 		.my_badge {
 			display: inline-block;
-			padding: 6px 22px;
+			padding: 4px 18px;
 			border-radius: 20px;
-			font-size: 0.85rem;
+			font-size: 12px;
 			font-weight: 600;
 			color: #fff;
 			letter-spacing: 1px;
@@ -367,7 +367,7 @@ const fnLogout = () => {
 			justify-content: center;
 			gap: 8px;
 			width: 100%;
-			padding: 14px 0;
+			padding: 12px 0;
 			border: 1.5px solid #c4b698;
 			border-radius: 10px;
 			background: transparent;
@@ -430,7 +430,7 @@ const fnLogout = () => {
 		justify-content: center;
 		gap: 8px;
 		width: 100%;
-		padding: 16px 0;
+		padding: 12px 0;
 		margin-top: 20px;
 		border: 1.5px solid #e8bcbc;
 		border-radius: 12px;

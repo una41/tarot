@@ -18,7 +18,7 @@
 		<GlobalLoader />
 
 		<div v-show="!store.loader.isAppLoading && store.authChecked">
-			<NuxtLayout v-if="store.isLoggedIn">
+			<NuxtLayout v-if="store.isLoggedIn || isPublicPage">
 				<NuxtPage />
 			</NuxtLayout>
 			<Login v-else/>
@@ -31,9 +31,12 @@
 </template>
 
 <script setup>
-	import { ref } from 'vue';
+	import { ref, computed } from 'vue';
 	import { useTarotStore } from '~/stores/tarot';
 	const store = useTarotStore();
+	const route = useRoute();
+	const publicPages = ['/terms', '/privacy'];
+	const isPublicPage = computed(() => publicPages.includes(route.path));
 	const showInitialLoader = ref(true);
 
 	onMounted(() => {
