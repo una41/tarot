@@ -1,0 +1,19 @@
+name = "tarot-billing"
+main = "src/index.js"
+compatibility_date = "2024-01-15"
+
+# KV 네임스페이스 (wrangler kv:namespace create "BILLING_STORE" 실행 후 id 입력)
+[[kv_namespaces]]
+binding = "BILLING_STORE"
+id = "17cb1b57ef744bb3a4c2bb61331ac73e"
+
+# 매일 오전 9시 UTC (한국 오후 6시) 실행 — nextBillingDate 도래 시 결제
+[triggers]
+crons = ["0 9 * * *"]
+
+[vars]
+FIREBASE_PROJECT_ID = "numerology-tarot"
+# 아래 시크릿은 wrangler secret put 명령으로 설정하세요:
+# wrangler secret put TOSS_SECRET_KEY
+# wrangler secret put FIREBASE_CLIENT_EMAIL
+# wrangler secret put FIREBASE_PRIVATE_KEY

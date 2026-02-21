@@ -18,7 +18,9 @@
       "Bash(npm run minify-json:*)",
       "Bash(wiki \")",
       "Bash(firebase deploy:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(npx wrangler deploy:*)"
     ]
   }
 }

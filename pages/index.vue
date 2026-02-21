@@ -8,14 +8,10 @@
 			<div class="right">
 				<div class="user_menu" :class="{ on: isUserMenuOpen }">
 					<button type="button" class="btn_user" @click="isUserMenuOpen = !isUserMenuOpen"></button>
+					
 					<div class="user_dropdown">
-						<div class="user_info">{{ userName }}님 <span class="user_grade" :class="gradeClass">{{ store.userGrade }}</span></div>
-						<button type="button" class="btn_modi_myinfo" @click.stop="openProfileModal">내정보 수정</button>
-						<div class="dropdown_legal">
-							<button type="button" class="link_legal" @click.stop="openLegal('terms')">이용약관</button>
-							<span class="legal_divider">·</span>
-							<button type="button" class="link_legal" @click.stop="openLegal('privacy')">개인정보처리방침</button>
-						</div>
+						<div class="user_info">{{ userName }}님 <span class="user_grade" :class="gradeClass">{{ store.userGrade }}</span><span class="user_state_subscribe" :class="{ active: popSubStatus.isActive }">{{ popSubStatus.isActive ? '앱 구독중' : '앱 미구독' }}</span></div>
+						<button type="button" class="btn_myinfo" @click.stop="openProfileModal">내정보</button>
 						<button type="button" class="btn_logout" @click.stop="showLogoutModal">로그아웃</button>
 					</div>
 				</div>
@@ -62,37 +58,92 @@
 	<!-- 마스터/프로 전용 위키 플로팅 버튼 -->
 	<div v-if="['마스터', '프로'].includes(store.userGrade)" class="wiki-floating-btn" @click="store.goToWikiMain">
 		<span>Wiki→</span>
+	</div>		<div v-if="['마스터', '프로'].includes(store.userGrade)" class="floating_app" @click="appPop.open()">
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="22" height="22">
+			<path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48C14.15 1.23 13.11 1 12 1c-1.11 0-2.15.23-3.09.63L7.43.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.3 1.3C6.55 3.07 5.55 4.51 5.55 6H18.45c0-1.49-1-2.93-2.92-3.84zM10 4H9V3h1v1zm5 0h-1V3h1v1z"/>
+		</svg>
+		<span>앱 출시</span>
 	</div>
+
+	<!-- 앱 출시 팝업 컴포넌트 -->
+	<AppLaunchPop ref="appPop" :sub-status="popSubStatus" @action="fnPopAction" />
+
 
 	<!-- 약관 레이어 팝업 -->
 	<LegalModal :show="legalModal.show" :type="legalModal.type" @close="legalModal.show = false" />
 
-	<!-- 내정보 수정 모달 -->
+	<!-- 내정보 모달 -->
 	<Transition name="m_fade">
-		<div v-if="showProfileModal" class="modal copy_modal" @click="showProfileModal = false">
+		<div v-if="showProfileModal" class="modal myinfo_modal" @click="closeProfileModal">
 			<div class="m_container" @click.stop>
-				<h2 class="m_title">내정보 수정</h2>
-				<div class="pdf_options">
-					<div class="pdf_opt_row">
-						<label>이메일</label>
-						<span class="email">{{ store.user?.email || '' }}</span>
-					</div>
-					<div class="pdf_opt_row">
-						<label>이름</label>
-						<span class="name">{{ store.user?.name || '' }}</span>
-					</div>
-					<div class="pdf_opt_row">
-						<label>핸드폰 번호</label>
-						<input type="tel" class="ipt" v-model="editPhone" placeholder="010-0000-0000" />
-					</div>
-					<div class="pdf_opt_row">
-						<label>상호명 (PDF 워터마크/헤더에 사용)</label>
-						<input type="text" class="ipt" v-model="editCorpName" placeholder="상호명을 입력하세요" />
-					</div>
+				<div class="m_header">
+					<h2 class="m_title">내정보</h2>
+					<button type="button" class="btn_close" @click="closeProfileModal">✕</button>
 				</div>
-				<div class="m_buttons">
-					<button class="btn-confirm" @click="saveProfile" :disabled="profileSaving">{{ profileSaving ? '저장 중...' : '저장' }}</button>
-					<button class="btn-cancel" @click="showProfileModal = false">취소</button>
+				<div class="m_body">
+					<!-- 보기 모드 -->
+					<template v-if="!editMode">
+						<ul class="info_list">
+							<li class="info_row">
+								<span class="info_label">이메일</span>
+								<span class="info_val">{{ store.user?.email || '' }}</span>
+							</li>
+							<li class="info_row">
+								<span class="info_label">이름</span>
+								<span class="info_val">{{ store.user?.name || '' }}</span>
+							</li>
+							<li class="info_row">
+								<span class="info_label">핸드폰</span>
+								<span class="info_val">{{ store.user?.phone || '-' }}</span>
+							</li>
+							<li class="info_row">
+								<span class="info_label">상호명</span>
+								<span class="info_val">{{ store.userCorpName || '-' }}</span>
+							</li>
+						</ul>
+						<button type="button" class="btn_edit" @click="editMode = true">수정</button>
+					</template>
+					<!-- 수정 모드 -->
+					<template v-else>
+						<ul class="info_list">
+							<li class="info_row">
+								<span class="info_label">이메일</span>
+								<span class="info_val">{{ store.user?.email || '' }}</span>
+							</li>
+							<li class="info_row">
+								<span class="info_label">이름</span>
+								<span class="info_val">{{ store.user?.name || '' }}</span>
+							</li>
+							<li class="info_row">
+								<span class="info_label">핸드폰</span>
+								<input type="tel" class="ipt" v-model="editPhone" placeholder="010-0000-0000" />
+							</li>
+							<li class="info_row">
+								<span class="info_label">상호명</span>
+								<input type="text" class="ipt" v-model="editCorpName" placeholder="상호명을 입력하세요" />
+							</li>
+						</ul>
+						<div class="edit_btns">
+							<button type="button" class="btn_save" @click="saveProfile" :disabled="profileSaving">{{ profileSaving ? '저장 중...' : '저장' }}</button>
+							<button type="button" class="btn_cancel_edit" @click="editMode = false">취소</button>
+						</div>
+					</template>
+					<!-- 구독 정보 -->
+					<div class="sub_info_bx">
+						<strong class="sub_tit">구독 정보</strong>
+						<div class="sub_row">
+							<span class="sub_badge" :class="popSubStatus.isActive ? 'active' : 'inactive'">{{ popSubStatus.isActive ? '앱구독중' : '앱미구독중' }}</span>
+							<span v-if="popSubStatus.isActive" class="sub_expiry">만료일 {{ popSubStatus.expiryText }}</span>
+						</div>
+						<p v-if="popSubStatus.isCancelled" class="sub_note">해지 신청됨 · 만료일까지 이용 가능합니다</p>
+						<button v-if="popSubStatus.isActive && !popSubStatus.isCancelled" type="button" class="btn_sub_cancel" @click="fnPopCancelSub">구독 해지</button>
+					</div>
+					<!-- 약관 링크 -->
+					<div class="legal_links">
+						<button type="button" class="link_legal" @click="openLegal('terms')">이용약관</button>
+						<span class="divider">·</span>
+						<button type="button" class="link_legal" @click="openLegal('privacy')">개인정보처리방침</button>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -100,8 +151,9 @@
 </template>
 <script setup>
 	//Store
-	import { ref, computed, onMounted, onUnmounted } from 'vue';
-	import { useTarotStore } from '~/stores/tarot'
+	import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+	import { useTarotStore } from '~/stores/tarot';	import { doc, getDoc } from 'firebase/firestore';
+
 	const store = useTarotStore();
 	// 데이터 가져오기 (GET)
 	const { data: proBirthData } = await useFetch('/data/pro_birth.json');
@@ -116,6 +168,8 @@
 	const legalModal = ref({ show: false, type: 'terms' });
 	const openLegal = (type) => {
 		isUserMenuOpen.value = false;
+		showProfileModal.value = false;
+		editMode.value = false;
 		legalModal.value = { show: true, type };
 	};
 
@@ -150,8 +204,9 @@
 		document.removeEventListener('click', closeUserMenu);
 	});
 
-	// 내정보 수정 모달
+	// 내정보 모달
 	const showProfileModal = ref(false);
+	const editMode = ref(false);
 	const editPhone = ref('');
 	const editCorpName = ref('');
 	const profileSaving = ref(false);
@@ -160,7 +215,13 @@
 		isUserMenuOpen.value = false;
 		editPhone.value = store.user?.phone || '';
 		editCorpName.value = store.userCorpName || '';
+		editMode.value = false;
 		showProfileModal.value = true;
+	};
+
+	const closeProfileModal = () => {
+		showProfileModal.value = false;
+		editMode.value = false;
 	};
 
 	const saveProfile = async () => {
@@ -172,12 +233,116 @@
 		profileSaving.value = false;
 
 		if (result.success) {
-			showProfileModal.value = false;
+			editMode.value = false;
 			store.showAlert({ title: '저장 완료', message: '내정보가 수정되었습니다.', icon: '✅' });
 		} else {
 			store.showAlert({ title: '저장 실패', message: result.error || '다시 시도해주세요.', icon: '❌' });
 		}
 	};
+	// ── 앱 출시 팝업 & 구독 ──────────────────────────────────
+	const appPop = ref(null);
+	const showAppPop = ref(false);
+	const popSubscribing = ref(false);
+	const popCancelling = ref(false);
+	const popSubData = ref({ isSubscribed: false, subscriptionExpiry: null, subscriptionCancelled: false });
+
+	const popSubStatus = computed(() => {
+		const now = new Date();
+		const expiry = popSubData.value.subscriptionExpiry ? new Date(popSubData.value.subscriptionExpiry) : null;
+		const isActive = popSubData.value.isSubscribed && expiry && expiry > now;
+		const expiryText = expiry ? `${expiry.getFullYear()}년 ${expiry.getMonth() + 1}월 ${expiry.getDate()}일` : '';
+		return { isActive, expiryText, isCancelled: popSubData.value.subscriptionCancelled || false };
+	});
+
+	const fetchSubData = async () => {
+		if (store.user?.uid) {
+			try {
+				const { $db } = useNuxtApp();
+				const snap = await getDoc(doc($db, 'users', store.user.uid));
+				if (snap.exists()) {
+					const d = snap.data();
+					popSubData.value = {
+						isSubscribed: d.isSubscribed || false,
+						subscriptionExpiry: d.subscriptionExpiry || null,
+						subscriptionCancelled: d.subscriptionCancelled || false,
+					};
+				}
+			} catch (e) {
+				console.error('구독 정보 조회 실패:', e);
+			}
+		} else {
+			popSubData.value = { isSubscribed: false, subscriptionExpiry: null, subscriptionCancelled: false };
+		}
+	};
+
+	watch(() => store.user, fetchSubData, { immediate: true });
+
+	const fnPopAction = () => {
+		if (popSubStatus.value.isActive) {
+			navigateTo('/app/my');
+		} else {
+			fnPopSubscribe();
+		}
+	};
+
+	const fnPopSubscribe = async () => {
+		if (popSubscribing.value) return;
+		popSubscribing.value = true;
+		try {
+			const cfg = useRuntimeConfig();
+			const clientKey = cfg.public.tossClientKey;
+			if (!window.TossPayments) {
+				store.showAlert({ message: '결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.', icon: '⏳' });
+				return;
+			}
+			const tossPayments = window.TossPayments(clientKey);
+
+			await tossPayments.requestBillingAuth('카드', {
+				customerKey: store.user.uid,
+				successUrl: `${window.location.origin}/payment/success`,
+				failUrl: `${window.location.origin}/payment/fail`,
+				customerEmail: store.user.email || '',
+				customerName: store.user.name || '사용자',
+			});
+		} catch (e) {
+			if (e.code !== 'USER_CANCEL') {
+				store.showAlert({ message: '결제 요청 중 오류가 발생했습니다.', icon: '❌' });
+			}
+			popSubscribing.value = false;
+		}
+	};
+
+	const fnPopCancelSub = () => {
+		store.showConfirm({
+			title: '구독 해지',
+			message: '정말 구독을 해지하시겠습니까?\n\n해지 즉시 자동 결제가 중단되며,\n현재 만료일까지는 앱을 계속 이용하실 수 있습니다.\n만료일 이후에는 앱 기능이 제한됩니다.',
+			icon: '⚠️',
+			confirmText: '해지하기',
+			cancelText: '취소',
+			onConfirm: async () => {
+				popCancelling.value = true;
+				try {
+					const cfg = useRuntimeConfig();
+					const res = await fetch(`${cfg.public.workerUrl}/api/billing/cancel`, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ uid: store.user.uid, customerKey: store.user.uid }),
+					});
+					if (res.ok) {
+						popSubData.value.subscriptionCancelled = true;
+						store.showAlert({ message: '구독이 취소되었습니다.\n만료일까지 이용 가능합니다.', icon: '✅' });
+					} else {
+						store.showAlert({ message: '취소 처리 중 오류가 발생했습니다.', icon: '❌' });
+					}
+				} catch {
+					store.showAlert({ message: '취소 처리 중 오류가 발생했습니다.', icon: '❌' });
+				} finally {
+					popCancelling.value = false;
+				}
+			}
+		});
+	};
+
 
 	// 로그아웃 모달 표시
 	const showLogoutModal = () => {

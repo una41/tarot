@@ -40,6 +40,7 @@
 					:selected-user="selectedUser"
 					:saving="saving"
 					@update-user="handleUpdateUser"
+					@admin-cancel-sub="handleAdminCancelSub"
 				/>
 			</div>
 		</template>
@@ -156,6 +157,15 @@ const handleUpdateUser = async (updateData) => {
 			message: '수정 중 오류가 발생했습니다.',
 			icon: '❌'
 		});
+	}
+};
+
+// 관리자 즉시 해지 후 유저 정보 업데이트
+const handleAdminCancelSub = (uid) => {
+	const index = users.value.findIndex(u => u.uid === uid);
+	if (index !== -1) {
+		users.value[index] = { ...users.value[index], isSubscribed: false, subscriptionCancelled: true };
+		selectedUser.value = { ...users.value[index] };
 	}
 };
 

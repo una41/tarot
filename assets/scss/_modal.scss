@@ -231,14 +231,17 @@
 		padding-top: 15px;
 		border-top: 1px solid rgba(255,255,255,0.1);
 		.pdf_opt_row{
-			margin-bottom: 12px;
+			margin-bottom: 17px;
 			&:last-child{ margin-bottom: 0; }
 			label{
 				display: block;
 				font-size: 13px;
 				font-weight: 600;
 				color: #aaa;
-				margin-bottom: 15px;
+				margin-bottom: 5px;
+			}
+			span{
+				color: #fff;
 			}
 			.ipt{
 				width: 100%;
@@ -319,6 +322,163 @@
 		box-shadow: 0 4px 15px rgba(248, 113, 113, 0.4) !important;
 		&:hover{
 			box-shadow: 0 6px 25px rgba(248, 113, 113, 0.6) !important;
+		}
+	}
+}
+
+// ========== 내정보 모달 ==========
+.myinfo_modal{
+	.m_container{
+		background: #fff;
+		border: none;
+		box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+		max-width: 380px;
+		padding: 0;
+		text-align: left;
+		overflow: hidden;
+		@include mobile{
+			min-width: unset;
+			width: 90%;
+		}
+	}
+	.m_header{
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 14px 20px;
+		background: #fbdf70;
+		.m_title{
+			@include font(16, 22, #59442c, $bold);
+			letter-spacing: 0;
+		}
+		.btn_close{
+			@include font(20, 20, #59442c);
+			padding: 2px 6px;
+			opacity: 0.7;
+			transition: opacity 200ms;
+			&:hover{ opacity: 1; }
+		}
+	}
+	.m_body{
+		padding: 20px;
+	}
+	.info_list{
+		list-style: none;
+		.info_row{
+			display: flex;
+			align-items: center;
+			padding: 9px 0;
+			border-bottom: 1px solid #f0f0f0;
+			&:last-child{ border-bottom: none; }
+		}
+		.info_label{
+			@include font(12, 18, #999);
+			width: 55px;
+			flex-shrink: 0;
+		}
+		.info_val{
+			@include font(14, 18, #222);
+			flex: 1;
+		}
+		.ipt{
+			flex: 1;
+			padding: 6px 10px;
+			border: 1px solid #e0e0e0;
+			border-radius: 5px;
+			@include font(14, 20, #222);
+			outline: none;
+			transition: border-color 200ms;
+			&:focus{ border-color: #fbdf70; }
+		}
+	}
+	.btn_edit{
+		display: block;
+		margin: 12px 0 0 auto;
+		padding: 6px 18px;
+		background: #fbdf70;
+		border-radius: 5px;
+		@include font(13, 20, #59442c, $bold);
+		transition: background 200ms;
+		&:hover{ background: #f5d24a; }
+	}
+	.edit_btns{
+		display: flex;
+		gap: 8px;
+		margin-top: 12px;
+		justify-content: flex-end;
+		.btn_save{
+			padding: 6px 18px;
+			background: #fbdf70;
+			border-radius: 5px;
+			@include font(13, 20, #59442c, $bold);
+			transition: background 200ms;
+			&:hover:not(:disabled){ background: #f5d24a; }
+			&:disabled{ opacity: 0.5; cursor: not-allowed; }
+		}
+		.btn_cancel_edit{
+			padding: 6px 14px;
+			border: 1px solid #ddd;
+			border-radius: 5px;
+			@include font(13, 20, #888);
+			background: #fff;
+			transition: border-color 200ms;
+			&:hover{ border-color: #aaa; }
+		}
+	}
+	.sub_info_bx{
+		margin-top: 16px;
+		padding-top: 14px;
+		border-top: 1px solid #f0f0f0;
+		.sub_tit{
+			display: block;
+			@include font(11, 16, #999);
+			margin-bottom: 8px;
+			letter-spacing: 0.5px;
+		}
+		.sub_row{
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			margin-bottom: 8px;
+		}
+		.sub_badge{
+			@include font(11, 14, #fff, $bold);
+			padding: 3px 8px;
+			border-radius: 20px;
+			&.active{ background: #059669; }
+			&.inactive{ background: #e5e7eb; color: #6b7280; }
+		}
+		.sub_expiry{
+			@include font(12, 16, #888);
+		}
+		.sub_note{
+			@include font(11, 16, #9ca3af);
+			margin-bottom: 6px;
+		}
+		.btn_sub_cancel{
+			display: inline-block;
+			@include font(12, 18, #9ca3af);
+			padding: 5px 12px;
+			border: 1px solid #e5e7eb;
+			border-radius: 5px;
+			background: #fff;
+			transition: all 200ms;
+			&:hover{ border-color: #ef4444; color: #ef4444; }
+		}
+	}
+	.legal_links{
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		margin-top: 14px;
+		padding-top: 12px;
+		border-top: 1px solid #f0f0f0;
+		justify-content: center;
+		.divider{ @include font(12, 16, #ddd); }
+		.link_legal{
+			@include font(12, 16, #aaa);
+			transition: color 200ms;
+			&:hover{ color: #555; text-decoration: underline; }
 		}
 	}
 }
