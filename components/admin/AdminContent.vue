@@ -275,6 +275,9 @@ const handleAdminCancel = () => {
 				});
 				if (res.ok) {
 					emit('admin-cancel-sub', props.selectedUser.uid);
+					// 히스토리 갱신
+					history.value = [];
+					if (showHistory.value) await fetchHistory();
 					store.showAlert({ message: '즉시 해지 및 환불 처리가 완료되었습니다.', icon: '✅' });
 				} else {
 					const data = await res.json();

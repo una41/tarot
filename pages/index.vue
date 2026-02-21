@@ -10,7 +10,7 @@
 					<button type="button" class="btn_user" @click="isUserMenuOpen = !isUserMenuOpen"></button>
 					
 					<div class="user_dropdown">
-						<div class="user_info">{{ userName }}님 <span class="user_grade" :class="gradeClass">{{ store.userGrade }}</span><span class="user_state_subscribe" :class="{ active: popSubStatus.isActive }">{{ popSubStatus.isActive ? '앱 구독중' : '앱 미구독' }}</span></div>
+						<div class="user_info">{{ userName }}님 <span class="user_grade" :class="gradeClass">{{ store.userGrade }}</span> <span class="user_state_subscribe active" v-if="popSubStatus.isActive">'앱 구독중'</span></div>
 						<button type="button" class="btn_myinfo" @click.stop="openProfileModal">내정보</button>
 						<button type="button" class="btn_logout" @click.stop="showLogoutModal">로그아웃</button>
 					</div>
@@ -101,7 +101,7 @@
 								<span class="info_val">{{ store.userCorpName || '-' }}</span>
 							</li>
 						</ul>
-						<button type="button" class="btn_edit" @click="editMode = true">수정</button>
+						<button type="button" class="btn_edit" @click="editMode = true">내정보 수정</button>
 					</template>
 					<!-- 수정 모드 -->
 					<template v-else>
@@ -130,13 +130,18 @@
 					</template>
 					<!-- 구독 정보 -->
 					<div class="sub_info_bx">
-						<strong class="sub_tit">구독 정보</strong>
-						<div class="sub_row">
-							<span class="sub_badge" :class="popSubStatus.isActive ? 'active' : 'inactive'">{{ popSubStatus.isActive ? '앱구독중' : '앱미구독중' }}</span>
-							<span v-if="popSubStatus.isActive" class="sub_expiry">만료일 {{ popSubStatus.expiryText }}</span>
-						</div>
-						<p v-if="popSubStatus.isCancelled" class="sub_note">해지 신청됨 · 만료일까지 이용 가능합니다</p>
-						<button v-if="popSubStatus.isActive && !popSubStatus.isCancelled" type="button" class="btn_sub_cancel" @click="fnPopCancelSub">구독 해지</button>
+						<template v-if="popSubStatus.isActive">
+							<strong class="sub_tit">구독 정보</strong>
+							<div class="sub_row">
+								<span class="sub_badge active">앱구독중</span>
+								<span class="sub_expiry">만료일 {{ popSubStatus.expiryText }}</span>
+							</div>
+							<p v-if="popSubStatus.isCancelled" class="sub_note">해지 신청됨 · 만료일까지 이용 가능합니다</p>
+							<button v-if="!popSubStatus.isCancelled" type="button" class="btn_sub_cancel" @click="fnPopCancelSub">구독 해지</button>
+						</template>
+						<template v-else>
+							<button type="button" class="btn_sub_start" @click="fnPopSubscribe">앱 구독하기</button>
+						</template>
 					</div>
 					<!-- 약관 링크 -->
 					<div class="legal_links">
