@@ -126,35 +126,7 @@
 					</div>
 				</div>
 
-				<!-- 탈퇴 관리 -->
-				<div class="info_section">
-					<h3>탈퇴 관리</h3>
-					<dl class="info_list">
-						<div class="info_item">
-							<dt>탈퇴 상태</dt>
-							<dd>
-								<span v-if="selectedUser.withdrawn" class="withdraw_badge withdrawn">탈퇴 완료</span>
-								<span v-else-if="selectedUser.withdrawalRequested" class="withdraw_badge requested">탈퇴 요청</span>
-								<span v-else class="withdraw_badge normal">정상</span>
-							</dd>
-						</div>
-					</dl>
-					<div class="btn_wrap withdraw_btn_wrap">
-						<template v-if="selectedUser.withdrawalRequested && !selectedUser.withdrawn">
-							<button class="btn_withdraw_process" :disabled="withdrawProcessing" @click="handleWithdraw">
-								{{ withdrawProcessing ? '처리 중...' : '탈퇴 처리' }}
-							</button>
-							<button class="btn_withdraw_cancel_req" :disabled="withdrawProcessing" @click="handleCancelWithdrawRequest">
-								{{ withdrawProcessing ? '처리 중...' : '요청 취소' }}
-							</button>
-						</template>
-						<button v-else-if="selectedUser.withdrawn" class="btn_withdraw_restore" :disabled="withdrawProcessing" @click="handleRestoreUser">
-							{{ withdrawProcessing ? '처리 중...' : '계정 복구' }}
-						</button>
-					</div>
-				</div>
-
-			<!-- 권한 설정 -->
+				<!-- 권한 설정 -->
 					<div class="info_section">
 						<h3>권한 설정</h3>
 						<div class="control_group">
@@ -187,9 +159,28 @@
 									</button>
 								</div>
 							</div>
+							<div class="control_item">
+								<label class="control_label">회원 탈퇴</label>
+								<button
+									v-if="!selectedUser.withdrawn"
+									class="btn_withdraw_direct"
+									:disabled="withdrawProcessing"
+									@click="handleWithdraw"
+								>
+									{{ withdrawProcessing ? '처리 중...' : '탈퇴' }}
+								</button>
+								<button
+									v-else
+									class="btn_withdraw_restore"
+									:disabled="withdrawProcessing"
+									@click="handleRestoreUser"
+								>
+									{{ withdrawProcessing ? '처리 중...' : '복구' }}
+								</button>
+							</div>
 						</div>
 
-						<!-- 저장 버튼 -->
+						<!-- 저장 / 탈퇴 버튼 -->
 						<div class="btn_wrap">
 							<button
 								class="btn_save"
@@ -333,25 +324,6 @@ const handleWithdraw = () => {
 			withdrawProcessing.value = true;
 			try {
 				emit('withdraw-user', props.selectedUser.uid);
-			} finally {
-				withdrawProcessing.value = false;
-			}
-		}
-	});
-};
-
-// 탈퇴 요청 취소 (withdrawalRequested: false)
-const handleCancelWithdrawRequest = () => {
-	store.showConfirm({
-		title: '탈퇴 요청 취소',
-		message: `${props.selectedUser.name}님의 탈퇴 요청을 취소하시겠습니까?`,
-		icon: '❓',
-		confirmText: '요청 취소',
-		cancelText: '닫기',
-		onConfirm: async () => {
-			withdrawProcessing.value = true;
-			try {
-				emit('cancel-withdraw-request', props.selectedUser.uid);
 			} finally {
 				withdrawProcessing.value = false;
 			}
@@ -550,44 +522,17 @@ const formatDateShort = (date) => {
 	color: #9ca3af;
 	font-size: 0.83rem;
 }
-.withdraw_badge {
-	font-size: 0.78rem;
-	font-weight: 600;
-	padding: 3px 10px;
-	border-radius: 20px;
-	&.normal { background: #d1fae5; color: #065f46; }
-	&.requested { background: #fef3c7; color: #92400e; }
-	&.withdrawn { background: #fee2e2; color: #991b1b; }
-}
-.withdraw_btn_wrap {
-	display: flex;
-	gap: 8px;
-	flex-wrap: wrap;
-}
-.btn_withdraw_process {
-	padding: 8px 16px;
+.btn_withdraw_direct {
+	padding: 9px 16px;
 	background: #991b1b;
 	color: #fff;
 	border: none;
-	border-radius: 7px;
-	font-size: 0.86rem;
+	border-radius: 8px;
+	font-size: 0.88rem;
 	font-weight: 600;
 	cursor: pointer;
 	transition: background 200ms;
 	&:hover:not(:disabled) { background: #7f1d1d; }
-	&:disabled { opacity: 0.6; cursor: not-allowed; }
-}
-.btn_withdraw_cancel_req {
-	padding: 8px 16px;
-	background: #fff;
-	color: #6b7280;
-	border: 1.5px solid #d1d5db;
-	border-radius: 7px;
-	font-size: 0.86rem;
-	font-weight: 500;
-	cursor: pointer;
-	transition: all 200ms;
-	&:hover:not(:disabled) { border-color: #9ca3af; color: #374151; }
 	&:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 .btn_withdraw_restore {

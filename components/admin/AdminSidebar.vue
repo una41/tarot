@@ -75,6 +75,8 @@
 						<span class="status_badge" :class="{ approved: user.isApproved }">
 							{{ user.isApproved ? '승인됨' : '대기중' }}
 						</span>
+						<span v-if="user.withdrawalRequested && !user.withdrawn" class="withdraw_request_badge">탈퇴요청</span>
+						<span v-else-if="user.withdrawn" class="withdrawn_badge">탈퇴됨</span>
 					</div>
 				</li>
 			</ul>
@@ -169,3 +171,24 @@ const getGradeClass = (grade) => {
 	return mapping[grade] || 'normal';
 };
 </script>
+
+<style lang="scss" scoped>
+.withdraw_request_badge {
+	font-size: 0.7rem;
+	font-weight: 600;
+	padding: 2px 7px;
+	border-radius: 10px;
+	background: #fef3c7;
+	color: #92400e;
+	margin-left: 5px;
+}
+.withdrawn_badge {
+	font-size: 0.7rem;
+	font-weight: 600;
+	padding: 2px 7px;
+	border-radius: 10px;
+	background: #fee2e2;
+	color: #991b1b;
+	margin-left: 5px;
+}
+</style>
