@@ -52,6 +52,15 @@
 				<h2>제9조 (분쟁 해결)</h2>
 				<p>서비스 이용과 관련하여 발생한 분쟁에 대해서는 대한민국 법률을 적용하며, 소송의 관할 법원은 민사소송법에 따릅니다.</p>
 			</section>
+			<section>
+				<h2>제10조 (회원 탈퇴)</h2>
+				<p>회원 탈퇴를 원하시는 경우 아래 방법 중 하나를 이용해주세요.</p>
+				<ul>
+					<li>서비스 내 탈퇴 신청: <a href="https://www.numerologytarot.uk/app/my" target="_blank">https://www.numerologytarot.uk/app/my</a> 페이지에서 직접 탈퇴 요청</li>
+					<li>이메일 신청: <a href="mailto:runanumerologytarot@gmail.com">runanumerologytarot@gmail.com</a>으로 탈퇴 요청 메일 발송</li>
+				</ul>
+				<p>탈퇴 요청 후 관리자 확인을 거쳐 처리되며, 처리 완료 시 해당 계정으로 로그인이 불가합니다.</p>
+			</section>
 		</template>
 
 		<!-- 개인정보 처리방침 -->
@@ -116,7 +125,11 @@
 					<li>삭제 요구</li>
 					<li>처리 정지 요구</li>
 				</ul>
-				<p>위 권리 행사는 서비스 내 '내 정보 수정' 또는 고객센터를 통해 요청하실 수 있습니다.</p>
+				<p>위 권리 행사는 서비스 내 '내 정보 수정' 또는 아래 방법으로 요청하실 수 있습니다.</p>
+				<ul>
+					<li>서비스 내 탈퇴 신청: <a href="https://www.numerologytarot.uk/app/my" target="_blank">https://www.numerologytarot.uk/app/my</a> 페이지에서 직접 탈퇴 요청</li>
+					<li>이메일 신청: <a href="mailto:runanumerologytarot@gmail.com">runanumerologytarot@gmail.com</a>으로 탈퇴 요청 메일 발송</li>
+				</ul>
 			</section>
 			<section>
 				<h2>7. 개인정보의 안전성 확보 조치</h2>
