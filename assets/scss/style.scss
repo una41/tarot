@@ -136,6 +136,10 @@ button{
 						background: rgba(5, 150, 105, 0.3);
 						color: #6ee7b7;
 					}
+					&.trial{
+						background: rgba(180, 120, 20, 0.3);
+						color: #fcd34d;
+					}
 				}
 			}
 			.btn_myinfo, .btn_logout{
@@ -1838,6 +1842,7 @@ h6{
 
 			&.active  { background: #d1fae5; color: #065f46; }
 			&.inactive { background: #f3f4f6; color: #6b7280; }
+			&.trial   { background: #fef3c7; color: #92400e; }
 		}
 	}
 
@@ -1847,6 +1852,7 @@ h6{
 		.sub_desc { font-size: 0.84rem; color: #8b7355; margin-bottom: 4px; }
 		.sub_expiry { font-size: 0.98rem; font-weight: 600; color: #2d2015; }
 		.sub_cancelled_note { font-size: 0.78rem; color: #9ca3af; margin-top: 5px; }
+		.sub_trial_note { font-size: 0.78rem; color: #92400e; margin-top: 5px; }
 	}
 
 	.btn_subscribe {

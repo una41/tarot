@@ -2,16 +2,7 @@ import { defineStore } from 'pinia'
 import Cookies from 'js-cookie';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
-
-// 휴대폰 번호 인코딩/디코딩 (Base64)
-const encodePhone = (phone) => {
-	if (!phone) return '';
-	try { return btoa(phone); } catch { return phone; }
-};
-const decodePhone = (encoded) => {
-	if (!encoded) return '';
-	try { return atob(encoded); } catch { return encoded; }
-};
+import { encryptPhone, decryptPhone, encryptData, decryptData } from '~/utils/phoneEncrypt';
 
 export const useTarotStore = defineStore('tarot', {
 	state: () => ({
@@ -71,7 +62,16 @@ export const useTarotStore = defineStore('tarot', {
         loader: {
             isAppLoading: true,    // 앱 초기 로딩
             isPdfLoading: false,   // PDF 생성 로딩
-        }
+        },
+        // --- 구독 상태 ---
+        subscription: {
+            isSubscribed: false,
+            subscriptionExpiry: null,
+            isTrial: false,
+            trialUsed: false,
+            subscriptionCancelled: false,
+        },
+        subscriptionLoaded: false,
 	}),
 	actions: {
         setReading(status) {
@@ -215,6 +215,8 @@ export const useTarotStore = defineStore('tarot', {
         // 1. Firebase 회원가입 (이메일 인증 포함)
         async fnSignUp(email, password, userName, userPhone, userCorpName = '') {
             const { $auth, $db } = useNuxtApp();
+            const config = useRuntimeConfig();
+            const cryptoKey = config.public.cryptoKey;
             this.authLoading = true;
 
             // 먼저 pendingVerificationEmail 설정 (onAuthStateChanged에서 무시하도록)
@@ -231,8 +233,8 @@ export const useTarotStore = defineStore('tarot', {
                 // 3. Firestore에 초기 권한 정보 저장 (핵심 로직)
                 await setDoc(doc($db, 'users', user.uid), {
                     email: email,
-                    name: userName,
-                    phone: encodePhone(userPhone),
+                    name: await encryptData(userName, cryptoKey),
+                    phone: await encryptPhone(userPhone, cryptoKey),
                     corpName: userCorpName || '',
                     isApproved: false, // 기본값: 승인 대기
                     grade: '일반',      // 기본값: 일반 등급 일반, 프로, 마스터
@@ -290,6 +292,8 @@ export const useTarotStore = defineStore('tarot', {
         // 2. Firebase 로그인 (이메일 인증 + 승인 확인)
         async fnLogin(email, password) {
             const { $auth, $db } = useNuxtApp();
+            const config = useRuntimeConfig();
+            const cryptoKey = config.public.cryptoKey;
             this.authLoading = true;
             try {
                 const userCredential = await signInWithEmailAndPassword($auth, email, password);
@@ -311,6 +315,21 @@ export const useTarotStore = defineStore('tarot', {
                 }
 
                 const userData = userDoc.data();
+
+                // 탈퇴 완료 회원
+                if (userData.withdrawn) {
+                    await signOut($auth);
+                    this.authLoading = false;
+                    return { success: false, error: '탈퇴한 회원입니다.' };
+                }
+
+                // 탈퇴 요청 중인 회원
+                if (userData.withdrawalRequested) {
+                    await signOut($auth);
+                    this.authLoading = false;
+                    return { success: false, error: '탈퇴를 요청하여 로그인이 불가합니다.' };
+                }
+
                 if (!userData.isApproved) {
                     await signOut($auth);
                     this.authLoading = false;
@@ -321,8 +340,8 @@ export const useTarotStore = defineStore('tarot', {
                 this.user = {
                     uid: user.uid,
                     email: user.email,
-                    name: userData.name || '',
-                    phone: decodePhone(userData.phone),
+                    name: await decryptData(userData.name, cryptoKey),
+                    phone: await decryptPhone(userData.phone, cryptoKey),
                     emailVerified: user.emailVerified,
                     loginAt: new Date().toLocaleString()
                 };
@@ -374,12 +393,54 @@ export const useTarotStore = defineStore('tarot', {
             Cookies.remove('user_corp');
         },
 
-        // 4. 인증 상태 체크 (앱 시작 시 호출)
+        // 4. 회원 탈퇴 요청 (관리자 승인 후 처리)
+        async fnWithdraw(password) {
+            const { $auth } = useNuxtApp();
+            const config = useRuntimeConfig();
+            try {
+                const { EmailAuthProvider, reauthenticateWithCredential } = await import('firebase/auth');
+
+                const user = $auth.currentUser;
+                if (!user) return { success: false, error: '로그인 정보를 찾을 수 없습니다.' };
+
+                // 비밀번호 재인증
+                const credential = EmailAuthProvider.credential(user.email, password);
+                await reauthenticateWithCredential(user, credential);
+
+                // Worker에 탈퇴 요청 (Firestore 플래그 설정 + 관리자 이메일 발송)
+                const res = await fetch(`${config.public.workerUrl}/api/withdrawal/request`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        uid: user.uid,
+                        name: this.user?.name || '',
+                        email: user.email,
+                    }),
+                });
+
+                if (!res.ok) {
+                    return { success: false, error: '탈퇴 요청 처리 중 오류가 발생했습니다.' };
+                }
+
+                // 로그아웃 처리
+                this.resetAndClear();
+                return { success: true };
+            } catch (error) {
+                if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    return { success: false, error: '비밀번호가 올바르지 않습니다.' };
+                }
+                return { success: false, error: '탈퇴 요청 처리 중 오류가 발생했습니다.' };
+            }
+        },
+
+        // 5. 인증 상태 체크 (앱 시작 시 호출)
        checkAuth() {
             // 1. 서버 사이드 렌더링(SSR) 중에는 실행 방지
             if (!process.client) return;
 
             const { $auth, $db } = useNuxtApp();
+            const config = useRuntimeConfig();
+            const cryptoKey = config.public.cryptoKey;
 
             // URL 쿼리 파라미터에서 인증 정보 복원 (앱 웹뷰 window.open 대응)
             const urlParams = new URLSearchParams(window.location.search);
@@ -447,7 +508,14 @@ export const useTarotStore = defineStore('tarot', {
                         const userDoc = await getDoc(doc($db, 'users', user.uid));
                         if (userDoc.exists()) {
                             const userData = userDoc.data();
-                            
+
+                            // 탈퇴 완료 또는 탈퇴 요청 회원 → 강제 로그아웃
+                            if (userData.withdrawn || userData.withdrawalRequested) {
+                                await signOut($auth);
+                                this.resetAndClear();
+                                return;
+                            }
+
                             if (!userData.isApproved) {
                                 await signOut($auth);
                                 this.resetAndClear();
@@ -458,8 +526,8 @@ export const useTarotStore = defineStore('tarot', {
                             this.user = {
                                 uid: user.uid,
                                 email: user.email,
-                                name: userData.name || '',
-                                phone: decodePhone(userData.phone),
+                                name: await decryptData(userData.name, cryptoKey),
+                                phone: await decryptPhone(userData.phone, cryptoKey),
                                 emailVerified: user.emailVerified,
                                 loginAt: new Date().toLocaleString()
                             };
@@ -492,11 +560,22 @@ export const useTarotStore = defineStore('tarot', {
                             Cookies.set('user_grade', this.userGrade, cookieOptions);
                             Cookies.set('user_corp', this.userCorpName, cookieOptions);
 
+                            // 구독 상태 저장
+                            this.subscription = {
+                                isSubscribed: userData.isSubscribed || false,
+                                subscriptionExpiry: userData.subscriptionExpiry || null,
+                                isTrial: userData.isTrial || false,
+                                trialUsed: userData.trialUsed || false,
+                                subscriptionCancelled: userData.subscriptionCancelled || false,
+                            };
+                            this.subscriptionLoaded = true;
+
                             // leading 컬렉션 체크
                             this.checkLeading(user.email);
                         }
                     } catch (error) {
                         console.error('Firestore 확인 오류:', error);
+                        this.subscriptionLoaded = true; // 에러 시에도 로드 완료 처리
                     }
                 } else {
                     // console.log('📢 Firebase: 인증 세션 없음');
@@ -583,6 +662,14 @@ export const useTarotStore = defineStore('tarot', {
             this.isLeading = false;
             this.token = null;
             this.isLoggedIn = false;
+            this.subscription = {
+                isSubscribed: false,
+                subscriptionExpiry: null,
+                isTrial: false,
+                trialUsed: false,
+                subscriptionCancelled: false,
+            };
+            this.subscriptionLoaded = false;
             Cookies.remove('user_token');
             Cookies.remove('user_info');
             Cookies.remove('user_grade');
@@ -766,10 +853,12 @@ export const useTarotStore = defineStore('tarot', {
         // 13. 내 프로필 수정 (핸드폰, 상호명)
         async updateMyProfile({ phone, corpName }) {
             const { $db } = useNuxtApp();
+            const config = useRuntimeConfig();
+            const cryptoKey = config.public.cryptoKey;
             if (!this.user?.uid) return { success: false, error: '로그인이 필요합니다.' };
             try {
                 const userRef = doc($db, 'users', this.user.uid);
-                await updateDoc(userRef, { phone: encodePhone(phone), corpName });
+                await updateDoc(userRef, { phone: await encryptPhone(phone, cryptoKey), corpName });
 
                 // 스토어 업데이트 (디코딩된 값 유지)
                 this.user.phone = phone;
@@ -792,6 +881,8 @@ export const useTarotStore = defineStore('tarot', {
         // 11. 전체 회원 목록 조회
         async fetchAllUsers() {
             const { $auth, $db } = useNuxtApp();
+            const config = useRuntimeConfig();
+            const cryptoKey = config.public.cryptoKey;
             try {
                 // Firebase Auth 초기화 대기 (쿠키 복원 후 바로 호출 시 auth가 아직 null일 수 있음)
                 if (!$auth.currentUser) {
@@ -812,13 +903,21 @@ export const useTarotStore = defineStore('tarot', {
                 const q = query(usersRef, orderBy('createdAt', 'desc'));
                 const snapshot = await getDocs(q);
 
-                const users = [];
+                const rawUsers = [];
                 snapshot.forEach(doc => {
-                    users.push({
+                    rawUsers.push({
                         uid: doc.id,
                         ...doc.data()
                     });
                 });
+
+                // 어드민에서 원문으로 표시/검색할 수 있도록 복호화
+                const users = await Promise.all(rawUsers.map(async (user) => ({
+                    ...user,
+                    name: await decryptData(user.name, cryptoKey),
+                    phone: await decryptPhone(user.phone, cryptoKey)
+                })));
+
                 return users;
             } catch (error) {
                 // 프로덕션 디버깅용 (console이 제거되므로 alert 사용)
@@ -828,13 +927,25 @@ export const useTarotStore = defineStore('tarot', {
             }
         },
 
-        // 12. 회원 정보 수정 (등급, 승인 상태)
+        // 12. 회원 정보 수정 (등급, 승인 상태 + 민감 정보 재암호화)
         async updateUserInfo(uid, updateData) {
             const { $db } = useNuxtApp();
+            const config = useRuntimeConfig();
+            const cryptoKey = config.public.cryptoKey;
             try {
                 const { doc, updateDoc } = await import('firebase/firestore');
                 const userRef = doc($db, 'users', uid);
-                await updateDoc(userRef, updateData);
+
+                // 민감 정보(이름, 전화번호) 암호화 처리
+                const dataToSave = { ...updateData };
+                if (dataToSave.name !== undefined) {
+                    dataToSave.name = await encryptData(dataToSave.name, cryptoKey);
+                }
+                if (dataToSave.phone !== undefined) {
+                    dataToSave.phone = await encryptPhone(dataToSave.phone, cryptoKey);
+                }
+
+                await updateDoc(userRef, dataToSave);
                 return { success: true };
             } catch (error) {
                 console.error('회원 정보 수정 실패:', error);

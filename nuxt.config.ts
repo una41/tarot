@@ -101,6 +101,7 @@ export default defineNuxtConfig({
 			firebaseAppId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID,
 			tossClientKey: process.env.NUXT_PUBLIC_TOSS_CLIENT_KEY,
 			workerUrl: process.env.NUXT_PUBLIC_WORKER_URL,
+			cryptoKey: process.env.NUXT_PUBLIC_CRYPTO_KEY,
 		}
 	},
 

@@ -31,18 +31,28 @@
 									<path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>
 								</svg>
 								<span class="sub_title">월 구독</span>
-								<span class="sub_badge" :class="subStatus.isActive ? 'active' : 'inactive'">
-									{{ subStatus.isActive ? '구독 중' : '미구독' }}
+								<span class="sub_badge" :class="subStatus.isTrial ? 'trial' : subStatus.isActive ? 'active' : 'inactive'">
+									{{ subStatus.isTrial ? '체험 중' : subStatus.isActive ? '구독 중' : '미구독' }}
 								</span>
 							</div>
 
-							<div class="sub_info" v-if="subStatus.isActive">
+							<!-- 체험 중 -->
+							<div class="sub_info" v-if="subStatus.isActive && subStatus.isTrial">
+								<p class="sub_desc">1일 무료 체험 기간</p>
+								<p class="sub_expiry">~ {{ subStatus.expiryText }}</p>
+								<p v-if="subStatus.isCancelled" class="sub_cancelled_note">체험이 취소되었습니다. 만료일까지 이용 가능합니다.</p>
+								<p v-else class="sub_trial_note">체험 종료 후 월 4,900원 자동 결제</p>
+							</div>
+							<!-- 구독 중 -->
+							<div class="sub_info" v-else-if="subStatus.isActive">
 								<p class="sub_desc">어플 이용 가능 기간</p>
 								<p class="sub_expiry">~ {{ subStatus.expiryText }}</p>
 								<p v-if="subStatus.isCancelled" class="sub_cancelled_note">구독이 취소되었습니다. 만료일까지 이용 가능합니다.</p>
 							</div>
+							<!-- 미구독 -->
 							<div class="sub_info" v-else>
-								<p class="sub_desc">월 4,900원 · 자동결제 · 언제든 취소 가능</p>
+								<p class="sub_desc" v-if="!subStatus.trialUsed">1일 무료 체험 후 월 4,900원 · 언제든 취소 가능</p>
+								<p class="sub_desc" v-else>월 4,900원 · 자동결제 · 언제든 취소 가능</p>
 							</div>
 
 							<button
@@ -51,7 +61,7 @@
 								@click="fnSubscribe"
 								:disabled="subscribing"
 							>
-								{{ subscribing ? '처리 중...' : '월구독 시작하기' }}
+								{{ subscribing ? '처리 중...' : (subStatus.trialUsed ? '앱 구독하기' : '1일 무료체험 후 앱 구독하기') }}
 							</button>
 							<button
 								v-else-if="!subStatus.isCancelled"
@@ -59,7 +69,7 @@
 								@click="fnCancelSub"
 								:disabled="cancelling"
 							>
-								{{ cancelling ? '처리 중...' : '구독 취소' }}
+								{{ cancelling ? '처리 중...' : (subStatus.isTrial ? '체험 취소' : '구독 취소') }}
 							</button>
 						</div>
 					</div>
@@ -83,6 +93,8 @@ const subData = ref({
 	isSubscribed: false,
 	subscriptionExpiry: null,
 	subscriptionCancelled: false,
+	isTrial: false,
+	trialUsed: false,
 });
 
 const subStatus = computed(() => {
@@ -94,6 +106,8 @@ const subStatus = computed(() => {
 		isActive,
 		expiryText,
 		isCancelled: subData.value.subscriptionCancelled || false,
+		isTrial: subData.value.isTrial || false,
+		trialUsed: subData.value.trialUsed || false,
 	};
 });
 
@@ -109,6 +123,8 @@ const open = async () => {
 				isSubscribed: d.isSubscribed || false,
 				subscriptionExpiry: d.subscriptionExpiry || null,
 				subscriptionCancelled: d.subscriptionCancelled || false,
+				isTrial: d.isTrial || false,
+				trialUsed: d.trialUsed || false,
 			};
 		}
 	} catch (e) {
@@ -127,9 +143,14 @@ const fnSubscribe = async () => {
 			return;
 		}
 		const tossPayments = window.TossPayments(config.public.tossClientKey);
+		// 체험 미사용 사용자는 trial=true 파라미터 포함한 URL로 이동
+		const isTrial = !subStatus.value.trialUsed;
+		const successUrl = isTrial
+			? `${window.location.origin}/payment/success?trial=true`
+			: `${window.location.origin}/payment/success`;
 		await tossPayments.requestBillingAuth('카드', {
 			customerKey: store.user.uid,
-			successUrl: `${window.location.origin}/payment/success`,
+			successUrl,
 			failUrl: `${window.location.origin}/payment/fail`,
 			customerEmail: store.user.email || '',
 			customerName: store.user.name || '사용자',
@@ -143,9 +164,12 @@ const fnSubscribe = async () => {
 };
 
 const fnCancelSub = () => {
+	const isTrial = subStatus.value.isTrial;
 	store.showConfirm({
-		title: '구독 취소',
-		message: '구독을 취소하시겠습니까?\n만료일까지는 계속 이용 가능합니다.',
+		title: isTrial ? '체험 취소' : '구독 취소',
+		message: isTrial
+			? '무료 체험을 취소하시겠습니까?\n만료일까지는 계속 이용 가능합니다.'
+			: '구독을 취소하시겠습니까?\n만료일까지는 계속 이용 가능합니다.',
 		icon: '📋',
 		confirmText: '취소하기',
 		cancelText: '닫기',
@@ -160,7 +184,12 @@ const fnCancelSub = () => {
 				});
 				if (res.ok) {
 					subData.value.subscriptionCancelled = true;
-					store.showAlert({ message: '구독이 취소되었습니다.\n만료일까지 이용 가능합니다.', icon: '✅' });
+					store.showAlert({
+						message: isTrial
+							? '체험이 취소되었습니다.\n만료일까지 이용 가능합니다.'
+							: '구독이 취소되었습니다.\n만료일까지 이용 가능합니다.',
+						icon: '✅',
+					});
 				} else {
 					store.showAlert({ message: '취소 처리 중 오류가 발생했습니다.', icon: '❌' });
 				}

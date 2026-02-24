@@ -73,30 +73,40 @@
 					<button class="btn_save" @click="fnSaveEdit">저장</button>
 				</div>
 			</div>
-			<!-- 구독 카드 (구독 중일 때만 노출) -->
-			<div v-if="subscriptionStatus.isActive" class="subscription_card">
+			<!-- 구독 카드 -->
+			<div class="subscription_card">
 				<div class="sub_header">
 					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#8b7355" viewBox="0 0 16 16">
 						<path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>
 					</svg>
 					<span class="sub_title">앱 월구독</span>
-					<span class="sub_badge" :class="subscriptionStatus.isActive ? 'active' : 'inactive'">
-						{{ subscriptionStatus.isActive ? '구독 중' : '미구독' }}
+					<span class="sub_badge" :class="subscriptionStatus.isTrial ? 'trial' : subscriptionStatus.isActive ? 'active' : 'inactive'">
+						{{ subscriptionStatus.isTrial ? '체험 중' : subscriptionStatus.isActive ? '정기 구독 중' : '미구독' }}
 					</span>
 				</div>
-				<div class="sub_info" v-if="subscriptionStatus.isActive">
-					<p class="sub_desc">어플 이용 가능 기간</p>
+				<!-- 체험 중 -->
+				<div class="sub_info" v-if="subscriptionStatus.isActive && subscriptionStatus.isTrial">
+					<p class="sub_desc">1일 무료 체험 기간</p>
+					<p class="sub_expiry">~ {{ subscriptionStatus.expiryText }}</p>
+					<p v-if="subscriptionStatus.isCancelled" class="sub_cancelled_note">체험이 취소되었습니다. 만료일까지 이용 가능합니다.</p>
+					<p v-else class="sub_trial_note">체험 종료 후 월 4,900원 자동 결제</p>
+				</div>
+				<!-- 구독 중 -->
+				<div class="sub_info" v-else-if="subscriptionStatus.isActive">
+					<p class="sub_desc">{{ subscriptionStatus.isCancelled ? '이용 가능 기간' : '다음 결제일' }}</p>
 					<p class="sub_expiry">~ {{ subscriptionStatus.expiryText }}</p>
 					<p v-if="subscriptionStatus.isCancelled" class="sub_cancelled_note">구독이 취소되었습니다. 만료일까지 이용 가능합니다.</p>
 				</div>
+				<!-- 미구독 -->
 				<div class="sub_info" v-else>
-					<p class="sub_desc">월 4,900원 · 자동결제 · 언제든 취소 가능</p>
+					<p class="sub_desc" v-if="!subscriptionStatus.trialUsed">1일 무료 체험 후 월 4,900원 · 언제든 취소 가능</p>
+					<p class="sub_desc" v-else>월 4,900원 · 자동결제 · 언제든 취소 가능</p>
 				</div>
 				<button v-if="!subscriptionStatus.isActive" class="btn_subscribe" @click="fnStartSubscription" :disabled="isSubscribing">
-					{{ isSubscribing ? '처리 중...' : '월구독 시작하기' }}
+					{{ isSubscribing ? '처리 중...' : (subscriptionStatus.trialUsed ? '앱 구독하기' : '1일 무료체험 후 앱 구독하기') }}
 				</button>
 				<button v-else-if="!subscriptionStatus.isCancelled" class="btn_cancel_sub" @click="fnCancelSubscription" :disabled="isCancelling">
-					{{ isCancelling ? '처리 중...' : '구독 취소' }}
+					{{ isCancelling ? '처리 중...' : (subscriptionStatus.isTrial ? '체험 취소' : '구독 취소') }}
 				</button>
 			</div>
 
@@ -107,14 +117,51 @@
 				</svg>
 				<span>로그아웃</span>
 			</button>
+			<div class="withdraw_area">
+				<button class="btn_withdraw" @click="showWithdrawModal = true">회원 탈퇴</button>
+			</div>
+			<p class="txt_contact">문의사항은 <a href="mailto:runanumerologytarot@gmail.com">runanumerologytarot@gmail.com</a>으로 보내주세요.</p>
 		</div>
 	</div>
+
+	<!-- 회원 탈퇴 모달 -->
+	<Transition name="m_fade">
+		<div v-if="showWithdrawModal" class="modal withdraw_modal" @click="closeWithdrawModal">
+			<div class="m_container" @click.stop>
+				<div class="m_header">
+					<h2 class="m_title">회원 탈퇴</h2>
+					<button type="button" class="btn_close" @click="closeWithdrawModal">✕</button>
+				</div>
+				<div class="m_body">
+					<p class="withdraw_warning">탈퇴 요청 후 관리자 승인 시 처리됩니다.<br>탈퇴 요청 중에는 로그인이 불가합니다.</p>
+					<div class="ipt_wrap">
+						<label class="ipt_label">비밀번호 확인</label>
+						<input
+							type="password"
+							class="ipt_pw"
+							v-model="withdrawPassword"
+							placeholder="현재 비밀번호를 입력하세요"
+							@keyup.enter="fnConfirmWithdraw"
+						/>
+						<p v-if="withdrawError" class="txt_error">{{ withdrawError }}</p>
+					</div>
+					<div class="withdraw_btns">
+						<button type="button" class="btn_cancel_edit" @click="closeWithdrawModal">취소</button>
+						<button type="button" class="btn_withdraw_confirm" @click="fnConfirmWithdraw" :disabled="isWithdrawing">
+							{{ isWithdrawing ? '처리 중...' : '탈퇴하기' }}
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</Transition>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useTarotStore } from '~/stores/tarot';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { encryptPhone, decryptPhone, decryptData } from '~/utils/phoneEncrypt';
 
 useHead({
 	script: [{ src: 'https://js.tosspayments.com/v1/payment', defer: false }]
@@ -136,6 +183,8 @@ const userData = ref({
 	isSubscribed: false,
 	subscriptionExpiry: null,
 	subscriptionCancelled: false,
+	isTrial: false,
+	trialUsed: false,
 });
 
 const editForm = ref({
@@ -143,25 +192,18 @@ const editForm = ref({
 	phone: '',
 });
 
-// Base64 디코딩 → 순수 숫자 전화번호
-const decodePhone = (encoded) => {
-	if (!encoded) return '';
-	try {
-		return atob(String(encoded));
-	} catch {
-		return String(encoded);
-	}
-};
+const config = useRuntimeConfig();
+const cryptoKey = config.public.cryptoKey;
 
-// 하이픈 포함 전화번호 → Base64 인코딩
-const encodePhone = (formatted) => {
-	if (!formatted) return '';
-	return btoa(formatted);
-};
+// 복호화된 전화번호 (async 처리 → ref + watch 패턴)
+const decodedPhone = ref('');
+watch(() => userData.value.phone, async (encoded) => {
+	decodedPhone.value = await decryptPhone(encoded, cryptoKey);
+}, { immediate: true });
 
-// 전화번호 마스킹 표시 (디코딩 후 010-****-4017 형태)
+// 전화번호 마스킹 표시 (복호화 후 010-****-4017 형태)
 const encodedPhone = computed(() => {
-	const decoded = decodePhone(userData.value.phone);
+	const decoded = decodedPhone.value;
 	if (!decoded) return '-';
 	const clean = decoded.replace(/[^0-9]/g, '');
 	if (!clean || clean.length < 8) return '-';
@@ -195,7 +237,7 @@ onMounted(async () => {
 			if (userDoc.exists()) {
 				const data = userDoc.data();
 				userData.value = {
-					name: data.name || '',
+					name: await decryptData(data.name, cryptoKey) || '',
 					email: data.email || '',
 					phone: data.phone || '',
 					corpName: data.corpName || '',
@@ -203,6 +245,8 @@ onMounted(async () => {
 					isSubscribed: data.isSubscribed || false,
 					subscriptionExpiry: data.subscriptionExpiry || null,
 					subscriptionCancelled: data.subscriptionCancelled || false,
+					isTrial: data.isTrial || false,
+					trialUsed: data.trialUsed || false,
 				};
 			}
 		} catch (e) {
@@ -220,6 +264,8 @@ const subscriptionStatus = computed(() => {
 		isActive,
 		expiryText,
 		isCancelled: userData.value.subscriptionCancelled || false,
+		isTrial: userData.value.isTrial || false,
+		trialUsed: userData.value.trialUsed || false,
 	};
 });
 
@@ -233,7 +279,7 @@ const gradeClass = computed(() => {
 const fnStartEdit = () => {
 	editForm.value = {
 		corpName: userData.value.corpName,
-		phone: decodePhone(userData.value.phone),
+		phone: decodedPhone.value,
 	};
 	phoneError.value = '';
 	isEditing.value = true;
@@ -256,15 +302,15 @@ const fnSaveEdit = async () => {
 			isSaving.value = false;
 			return;
 		}
-		const encoded = encodePhone(phone);
+		const encrypted = await encryptPhone(phone, cryptoKey);
 
 		await updateDoc(userRef, {
 			corpName: editForm.value.corpName,
-			phone: encoded,
+			phone: encrypted,
 		});
 
 		userData.value.corpName = editForm.value.corpName;
-		userData.value.phone = encoded;
+		userData.value.phone = encrypted;
 
 		isEditing.value = false;
 		store.showAlert({
@@ -302,9 +348,14 @@ const fnStartSubscription = async () => {
 
 		const tossPayments = window.TossPayments(clientKey);
 
+		// 체험 미사용 사용자는 trial=true 파라미터 포함한 URL로 이동
+		const isTrial = !subscriptionStatus.value.trialUsed;
+		const successUrl = isTrial
+			? `${window.location.origin}/payment/success?trial=true`
+			: `${window.location.origin}/payment/success`;
 		await tossPayments.requestBillingAuth('카드', {
 			customerKey: store.user.uid,
-			successUrl: `${window.location.origin}/payment/success`,
+			successUrl,
 			failUrl: `${window.location.origin}/payment/fail`,
 			customerEmail: store.user.email || '',
 			customerName: store.user.name || '사용자',
@@ -318,9 +369,12 @@ const fnStartSubscription = async () => {
 };
 
 const fnCancelSubscription = () => {
+	const isTrial = subscriptionStatus.value.isTrial;
 	store.showConfirm({
-		title: '구독 취소',
-		message: '구독을 취소하시겠습니까?\n만료일까지는 계속 이용 가능합니다.',
+		title: isTrial ? '체험 취소' : '구독 취소',
+		message: isTrial
+			? '무료 체험을 취소하시겠습니까?\n만료일까지는 계속 이용 가능합니다.'
+			: '구독을 취소하시겠습니까?\n만료일까지는 계속 이용 가능합니다.',
 		icon: '📋',
 		confirmText: '취소하기',
 		cancelText: '닫기',
@@ -341,7 +395,12 @@ const fnCancelSubscription = () => {
 
 				if (res.ok) {
 					userData.value.subscriptionCancelled = true;
-					store.showAlert({ message: '구독이 취소되었습니다.\n만료일까지 이용 가능합니다.', icon: '✅' });
+					store.showAlert({
+						message: isTrial
+							? '체험이 취소되었습니다.\n만료일까지 이용 가능합니다.'
+							: '구독이 취소되었습니다.\n만료일까지 이용 가능합니다.',
+						icon: '✅',
+					});
 				} else {
 					store.showAlert({ message: '취소 처리 중 오류가 발생했습니다.', icon: '❌' });
 				}
@@ -364,6 +423,36 @@ const fnLogout = () => {
 			navigateTo('/');
 		}
 	});
+};
+
+// 회원 탈퇴
+const showWithdrawModal = ref(false);
+const withdrawPassword = ref('');
+const withdrawError = ref('');
+const isWithdrawing = ref(false);
+
+const closeWithdrawModal = () => {
+	showWithdrawModal.value = false;
+	withdrawPassword.value = '';
+	withdrawError.value = '';
+};
+
+const fnConfirmWithdraw = async () => {
+	if (!withdrawPassword.value.trim()) {
+		withdrawError.value = '비밀번호를 입력해주세요.';
+		return;
+	}
+	isWithdrawing.value = true;
+	withdrawError.value = '';
+	const result = await store.fnWithdraw(withdrawPassword.value);
+	isWithdrawing.value = false;
+	if (result.success) {
+		closeWithdrawModal();
+		store.showAlert({ message: '탈퇴 요청이 접수되었습니다.\n관리자 승인 후 처리됩니다.', icon: '📋' });
+		navigateTo('/');
+	} else {
+		withdrawError.value = result.error;
+	}
 };
 </script>
 
@@ -587,6 +676,11 @@ const fnLogout = () => {
 					background: #f3f4f6;
 					color: #6b7280;
 				}
+
+				&.trial {
+					background: #fef3c7;
+					color: #92400e;
+				}
 			}
 		}
 
@@ -602,6 +696,12 @@ const fnLogout = () => {
 				font-size: 1rem;
 				font-weight: 600;
 				color: #2d2015;
+			}
+
+			.sub_trial_note {
+				font-size: 0.8rem;
+				color: #92400e;
+				margin-top: 6px;
 			}
 
 			.sub_cancelled_note {
@@ -636,6 +736,7 @@ const fnLogout = () => {
 		.btn_cancel_sub {
 			width: 100%;
 			padding: 13px 0;
+			margin-top: 12px;
 			background: transparent;
 			color: #9ca3af;
 			border: 1.5px solid #e5e7eb;
@@ -682,6 +783,40 @@ const fnLogout = () => {
 		}
 		&:active {
 			background: #fde8e8;
+		}
+	}
+
+	.withdraw_area {
+		display: flex;
+		justify-content: center;
+		margin-top: 14px;
+
+		.btn_withdraw {
+			font-size: 12px;
+			color: #bbb;
+			text-decoration: underline;
+			transition: color 200ms;
+
+			&:hover {
+				color: #ef4444;
+			}
+		}
+	}
+
+	.txt_contact {
+		margin-top: 16px;
+		padding-bottom: 10px;
+		text-align: center;
+		font-size: 12px;
+		color: #bbb;
+
+		a {
+			color: #a89070;
+			text-decoration: underline;
+
+			&:hover {
+				color: #5c4033;
+			}
 		}
 	}
 }

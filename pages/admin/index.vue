@@ -41,6 +41,9 @@
 					:saving="saving"
 					@update-user="handleUpdateUser"
 					@admin-cancel-sub="handleAdminCancelSub"
+					@withdraw-user="handleWithdrawUser"
+					@cancel-withdraw-request="handleCancelWithdrawRequest"
+					@restore-user="handleRestoreUser"
 				/>
 			</div>
 		</template>
@@ -166,6 +169,51 @@ const handleAdminCancelSub = (uid) => {
 	if (index !== -1) {
 		users.value[index] = { ...users.value[index], isSubscribed: false, subscriptionCancelled: true };
 		selectedUser.value = { ...users.value[index] };
+	}
+};
+
+// 탈퇴 처리 (withdrawn: true, withdrawalRequested: false)
+const handleWithdrawUser = async (uid) => {
+	const result = await store.updateUserInfo(uid, { withdrawn: true, withdrawalRequested: false });
+	if (result.success) {
+		const index = users.value.findIndex(u => u.uid === uid);
+		if (index !== -1) {
+			users.value[index] = { ...users.value[index], withdrawn: true, withdrawalRequested: false };
+			selectedUser.value = { ...users.value[index] };
+		}
+		store.showAlert({ message: '탈퇴 처리가 완료되었습니다.', icon: '✅' });
+	} else {
+		store.showAlert({ message: '처리 중 오류가 발생했습니다.', icon: '❌' });
+	}
+};
+
+// 탈퇴 요청 취소 (withdrawalRequested: false)
+const handleCancelWithdrawRequest = async (uid) => {
+	const result = await store.updateUserInfo(uid, { withdrawalRequested: false });
+	if (result.success) {
+		const index = users.value.findIndex(u => u.uid === uid);
+		if (index !== -1) {
+			users.value[index] = { ...users.value[index], withdrawalRequested: false };
+			selectedUser.value = { ...users.value[index] };
+		}
+		store.showAlert({ message: '탈퇴 요청이 취소되었습니다.', icon: '✅' });
+	} else {
+		store.showAlert({ message: '처리 중 오류가 발생했습니다.', icon: '❌' });
+	}
+};
+
+// 탈퇴 계정 복구 (withdrawn: false)
+const handleRestoreUser = async (uid) => {
+	const result = await store.updateUserInfo(uid, { withdrawn: false });
+	if (result.success) {
+		const index = users.value.findIndex(u => u.uid === uid);
+		if (index !== -1) {
+			users.value[index] = { ...users.value[index], withdrawn: false };
+			selectedUser.value = { ...users.value[index] };
+		}
+		store.showAlert({ message: '계정이 복구되었습니다.', icon: '✅' });
+	} else {
+		store.showAlert({ message: '처리 중 오류가 발생했습니다.', icon: '❌' });
 	}
 };
 

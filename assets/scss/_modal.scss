@@ -491,9 +491,114 @@
 		justify-content: center;
 		.divider{ @include font(12, 16, #ddd); }
 		.link_legal{
-			@include font(12, 16, #aaa);
+			@include font(12, 16, #666);
 			transition: color 200ms;
 			&:hover{ color: #555; text-decoration: underline; }
+		}
+	}
+	.withdraw_area{
+		display: flex;
+		justify-content: center;
+		margin-top: 10px;
+		.btn_withdraw{
+			@include font(12, 16, #9a9a9a);
+			text-decoration: underline;
+			transition: color 200ms;
+			&:hover{ color: #ef4444; }
+		}
+	}
+}
+
+// ========== 회원 탈퇴 모달 ==========
+.withdraw_modal{
+	.m_container{
+		background: #fff;
+		border: none;
+		box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+		max-width: 360px;
+		padding: 0;
+		text-align: left;
+		overflow: hidden;
+		@include mobile{
+			min-width: unset;
+			width: 90%;
+		}
+	}
+	.m_header{
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 14px 20px;
+		background: #fee2e2;
+		.m_title{
+			@include font(16, 22, #991b1b, $bold);
+			letter-spacing: 0;
+		}
+		.btn_close{
+			@include font(20, 20, #991b1b);
+			padding: 2px 6px;
+			opacity: 0.7;
+			transition: opacity 200ms;
+			&:hover{ opacity: 1; }
+		}
+	}
+	.m_body{
+		padding: 20px;
+	}
+	.withdraw_warning{
+		@include font(13, 20, #555);
+		background: #fef2f2;
+		border: 1px solid #fecaca;
+		border-radius: 8px;
+		padding: 10px 14px;
+		margin-bottom: 16px;
+		line-height: 1.6;
+	}
+	.ipt_wrap{
+		margin-bottom: 16px;
+		.ipt_label{
+			display: block;
+			@include font(12, 18, #888);
+			margin-bottom: 6px;
+		}
+		.ipt_pw{
+			width: 100%;
+			padding: 9px 12px;
+			border: 1px solid #e0e0e0;
+			border-radius: 6px;
+			@include font(14, 20, #222);
+			outline: none;
+			transition: border-color 200ms;
+			&:focus{ border-color: #ef4444; }
+		}
+		.txt_error{
+			@include font(12, 18, #ef4444);
+			margin-top: 5px;
+		}
+	}
+	.withdraw_btns{
+		display: flex;
+		gap: 8px;
+		.btn_cancel_edit{
+			flex: 1;
+			padding: 9px 0;
+			border: 1px solid #ddd;
+			border-radius: 6px;
+			@include font(13, 20, #888);
+			background: #fff;
+			transition: border-color 200ms;
+			&:hover{ border-color: #aaa; }
+		}
+		.btn_withdraw_confirm{
+			flex: 1;
+			padding: 9px 0;
+			background: #ef4444;
+			border: none;
+			border-radius: 6px;
+			@include font(13, 20, #fff, $bold);
+			transition: background 200ms;
+			&:hover:not(:disabled){ background: #dc2626; }
+			&:disabled{ opacity: 0.5; cursor: not-allowed; }
 		}
 	}
 }

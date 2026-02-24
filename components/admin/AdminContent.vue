@@ -126,7 +126,35 @@
 					</div>
 				</div>
 
-				<!-- 권한 설정 -->
+				<!-- 탈퇴 관리 -->
+				<div class="info_section">
+					<h3>탈퇴 관리</h3>
+					<dl class="info_list">
+						<div class="info_item">
+							<dt>탈퇴 상태</dt>
+							<dd>
+								<span v-if="selectedUser.withdrawn" class="withdraw_badge withdrawn">탈퇴 완료</span>
+								<span v-else-if="selectedUser.withdrawalRequested" class="withdraw_badge requested">탈퇴 요청</span>
+								<span v-else class="withdraw_badge normal">정상</span>
+							</dd>
+						</div>
+					</dl>
+					<div class="btn_wrap withdraw_btn_wrap">
+						<template v-if="selectedUser.withdrawalRequested && !selectedUser.withdrawn">
+							<button class="btn_withdraw_process" :disabled="withdrawProcessing" @click="handleWithdraw">
+								{{ withdrawProcessing ? '처리 중...' : '탈퇴 처리' }}
+							</button>
+							<button class="btn_withdraw_cancel_req" :disabled="withdrawProcessing" @click="handleCancelWithdrawRequest">
+								{{ withdrawProcessing ? '처리 중...' : '요청 취소' }}
+							</button>
+						</template>
+						<button v-else-if="selectedUser.withdrawn" class="btn_withdraw_restore" :disabled="withdrawProcessing" @click="handleRestoreUser">
+							{{ withdrawProcessing ? '처리 중...' : '계정 복구' }}
+						</button>
+					</div>
+				</div>
+
+			<!-- 권한 설정 -->
 					<div class="info_section">
 						<h3>권한 설정</h3>
 						<div class="control_group">
@@ -199,11 +227,12 @@ const props = defineProps({
 	}
 });
 
-const emit = defineEmits(['update-user', 'admin-cancel-sub']);
+const emit = defineEmits(['update-user', 'admin-cancel-sub', 'withdraw-user', 'restore-user', 'cancel-withdraw-request']);
 
 const grades = ['일반', '프로', '마스터'];
 
 const adminCancelling = ref(false);
+const withdrawProcessing = ref(false);
 
 const showHistory = ref(false);
 const history = ref([]);
@@ -292,6 +321,63 @@ const handleAdminCancel = () => {
 	});
 };
 
+// 탈퇴 처리 (withdrawn: true)
+const handleWithdraw = () => {
+	store.showConfirm({
+		title: '탈퇴 처리',
+		message: `${props.selectedUser.name}님을 탈퇴 처리하시겠습니까?\n탈퇴 후 해당 계정으로 로그인이 불가합니다.`,
+		icon: '⚠️',
+		confirmText: '탈퇴 처리',
+		cancelText: '취소',
+		onConfirm: async () => {
+			withdrawProcessing.value = true;
+			try {
+				emit('withdraw-user', props.selectedUser.uid);
+			} finally {
+				withdrawProcessing.value = false;
+			}
+		}
+	});
+};
+
+// 탈퇴 요청 취소 (withdrawalRequested: false)
+const handleCancelWithdrawRequest = () => {
+	store.showConfirm({
+		title: '탈퇴 요청 취소',
+		message: `${props.selectedUser.name}님의 탈퇴 요청을 취소하시겠습니까?`,
+		icon: '❓',
+		confirmText: '요청 취소',
+		cancelText: '닫기',
+		onConfirm: async () => {
+			withdrawProcessing.value = true;
+			try {
+				emit('cancel-withdraw-request', props.selectedUser.uid);
+			} finally {
+				withdrawProcessing.value = false;
+			}
+		}
+	});
+};
+
+// 탈퇴 계정 복구 (withdrawn: false)
+const handleRestoreUser = () => {
+	store.showConfirm({
+		title: '계정 복구',
+		message: `${props.selectedUser.name}님의 계정을 복구하시겠습니까?`,
+		icon: '🔄',
+		confirmText: '복구',
+		cancelText: '취소',
+		onConfirm: async () => {
+			withdrawProcessing.value = true;
+			try {
+				emit('restore-user', props.selectedUser.uid);
+			} finally {
+				withdrawProcessing.value = false;
+			}
+		}
+	});
+};
+
 // 수정 데이터
 const editData = ref({
 	isApproved: false,
@@ -338,14 +424,16 @@ const selectGrade = (grade) => {
 	editData.value.grade = grade;
 };
 
-// 저장
+// 저장 (기존 민감 정보 재암호화를 위해 name, phone도 함께 전달)
 const saveChanges = () => {
 	emit('update-user', {
 		isApproved: editData.value.isApproved,
 		grade: editData.value.grade,
 		class: editData.value.class,
 		corpName: editData.value.corpName,
-		memo: editData.value.memo
+		memo: editData.value.memo,
+		name: props.selectedUser.name,
+		phone: props.selectedUser.phone,
 	});
 };
 
@@ -461,5 +549,58 @@ const formatDateShort = (date) => {
 	text-align: center;
 	color: #9ca3af;
 	font-size: 0.83rem;
+}
+.withdraw_badge {
+	font-size: 0.78rem;
+	font-weight: 600;
+	padding: 3px 10px;
+	border-radius: 20px;
+	&.normal { background: #d1fae5; color: #065f46; }
+	&.requested { background: #fef3c7; color: #92400e; }
+	&.withdrawn { background: #fee2e2; color: #991b1b; }
+}
+.withdraw_btn_wrap {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+.btn_withdraw_process {
+	padding: 8px 16px;
+	background: #991b1b;
+	color: #fff;
+	border: none;
+	border-radius: 7px;
+	font-size: 0.86rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 200ms;
+	&:hover:not(:disabled) { background: #7f1d1d; }
+	&:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+.btn_withdraw_cancel_req {
+	padding: 8px 16px;
+	background: #fff;
+	color: #6b7280;
+	border: 1.5px solid #d1d5db;
+	border-radius: 7px;
+	font-size: 0.86rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 200ms;
+	&:hover:not(:disabled) { border-color: #9ca3af; color: #374151; }
+	&:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+.btn_withdraw_restore {
+	padding: 8px 16px;
+	background: #1d4ed8;
+	color: #fff;
+	border: none;
+	border-radius: 7px;
+	font-size: 0.86rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 200ms;
+	&:hover:not(:disabled) { background: #1e40af; }
+	&:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 </style>

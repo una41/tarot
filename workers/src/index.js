@@ -37,6 +37,9 @@ export default {
       if (pathname === '/api/billing/history' && request.method === 'POST') {
         return await handleGetHistory(request, env, corsHeaders);
       }
+      if (pathname === '/api/withdrawal/request' && request.method === 'POST') {
+        return await handleWithdrawalRequest(request, env, corsHeaders);
+      }
       return json({ error: 'Not found' }, 404, corsHeaders);
     } catch (err) {
       console.error('Worker error:', err);
@@ -50,15 +53,15 @@ export default {
   },
 };
 
-// ── 빌링키 발급 + 첫 결제 ────────────────────────────────────
+// ── 빌링키 발급 + 첫 결제 (또는 무료 체험 등록) ─────────────
 async function handleIssue(request, env, corsHeaders) {
-  const { authKey, customerKey, uid, customerEmail, customerName } = await request.json();
+  const { authKey, customerKey, uid, customerEmail, customerName, trial } = await request.json();
 
   if (!authKey || !customerKey || !uid) {
     return json({ error: '필수 파라미터가 누락되었습니다.' }, 400, corsHeaders);
   }
 
-  // 1. 이미 활성 구독인지 확인
+  // 1. 이미 활성 구독 또는 체험 중인지 확인
   const existing = await env.BILLING_STORE.get(`sub:${customerKey}`);
   if (existing) {
     const sub = JSON.parse(existing);
@@ -66,6 +69,12 @@ async function handleIssue(request, env, corsHeaders) {
       const expiry = new Date(sub.nextBillingDate);
       if (expiry > new Date()) {
         return json({ error: '이미 활성 구독이 있습니다.' }, 409, corsHeaders);
+      }
+    }
+    if (sub.status === 'trial') {
+      const trialExpiry = new Date(sub.trialExpiry);
+      if (trialExpiry > new Date()) {
+        return json({ error: '이미 진행 중인 무료 체험이 있습니다.' }, 409, corsHeaders);
       }
     }
   }
@@ -86,6 +95,48 @@ async function handleIssue(request, env, corsHeaders) {
   }
 
   const { billingKey } = issueData;
+  const now = new Date();
+
+  // ── 무료 체험 모드 ────────────────────────────────────────
+  if (trial) {
+    const trialExpiry = new Date(now);
+    trialExpiry.setDate(trialExpiry.getDate() + 1); // 테스트용 1일
+
+    const subscription = {
+      billingKey,
+      uid,
+      customerKey,
+      email: customerEmail,
+      name: customerName,
+      amount: SUBSCRIPTION_AMOUNT,
+      status: 'trial',
+      startDate: now.toISOString(),
+      trialExpiry: trialExpiry.toISOString(),
+      nextBillingDate: trialExpiry.toISOString(),
+    };
+    await env.BILLING_STORE.put(`sub:${customerKey}`, JSON.stringify(subscription));
+
+    // Firestore 업데이트 — 실패 시 KV 삭제 (결제 없으므로 결제 취소 불필요)
+    try {
+      await updateFirestore(uid, {
+        isSubscribed: { booleanValue: true },
+        isTrial: { booleanValue: true },
+        trialUsed: { booleanValue: true },
+        subscriptionStart: { stringValue: now.toISOString() },
+        subscriptionExpiry: { stringValue: trialExpiry.toISOString() },
+        subscriptionCustomerKey: { stringValue: customerKey },
+        subscriptionCancelled: { booleanValue: false },
+      }, env);
+      await pushHistory(env, customerKey, { type: 'trial_started', expiry: trialExpiry.toISOString() });
+    } catch (err) {
+      await env.BILLING_STORE.delete(`sub:${customerKey}`).catch(() => {});
+      return json({ error: 'DB 저장 실패로 무료 체험 등록이 취소되었습니다. 다시 시도해주세요.' }, 500, corsHeaders);
+    }
+
+    return json({ success: true, trial: true, trialExpiry: trialExpiry.toISOString() }, 200, corsHeaders);
+  }
+
+  // ── 즉시 결제 모드 ────────────────────────────────────────
 
   // 3. 첫 결제 실행
   const orderId = makeOrderId(uid);
@@ -114,7 +165,6 @@ async function handleIssue(request, env, corsHeaders) {
   const paymentKey = chargeData.paymentKey;
 
   // 4. KV에 구독 정보 저장 (빌링키 보안 보관)
-  const now = new Date();
   const expiry = addOneMonth(now);
   const subscription = {
     billingKey,
@@ -136,6 +186,7 @@ async function handleIssue(request, env, corsHeaders) {
   try {
     await updateFirestore(uid, {
       isSubscribed: { booleanValue: true },
+      isTrial: { booleanValue: false },
       subscriptionStart: { stringValue: now.toISOString() },
       subscriptionExpiry: { stringValue: expiry.toISOString() },
       subscriptionCustomerKey: { stringValue: customerKey },
@@ -143,7 +194,6 @@ async function handleIssue(request, env, corsHeaders) {
     }, env);
     await pushHistory(env, customerKey, { type: 'subscribed', amount: SUBSCRIPTION_AMOUNT, orderId, expiry: expiry.toISOString() });
   } catch (err) {
-    console.error('Firestore 업데이트 실패, 롤백 시작:', err);
     // 결제 취소
     await fetch(`${TOSS_API_BASE}/v1/payments/${paymentKey}/cancel`, {
       method: 'POST',
@@ -152,9 +202,9 @@ async function handleIssue(request, env, corsHeaders) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ cancelReason: 'Firestore 업데이트 실패로 인한 자동 취소' }),
-    }).catch(e => console.error('결제 취소 실패:', e));
+    }).catch(() => {});
     // KV 삭제
-    await env.BILLING_STORE.delete(`sub:${customerKey}`).catch(e => console.error('KV 삭제 실패:', e));
+    await env.BILLING_STORE.delete(`sub:${customerKey}`).catch(() => {});
     return json({ error: 'DB 저장 실패로 결제가 취소되었습니다. 다시 시도해주세요.' }, 500, corsHeaders);
   }
 
@@ -234,7 +284,7 @@ async function handleAdminCancel(request, env, corsHeaders) {
   return json({ success: true }, 200, corsHeaders);
 }
 
-// ── 월간 자동 결제 (Cron) ────────────────────────────────────
+// ── 월간 자동 결제 + 체험 종료 첫 결제 (Cron) ───────────────
 async function handleMonthlyBilling(env) {
   const list = await env.BILLING_STORE.list({ prefix: 'sub:' });
   const now = new Date();
@@ -244,6 +294,62 @@ async function handleMonthlyBilling(env) {
     if (!subStr) continue;
 
     const sub = JSON.parse(subStr);
+
+    // ── 체험 종료 → 첫 결제 처리 ─────────────────────────────
+    if (sub.status === 'trial') {
+      const trialExpiry = new Date(sub.trialExpiry);
+      if (trialExpiry > now) continue; // 아직 체험 기간
+
+      const orderId = makeOrderId(sub.uid);
+      const chargeRes = await fetch(`${TOSS_API_BASE}/v1/billing/${sub.billingKey}`, {
+        method: 'POST',
+        headers: {
+          Authorization: tossAuth(env.TOSS_SECRET_KEY),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerKey: sub.customerKey,
+          amount: sub.amount,
+          orderId,
+          orderName: ORDER_NAME,
+          customerEmail: sub.email,
+          customerName: sub.name,
+          taxFreeAmount: 0,
+        }),
+      });
+
+      if (chargeRes.ok) {
+        const chargeData = await chargeRes.json();
+        const newExpiry = addOneMonth(now);
+        sub.status = 'active';
+        sub.nextBillingDate = newExpiry.toISOString();
+        sub.lastPaymentDate = now.toISOString();
+        sub.lastOrderId = orderId;
+        sub.lastPaymentKey = chargeData.paymentKey;
+        await env.BILLING_STORE.put(key.name, JSON.stringify(sub));
+
+        await updateFirestore(sub.uid, {
+          isTrial: { booleanValue: false },
+          subscriptionExpiry: { stringValue: newExpiry.toISOString() },
+        }, env);
+        await pushHistory(env, sub.customerKey, { type: 'trial_converted', amount: sub.amount, orderId, expiry: newExpiry.toISOString() });
+      } else {
+        // 체험 첫 결제 실패 → 구독 비활성화
+        sub.status = 'failed';
+        sub.failedAt = now.toISOString();
+        await env.BILLING_STORE.put(key.name, JSON.stringify(sub));
+
+        await updateFirestore(sub.uid, {
+          isSubscribed: { booleanValue: false },
+          isTrial: { booleanValue: false },
+          subscriptionCancelled: { booleanValue: true },
+        }, env);
+        await pushHistory(env, sub.customerKey, { type: 'trial_payment_failed', amount: sub.amount });
+      }
+      continue;
+    }
+
+    // ── 월간 자동 결제 ────────────────────────────────────────
     if (sub.status !== 'active') continue;
 
     const nextBilling = new Date(sub.nextBillingDate);
@@ -308,6 +414,56 @@ async function handleGetHistory(request, env, corsHeaders) {
   const history = histStr ? JSON.parse(histStr) : [];
 
   return json({ history }, 200, corsHeaders);
+}
+
+// ── 회원 탈퇴 요청 처리 ─────────────────────────────────────
+async function handleWithdrawalRequest(request, env, corsHeaders) {
+  const { uid, name, email } = await request.json();
+
+  if (!uid) {
+    return json({ error: '필수 파라미터가 누락되었습니다.' }, 400, corsHeaders);
+  }
+
+  // 1. Firestore: withdrawalRequested = true 설정
+  await updateFirestore(uid, {
+    withdrawalRequested: { booleanValue: true },
+  }, env);
+
+  // 2. 관리자 이메일 발송 (Resend)
+  try {
+    const resendRes = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: '수비학타로 <noreply@numerologytarot.uk>',
+        to: ['runanumerologytarot@gmail.com'],
+        subject: '[수비학타로] 회원 탈퇴 요청',
+        html: `
+          <h2>회원 탈퇴 요청</h2>
+          <p>아래 회원이 탈퇴를 요청했습니다.</p>
+          <ul>
+            <li><strong>이름:</strong> ${name || '(알 수 없음)'}</li>
+            <li><strong>이메일:</strong> ${email || '(알 수 없음)'}</li>
+            <li><strong>UID:</strong> ${uid}</li>
+            <li><strong>요청 시각:</strong> ${new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}</li>
+          </ul>
+          <p>관리자 페이지에서 탈퇴 처리를 진행해주세요.</p>
+        `,
+      }),
+    });
+    if (!resendRes.ok) {
+      const resendErr = await resendRes.text();
+      console.error('Resend 이메일 발송 실패:', resendRes.status, resendErr);
+    }
+  } catch (err) {
+    // 이메일 발송 실패해도 탈퇴 요청 자체는 성공 처리
+    console.error('탈퇴 요청 이메일 발송 실패:', err);
+  }
+
+  return json({ success: true }, 200, corsHeaders);
 }
 
 // ── 히스토리 이벤트 추가 ─────────────────────────────────────

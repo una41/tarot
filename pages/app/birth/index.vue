@@ -26,6 +26,7 @@
 </template>
 
 <script setup>
+definePageMeta({ middleware: 'subscription' })
 import { computed, watchEffect } from 'vue';
 import { useTarotStore } from '~/stores/tarot';
 

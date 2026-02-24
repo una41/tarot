@@ -9,9 +9,16 @@
 
 			<template v-else-if="state === 'success'">
 				<div class="icon">✅</div>
-				<h1 class="result_title">구독이 완료되었습니다!</h1>
-				<p class="result_desc">월 4,900원 구독이 시작되었습니다.</p>
-				<p class="result_expiry">이용 가능 기간: ~ {{ expiryText }}</p>
+				<template v-if="isTrial">
+					<h1 class="result_title">1일 무료 체험이 시작되었습니다!</h1>
+					<p class="result_desc">체험 종료 후 월 4,900원이 자동 결제됩니다.</p>
+					<p class="result_expiry">체험 종료일: ~ {{ expiryText }}</p>
+				</template>
+				<template v-else>
+					<h1 class="result_title">구독이 완료되었습니다!</h1>
+					<p class="result_desc">월 4,900원 구독이 시작되었습니다.</p>
+					<p class="result_expiry">이용 가능 기간: ~ {{ expiryText }}</p>
+				</template>
 				<button class="btn_go" @click="navigateTo('/app/my', { replace: true })">마이페이지로 이동</button>
 			</template>
 
@@ -34,6 +41,7 @@ const route = useRoute();
 const config = useRuntimeConfig();
 
 const state = ref('loading');
+const isTrial = ref(false);
 const expiryText = ref('');
 const errorMessage = ref('결제 처리 중 문제가 발생했습니다. 고객센터에 문의해주세요.');
 
@@ -80,6 +88,7 @@ onMounted(async () => {
 
 	try {
 		const workerUrl = config.public.workerUrl;
+		const trial = route.query.trial === 'true';
 		const res = await fetch(`${workerUrl}/api/billing/issue`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -89,13 +98,15 @@ onMounted(async () => {
 				uid: store.user.uid,
 				customerEmail: store.user.email,
 				customerName: store.user.name,
+				trial,
 			}),
 		});
 
 		const data = await res.json();
 
 		if (res.ok && data.success) {
-			expiryText.value = formatExpiry(data.expiry);
+			isTrial.value = data.trial || false;
+			expiryText.value = formatExpiry(data.trial ? data.trialExpiry : data.expiry);
 			state.value = 'success';
 		} else {
 			errorMessage.value = data.error || '결제 처리 중 문제가 발생했습니다.';

@@ -35,7 +35,7 @@
 	import { useTarotStore } from '~/stores/tarot';
 	const store = useTarotStore();
 	const route = useRoute();
-	const publicPages = ['/terms', '/privacy', '/payment/success', '/payment/fail'];
+	const publicPages = ['/terms', '/privacy', '/app/terms', '/app/privacy', '/payment/success', '/payment/fail'];
 	const isPublicPage = computed(() => publicPages.includes(route.path));
 	const showInitialLoader = ref(true);
 
