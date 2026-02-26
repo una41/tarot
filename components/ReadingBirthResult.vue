@@ -94,7 +94,7 @@
 										<li v-for="(item, i) in data.list[store.result].summary" :key="i" v-html="item"></li>
 									</ul>
 									<div class="bx_tip soul_tip pc_half">
-										<h6>🔮소울카드 <span>- {{ data.list[store.result].soul.card }} </span></h6>
+										<h6><img src="https://img.numerologytarot.uk/web/img/icon_ball.png?v=260219" class="ico_ball" alt="" />소울카드 <span>- {{ data.list[store.result].soul.card }} </span></h6>
 										<ul class="sl_cont">
 											<li v-for="(item, i) in data.list[store.result].soul.cont" :key="i" v-html="item"></li>
 										</ul>

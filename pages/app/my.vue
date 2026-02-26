@@ -80,33 +80,33 @@
 						<path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>
 					</svg>
 					<span class="sub_title">앱 월구독</span>
-					<span class="sub_badge" :class="subscriptionStatus.isTrial ? 'trial' : subscriptionStatus.isActive ? 'active' : 'inactive'">
-						{{ subscriptionStatus.isTrial ? '체험 중' : subscriptionStatus.isActive ? '정기 구독 중' : '미구독' }}
+					<span class="sub_badge" :class="subscriptionStatus.isActive ? 'active' : 'inactive'">
+						{{ subscriptionStatus.isActive ? '정기 구독 중' : '미구독' }}
 					</span>
 				</div>
-				<!-- 체험 중 -->
+				<!-- 체험 중 (비활성화)
 				<div class="sub_info" v-if="subscriptionStatus.isActive && subscriptionStatus.isTrial">
 					<p class="sub_desc">1일 무료 체험 기간</p>
 					<p class="sub_expiry">~ {{ subscriptionStatus.expiryText }}</p>
 					<p v-if="subscriptionStatus.isCancelled" class="sub_cancelled_note">체험이 취소되었습니다. 만료일까지 이용 가능합니다.</p>
 					<p v-else class="sub_trial_note">체험 종료 후 월 4,900원 자동 결제</p>
-				</div>
+				</div> -->
 				<!-- 구독 중 -->
-				<div class="sub_info" v-else-if="subscriptionStatus.isActive">
+				<div class="sub_info" v-if="subscriptionStatus.isActive">
 					<p class="sub_desc">{{ subscriptionStatus.isCancelled ? '이용 가능 기간' : '다음 결제일' }}</p>
 					<p class="sub_expiry">~ {{ subscriptionStatus.expiryText }}</p>
 					<p v-if="subscriptionStatus.isCancelled" class="sub_cancelled_note">구독이 취소되었습니다. 만료일까지 이용 가능합니다.</p>
 				</div>
 				<!-- 미구독 -->
 				<div class="sub_info" v-else>
-					<p class="sub_desc" v-if="!subscriptionStatus.trialUsed">1일 무료 체험 후 월 4,900원 · 언제든 취소 가능</p>
-					<p class="sub_desc" v-else>월 4,900원 · 자동결제 · 언제든 취소 가능</p>
+					<!-- <p class="sub_desc" v-if="!subscriptionStatus.trialUsed">1일 무료 체험 후 월 4,900원 · 언제든 취소 가능</p> -->
+					<p class="sub_desc">월 4,900원 · 자동결제 · 언제든 취소 가능</p>
 				</div>
 				<button v-if="!subscriptionStatus.isActive" class="btn_subscribe" @click="fnStartSubscription" :disabled="isSubscribing">
-					{{ isSubscribing ? '처리 중...' : (subscriptionStatus.trialUsed ? '앱 구독하기' : '1일 무료체험 후 앱 구독하기') }}
+					{{ isSubscribing ? '처리 중...' : '앱 구독하기' }}
 				</button>
 				<button v-else-if="!subscriptionStatus.isCancelled" class="btn_cancel_sub" @click="fnCancelSubscription" :disabled="isCancelling">
-					{{ isCancelling ? '처리 중...' : (subscriptionStatus.isTrial ? '체험 취소' : '구독 취소') }}
+					{{ isCancelling ? '처리 중...' : '구독 취소' }}
 				</button>
 			</div>
 

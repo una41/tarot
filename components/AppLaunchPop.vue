@@ -19,7 +19,7 @@
 							</p>
 							<div class="promo_tags">
 								<span class="tag">📱 안드로이드</span>
-								<span class="tag">🔮 수비학 타로</span>
+								<span class="tag"><img src="https://img.numerologytarot.uk/web/img/icon_ball.png?v=260219" class="ico_ball" alt="" /> 수비학 타로</span>
 								<span class="tag">✨ 월 4,900원</span>
 							</div>
 						</div>

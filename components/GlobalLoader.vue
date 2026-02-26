@@ -2,7 +2,7 @@
 	<Transition name="ifade">
 		<div v-if="store.loader.isAppLoading || store.loader.isPdfLoading" class="global-loader" :class="{ 'pdf-mode': store.loader.isPdfLoading }">
 			<div class="loader-content">
-				<div class="mystic-icon">{{ loaderConfig.icon }}</div>
+				<div class="mystic-icon"><img src="https://img.numerologytarot.uk/web/img/icon_ball.png?v=260219" class="ico_ball" alt="" /></div>
 				<h1 class="title">{{ loaderConfig.title }}</h1>
 				<div class="progress-bar">
 					<div class="progress-inner"></div>

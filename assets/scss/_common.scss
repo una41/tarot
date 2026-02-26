@@ -369,3 +369,12 @@ $com_primary_light: #a78bfa;
 		transform: translateY(-10px);
 	}
 }
+
+
+// 수정구슬 아이콘 이미지 (🔮 대체)
+.ico_ball {
+	width: 65px;
+	height: auto;
+	object-fit: contain;
+	vertical-align: middle;
+}

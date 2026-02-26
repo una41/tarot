@@ -3,7 +3,7 @@
 		<div class="subscribe_wrap">
 			<!-- 헤더 -->
 			<div class="subscribe_header">
-				<div class="logo_icon">🔮</div>
+				<div class="logo_icon"><img src="https://img.numerologytarot.uk/web/img/icon_ball.png?v=260219" class="ico_ball" alt="" /></div>
 				<h1 class="subscribe_title">수비학타로 앱</h1>
 				<p class="subscribe_subtitle">부자사관학교 전용 타로 앱</p>
 			</div>
@@ -46,10 +46,10 @@
 					<span class="price_amount">4,900원</span>
 					<span class="price_unit">/ 월</span>
 				</div>
-				<p class="price_desc" v-if="!subscriptionStatus.trialUsed">
+				<!-- <p class="price_desc" v-if="!subscriptionStatus.trialUsed">
 					1일 무료 체험 후 월 4,900원 · 언제든 취소 가능
-				</p>
-				<p class="price_desc" v-else>
+				</p> -->
+				<p class="price_desc">
 					월 4,900원 · 자동결제 · 언제든 취소 가능
 				</p>
 
@@ -60,7 +60,7 @@
 					:disabled="isLoading"
 				>
 					<template v-if="isLoading">로딩 중...</template>
-					<template v-else-if="!subscriptionStatus.trialUsed">1일 무료체험 후 앱 구독하기</template>
+					<!-- <template v-else-if="!subscriptionStatus.trialUsed">1일 무료체험 후 앱 구독하기</template> -->
 					<template v-else>앱 구독하기</template>
 				</button>
 
@@ -147,10 +147,10 @@ const subscriptionStatus = computed(() => {
 // 구독 버튼 클릭 → 안드로이드 앱에 구독 요청 전달
 const fnSubscribe = () => {
 	if (!window.ReactNativeWebView) return;
-	const isTrial = !subscriptionStatus.value.trialUsed;
+	// const isTrial = !subscriptionStatus.value.trialUsed;
 	window.ReactNativeWebView.postMessage(JSON.stringify({
 		type: 'subscribe',
-		isTrial,
+		isTrial: false,
 		uid: store.user?.uid || '',
 		email: store.user?.email || '',
 		name: store.user?.name || '',

@@ -55,7 +55,7 @@ export default {
 
 // ── 빌링키 발급 + 첫 결제 (또는 무료 체험 등록) ─────────────
 async function handleIssue(request, env, corsHeaders) {
-  const { authKey, customerKey, uid, customerEmail, customerName, trial } = await request.json();
+  const { authKey, customerKey, uid, customerEmail, customerName } = await request.json();
 
   if (!authKey || !customerKey || !uid) {
     return json({ error: '필수 파라미터가 누락되었습니다.' }, 400, corsHeaders);
@@ -97,44 +97,43 @@ async function handleIssue(request, env, corsHeaders) {
   const { billingKey } = issueData;
   const now = new Date();
 
-  // ── 무료 체험 모드 ────────────────────────────────────────
-  if (trial) {
-    const trialExpiry = new Date(now);
-    trialExpiry.setDate(trialExpiry.getDate() + 1); // 테스트용 1일
-
-    const subscription = {
-      billingKey,
-      uid,
-      customerKey,
-      email: customerEmail,
-      name: customerName,
-      amount: SUBSCRIPTION_AMOUNT,
-      status: 'trial',
-      startDate: now.toISOString(),
-      trialExpiry: trialExpiry.toISOString(),
-      nextBillingDate: trialExpiry.toISOString(),
-    };
-    await env.BILLING_STORE.put(`sub:${customerKey}`, JSON.stringify(subscription));
-
-    // Firestore 업데이트 — 실패 시 KV 삭제 (결제 없으므로 결제 취소 불필요)
-    try {
-      await updateFirestore(uid, {
-        isSubscribed: { booleanValue: true },
-        isTrial: { booleanValue: true },
-        trialUsed: { booleanValue: true },
-        subscriptionStart: { stringValue: now.toISOString() },
-        subscriptionExpiry: { stringValue: trialExpiry.toISOString() },
-        subscriptionCustomerKey: { stringValue: customerKey },
-        subscriptionCancelled: { booleanValue: false },
-      }, env);
-      await pushHistory(env, customerKey, { type: 'trial_started', expiry: trialExpiry.toISOString() });
-    } catch (err) {
-      await env.BILLING_STORE.delete(`sub:${customerKey}`).catch(() => {});
-      return json({ error: 'DB 저장 실패로 무료 체험 등록이 취소되었습니다. 다시 시도해주세요.' }, 500, corsHeaders);
-    }
-
-    return json({ success: true, trial: true, trialExpiry: trialExpiry.toISOString() }, 200, corsHeaders);
-  }
+  // ── 무료 체험 모드 (비활성화) ──────────────────────────────
+  // if (trial) {
+  //   const trialExpiry = new Date(now);
+  //   trialExpiry.setDate(trialExpiry.getDate() + 1); // 테스트용 1일
+  //
+  //   const subscription = {
+  //     billingKey,
+  //     uid,
+  //     customerKey,
+  //     email: customerEmail,
+  //     name: customerName,
+  //     amount: SUBSCRIPTION_AMOUNT,
+  //     status: 'trial',
+  //     startDate: now.toISOString(),
+  //     trialExpiry: trialExpiry.toISOString(),
+  //     nextBillingDate: trialExpiry.toISOString(),
+  //   };
+  //   await env.BILLING_STORE.put(`sub:${customerKey}`, JSON.stringify(subscription));
+  //
+  //   try {
+  //     await updateFirestore(uid, {
+  //       isSubscribed: { booleanValue: true },
+  //       isTrial: { booleanValue: true },
+  //       trialUsed: { booleanValue: true },
+  //       subscriptionStart: { stringValue: now.toISOString() },
+  //       subscriptionExpiry: { stringValue: trialExpiry.toISOString() },
+  //       subscriptionCustomerKey: { stringValue: customerKey },
+  //       subscriptionCancelled: { booleanValue: false },
+  //     }, env);
+  //     await pushHistory(env, customerKey, { type: 'trial_started', expiry: trialExpiry.toISOString() });
+  //   } catch (err) {
+  //     await env.BILLING_STORE.delete(`sub:${customerKey}`).catch(() => {});
+  //     return json({ error: 'DB 저장 실패로 무료 체험 등록이 취소되었습니다. 다시 시도해주세요.' }, 500, corsHeaders);
+  //   }
+  //
+  //   return json({ success: true, trial: true, trialExpiry: trialExpiry.toISOString() }, 200, corsHeaders);
+  // }
 
   // ── 즉시 결제 모드 ────────────────────────────────────────
 
@@ -295,59 +294,18 @@ async function handleMonthlyBilling(env) {
 
     const sub = JSON.parse(subStr);
 
-    // ── 체험 종료 → 첫 결제 처리 ─────────────────────────────
-    if (sub.status === 'trial') {
-      const trialExpiry = new Date(sub.trialExpiry);
-      if (trialExpiry > now) continue; // 아직 체험 기간
-
-      const orderId = makeOrderId(sub.uid);
-      const chargeRes = await fetch(`${TOSS_API_BASE}/v1/billing/${sub.billingKey}`, {
-        method: 'POST',
-        headers: {
-          Authorization: tossAuth(env.TOSS_SECRET_KEY),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          customerKey: sub.customerKey,
-          amount: sub.amount,
-          orderId,
-          orderName: ORDER_NAME,
-          customerEmail: sub.email,
-          customerName: sub.name,
-          taxFreeAmount: 0,
-        }),
-      });
-
-      if (chargeRes.ok) {
-        const chargeData = await chargeRes.json();
-        const newExpiry = addOneMonth(now);
-        sub.status = 'active';
-        sub.nextBillingDate = newExpiry.toISOString();
-        sub.lastPaymentDate = now.toISOString();
-        sub.lastOrderId = orderId;
-        sub.lastPaymentKey = chargeData.paymentKey;
-        await env.BILLING_STORE.put(key.name, JSON.stringify(sub));
-
-        await updateFirestore(sub.uid, {
-          isTrial: { booleanValue: false },
-          subscriptionExpiry: { stringValue: newExpiry.toISOString() },
-        }, env);
-        await pushHistory(env, sub.customerKey, { type: 'trial_converted', amount: sub.amount, orderId, expiry: newExpiry.toISOString() });
-      } else {
-        // 체험 첫 결제 실패 → 구독 비활성화
-        sub.status = 'failed';
-        sub.failedAt = now.toISOString();
-        await env.BILLING_STORE.put(key.name, JSON.stringify(sub));
-
-        await updateFirestore(sub.uid, {
-          isSubscribed: { booleanValue: false },
-          isTrial: { booleanValue: false },
-          subscriptionCancelled: { booleanValue: true },
-        }, env);
-        await pushHistory(env, sub.customerKey, { type: 'trial_payment_failed', amount: sub.amount });
-      }
-      continue;
-    }
+    // ── 체험 종료 → 첫 결제 처리 (비활성화) ──────────────────
+    // if (sub.status === 'trial') {
+    //   const trialExpiry = new Date(sub.trialExpiry);
+    //   if (trialExpiry > now) continue;
+    //
+    //   const orderId = makeOrderId(sub.uid);
+    //   const chargeRes = await fetch(`${TOSS_API_BASE}/v1/billing/${sub.billingKey}`, { ... });
+    //
+    //   if (chargeRes.ok) { ... trial_converted ... }
+    //   else { ... trial_payment_failed ... }
+    //   continue;
+    // }
 
     // ── 월간 자동 결제 ────────────────────────────────────────
     if (sub.status !== 'active') continue;

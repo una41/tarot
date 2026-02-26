@@ -1,7 +1,7 @@
 <template>
 	<div class="login">
 		<div class="l_wrap">
-			<div class="icon">🔮</div>
+			<div class="icon"><img src="https://img.numerologytarot.uk/web/img/icon_ball.png?v=260219" class="ico_ball" alt="" /></div>
 			<p class="l_logo">numerologyTarot</p>
 			<Transition name="l_fade" mode="out-in">
 				<h2 class="tit" :key="currentMode">{{ modeTitle }}</h2>

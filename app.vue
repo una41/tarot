@@ -4,7 +4,7 @@
 		<Teleport to="body">
 			<div v-if="showInitialLoader" id="initial-loader">
 				<div class="loader-content">
-					<div class="mystic-icon">🔮</div>
+					<div class="mystic-icon"><img src="https://img.numerologytarot.uk/web/img/icon_ball.png?v=260219" class="ico_ball" alt="" /></div>
 					<h1 class="title">운명의 흐름을 읽는 중</h1>
 					<div class="progress-bar">
 						<div class="progress-inner"></div>
