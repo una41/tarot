@@ -420,6 +420,8 @@ const fnLogout = () => {
 		icon: '👋',
 		onConfirm: async () => {
 			await store.fnLogout();
+			// 앱에 로그아웃 상태 전송
+			window.ReactNativeWebView?.postMessage(JSON.stringify({ login: false }));
 			navigateTo('/');
 		}
 	});

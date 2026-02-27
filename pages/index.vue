@@ -323,6 +323,14 @@
 
 	watch(() => store.user, fetchSubData, { immediate: true });
 
+	// 앱 로그인 완료 시 WebView 브릿지로 전송
+	watch(() => store.authChecked, (checked) => {
+		if (!checked) return
+		if (store.isLoggedIn) {
+			window.ReactNativeWebView?.postMessage(JSON.stringify({ login: true }))
+		}
+	}, { immediate: true });
+
 	const fnPopAction = () => {
 		if (popSubStatus.value.isActive) {
 			navigateTo('/app/my');
