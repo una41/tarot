@@ -23,6 +23,13 @@
     padding-top: 50px;
     color: #999;
   }
+  .copy_modal .m_container{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 10000;
+    transform: translate(-50%, -50%);
+  }
 }
 
 /* 앱 웹뷰 전용 플로팅 바 */

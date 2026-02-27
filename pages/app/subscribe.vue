@@ -43,14 +43,14 @@
 			<!-- 구독 카드 -->
 			<div class="subscribe_card">
 				<div class="price_info">
-					<span class="price_amount">4,900원</span>
+					<span class="price_amount">3,900원</span>
 					<span class="price_unit">/ 월</span>
 				</div>
 				<!-- <p class="price_desc" v-if="!subscriptionStatus.trialUsed">
-					1일 무료 체험 후 월 4,900원 · 언제든 취소 가능
+					1일 무료 체험 후 월 3,900원 · 언제든 취소 가능
 				</p> -->
 				<p class="price_desc">
-					월 4,900원 · 자동결제 · 언제든 취소 가능
+					월 3,900원 · 자동결제 · 언제든 취소 가능
 				</p>
 
 				<button

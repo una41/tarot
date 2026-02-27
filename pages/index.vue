@@ -139,7 +139,7 @@
 								<span class="sub_expiry">{{ popSubStatus.isTrial ? '체험 종료일' : (popSubStatus.isCancelled ? '이용 가능 기간' : '다음 결제일') }} {{ popSubStatus.expiryText }}</span>
 							</div>
 							<p v-if="popSubStatus.isCancelled" class="sub_note">{{ popSubStatus.isTrial ? '체험 취소됨' : '해지 신청됨' }} · 만료일까지 이용 가능합니다</p>
-							<p v-else-if="popSubStatus.isTrial" class="sub_note">체험 종료 후 월 4,900원 자동 결제</p>
+							<p v-else-if="popSubStatus.isTrial" class="sub_note">체험 종료 후 월 3,900원 자동 결제</p>
 							<button v-if="!popSubStatus.isCancelled" type="button" class="btn_sub_cancel" @click="fnPopCancelSub">{{ popSubStatus.isTrial ? '체험 취소' : '구독 해지' }}</button>
 						</template>
 						<template v-else>

@@ -89,7 +89,7 @@
 					<p class="sub_desc">1일 무료 체험 기간</p>
 					<p class="sub_expiry">~ {{ subscriptionStatus.expiryText }}</p>
 					<p v-if="subscriptionStatus.isCancelled" class="sub_cancelled_note">체험이 취소되었습니다. 만료일까지 이용 가능합니다.</p>
-					<p v-else class="sub_trial_note">체험 종료 후 월 4,900원 자동 결제</p>
+					<p v-else class="sub_trial_note">체험 종료 후 월 3,900원 자동 결제</p>
 				</div> -->
 				<!-- 구독 중 -->
 				<div class="sub_info" v-if="subscriptionStatus.isActive">
@@ -99,8 +99,8 @@
 				</div>
 				<!-- 미구독 -->
 				<div class="sub_info" v-else>
-					<!-- <p class="sub_desc" v-if="!subscriptionStatus.trialUsed">1일 무료 체험 후 월 4,900원 · 언제든 취소 가능</p> -->
-					<p class="sub_desc">월 4,900원 · 자동결제 · 언제든 취소 가능</p>
+					<!-- <p class="sub_desc" v-if="!subscriptionStatus.trialUsed">1일 무료 체험 후 월 3,900원 · 언제든 취소 가능</p> -->
+					<p class="sub_desc">월 3,900원 · 자동결제 · 언제든 취소 가능</p>
 				</div>
 				<button v-if="!subscriptionStatus.isActive" class="btn_subscribe" @click="fnStartSubscription" :disabled="isSubscribing">
 					{{ isSubscribing ? '처리 중...' : '앱 구독하기' }}

@@ -11,12 +11,12 @@
 				<div class="icon">✅</div>
 				<template v-if="isTrial">
 					<h1 class="result_title">1일 무료 체험이 시작되었습니다!</h1>
-					<p class="result_desc">체험 종료 후 월 4,900원이 자동 결제됩니다.</p>
+					<p class="result_desc">체험 종료 후 월 3,900원이 자동 결제됩니다.</p>
 					<p class="result_expiry">체험 종료일: ~ {{ expiryText }}</p>
 				</template>
 				<template v-else>
 					<h1 class="result_title">구독이 완료되었습니다!</h1>
-					<p class="result_desc">월 4,900원 구독이 시작되었습니다.</p>
+					<p class="result_desc">월 3,900원 구독이 시작되었습니다.</p>
 					<p class="result_expiry">이용 가능 기간: ~ {{ expiryText }}</p>
 				</template>
 				<button class="btn_go" @click="navigateTo('/app/my', { replace: true })">마이페이지로 이동</button>

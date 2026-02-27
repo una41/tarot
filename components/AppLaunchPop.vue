@@ -20,7 +20,7 @@
 							<div class="promo_tags">
 								<span class="tag">📱 안드로이드</span>
 								<span class="tag"><img src="https://img.numerologytarot.uk/web/img/icon_ball.png?v=260219" class="ico_ball" alt="" /> 수비학 타로</span>
-								<span class="tag">✨ 월 4,900원</span>
+								<span class="tag">✨ 월 3,900원</span>
 							</div>
 						</div>
 
@@ -41,7 +41,7 @@
 								<p class="sub_desc">1일 무료 체험 기간</p>
 								<p class="sub_expiry">~ {{ subStatus.expiryText }}</p>
 								<p v-if="subStatus.isCancelled" class="sub_cancelled_note">체험이 취소되었습니다. 만료일까지 이용 가능합니다.</p>
-								<p v-else class="sub_trial_note">체험 종료 후 월 4,900원 자동 결제</p>
+								<p v-else class="sub_trial_note">체험 종료 후 월 3,900원 자동 결제</p>
 							</div>
 							<!-- 구독 중 -->
 							<div class="sub_info" v-else-if="subStatus.isActive">
@@ -51,8 +51,8 @@
 							</div>
 							<!-- 미구독 -->
 							<div class="sub_info" v-else>
-								<p class="sub_desc" v-if="!subStatus.trialUsed">1일 무료 체험 후 월 4,900원 · 언제든 취소 가능</p>
-								<p class="sub_desc" v-else>월 4,900원 · 자동결제 · 언제든 취소 가능</p>
+								<p class="sub_desc" v-if="!subStatus.trialUsed">1일 무료 체험 후 월 3,900원 · 언제든 취소 가능</p>
+								<p class="sub_desc" v-else>월 3,900원 · 자동결제 · 언제든 취소 가능</p>
 							</div>
 
 							<button
