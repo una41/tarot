@@ -158,7 +158,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useTarotStore } from '~/stores/tarot';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { encryptPhone, decryptPhone, decryptData } from '~/utils/phoneEncrypt';
@@ -254,30 +254,17 @@ const loadUserData = async () => {
 	}
 };
 
-// 앱에서 로그인 메시지 수신 처리
-const handleAppMessage = async (event) => {
-	try {
-		const data = JSON.parse(event.data);
-		if (data.type === 'login' && data.uid && data.email && data.token) {
-			// 받은 토큰으로 스토어 로그인 상태 설정
-			store.user = { uid: data.uid, email: data.email };
-			store.token = data.token;
-			store.isLoggedIn = true;
-			// Firestore에서 나머지 유저 정보 로드
-			await loadUserData();
-		}
-	} catch {
-		// JSON 파싱 실패 시 무시
-	}
-};
+const route = useRoute();
 
 onMounted(async () => {
+	// 앱에서 URL 쿼리로 로그인 정보 전달 시 처리
+	const { type, uid, email, token } = route.query;
+	if (type === 'login' && uid && email && token) {
+		store.user = { uid, email };
+		store.token = token;
+		store.isLoggedIn = true;
+	}
 	await loadUserData();
-	window.addEventListener('message', handleAppMessage);
-});
-
-onUnmounted(() => {
-	window.removeEventListener('message', handleAppMessage);
 });
 
 const subscriptionStatus = computed(() => {
@@ -716,7 +703,7 @@ const fnConfirmWithdraw = async () => {
 			.sub_desc {
 				font-size: 0.85rem;
 				color: #8b7355;
-				margin-bottom: 4px;
+				margin-bottom: 15px;
 			}
 
 			.sub_expiry {

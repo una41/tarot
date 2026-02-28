@@ -426,6 +426,10 @@ h6{
 			transform: translate(-50%, -50%);
 			z-index: 10;
 		}
+		.ico_ball{
+			@include setCont(24px, auto, inline-block);
+		    margin-top: -3px;
+		}
 		.r_wrap{
 			@include setCont(90%, 80%, block, absolute, #fff);
 			max-width: 770px;
