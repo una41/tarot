@@ -330,6 +330,7 @@
 			await fetchSubData()
 			window.ReactNativeWebView?.postMessage(JSON.stringify({
 				login: true,
+				name: store.user?.name || '',
 				isSubscribed: popSubData.value.isSubscribed,
 				subscriptionExpiry: popSubData.value.subscriptionExpiry,
 				subscriptionCancelled: popSubData.value.subscriptionCancelled,
