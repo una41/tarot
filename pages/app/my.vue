@@ -158,7 +158,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useTarotStore } from '~/stores/tarot';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { encryptPhone, decryptPhone, decryptData } from '~/utils/phoneEncrypt';
@@ -229,30 +229,53 @@ const onPhoneInput = (e) => {
 	}
 };
 
-onMounted(async () => {
-	if (store.user?.uid) {
-		try {
-			const { $db } = useNuxtApp();
-			const userDoc = await getDoc(doc($db, 'users', store.user.uid));
-			if (userDoc.exists()) {
-				const data = userDoc.data();
-				userData.value = {
-					name: await decryptData(data.name, cryptoKey) || '',
-					email: data.email || '',
-					phone: data.phone || '',
-					corpName: data.corpName || '',
-					class: data.class || '',
-					isSubscribed: data.isSubscribed || false,
-					subscriptionExpiry: data.subscriptionExpiry || null,
-					subscriptionCancelled: data.subscriptionCancelled || false,
-					isTrial: data.isTrial || false,
-					trialUsed: data.trialUsed || false,
-				};
-			}
-		} catch (e) {
-			console.error('사용자 정보 조회 실패:', e);
+const loadUserData = async () => {
+	if (!store.user?.uid) return;
+	try {
+		const { $db } = useNuxtApp();
+		const userDoc = await getDoc(doc($db, 'users', store.user.uid));
+		if (userDoc.exists()) {
+			const data = userDoc.data();
+			userData.value = {
+				name: await decryptData(data.name, cryptoKey) || '',
+				email: data.email || '',
+				phone: data.phone || '',
+				corpName: data.corpName || '',
+				class: data.class || '',
+				isSubscribed: data.isSubscribed || false,
+				subscriptionExpiry: data.subscriptionExpiry || null,
+				subscriptionCancelled: data.subscriptionCancelled || false,
+				isTrial: data.isTrial || false,
+				trialUsed: data.trialUsed || false,
+			};
 		}
+	} catch (e) {
+		console.error('사용자 정보 조회 실패:', e);
 	}
+};
+
+// 앱에서 로그인 메시지 수신 처리
+const handleAppMessage = async (event) => {
+	try {
+		const data = JSON.parse(event.data);
+		if (data.type === 'login' && data.email && data.password) {
+			const result = await store.fnLogin(data.email, data.password);
+			if (result.success) {
+				await loadUserData();
+			}
+		}
+	} catch {
+		// JSON 파싱 실패 시 무시
+	}
+};
+
+onMounted(async () => {
+	await loadUserData();
+	window.addEventListener('message', handleAppMessage);
+});
+
+onUnmounted(() => {
+	window.removeEventListener('message', handleAppMessage);
 });
 
 const subscriptionStatus = computed(() => {
