@@ -258,11 +258,13 @@ const loadUserData = async () => {
 const handleAppMessage = async (event) => {
 	try {
 		const data = JSON.parse(event.data);
-		if (data.type === 'login' && data.email && data.password) {
-			const result = await store.fnLogin(data.email, data.password);
-			if (result.success) {
-				await loadUserData();
-			}
+		if (data.type === 'login' && data.uid && data.email && data.token) {
+			// 받은 토큰으로 스토어 로그인 상태 설정
+			store.user = { uid: data.uid, email: data.email };
+			store.token = data.token;
+			store.isLoggedIn = true;
+			// Firestore에서 나머지 유저 정보 로드
+			await loadUserData();
 		}
 	} catch {
 		// JSON 파싱 실패 시 무시
