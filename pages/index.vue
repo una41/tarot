@@ -237,15 +237,30 @@
 		}
 	};
 
+	// 앱에서 로그아웃 메시지 수신 처리
+	const handleAppMessage = async (event) => {
+		try {
+			const data = JSON.parse(event.data)
+			if (data.login === false) {
+				await store.fnLogout()
+			}
+		} catch {
+			// JSON 파싱 실패 시 무시
+		}
+	}
+
 	onMounted(() => {
 		// 앱이 로드될 때 쿠키를 다시 확인
 		store.checkAuth();
 		// 바깥 클릭 이벤트 등록
 		document.addEventListener('click', closeUserMenu);
+		// 앱 → 웹뷰 메시지 수신
+		window.addEventListener('message', handleAppMessage);
 	});
 
 	onUnmounted(() => {
 		document.removeEventListener('click', closeUserMenu);
+		window.removeEventListener('message', handleAppMessage);
 	});
 
 	// 내정보 모달
