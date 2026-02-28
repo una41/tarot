@@ -323,11 +323,18 @@
 
 	watch(() => store.user, fetchSubData, { immediate: true });
 
-	// 앱 로그인 완료 시 WebView 브릿지로 전송
-	watch(() => store.authChecked, (checked) => {
+	// 앱 로그인 완료 시 WebView 브릿지로 전송 (구독 정보 포함)
+	watch(() => store.authChecked, async (checked) => {
 		if (!checked) return
 		if (store.isLoggedIn) {
-			window.ReactNativeWebView?.postMessage(JSON.stringify({ login: true }))
+			await fetchSubData()
+			window.ReactNativeWebView?.postMessage(JSON.stringify({
+				login: true,
+				isSubscribed: popSubData.value.isSubscribed,
+				subscriptionExpiry: popSubData.value.subscriptionExpiry,
+				subscriptionCancelled: popSubData.value.subscriptionCancelled,
+				isTrial: popSubData.value.isTrial,
+			}))
 		}
 	}, { immediate: true });
 

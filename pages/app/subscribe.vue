@@ -53,6 +53,11 @@
 					월 3,900원 · 자동결제 · 언제든 취소 가능
 				</p>
 
+				<p class="subscribe_reason">
+					더 완벽한 서비스 유지와 지속적인 성장을 위해 구독제로 운영되고 있습니다.<br>
+					보내주시는 응원은 더 좋은 콘텐츠와 안정적인 앱 환경으로 보답하겠습니다.
+				</p>
+
 				<button
 					v-if="!subscriptionStatus.isActive"
 					class="btn_subscribe"
@@ -267,8 +272,18 @@ const fnSubscribe = () => {
 	.price_desc {
 		font-size: 0.82rem;
 		color: #8b7355;
-		margin-bottom: 20px;
+		margin-bottom: 12px;
 		line-height: 1.4;
+	}
+
+	.subscribe_reason {
+		font-size: 0.78rem;
+		color: #a89880;
+		line-height: 1.6;
+		margin-bottom: 20px;
+		padding: 12px 14px;
+		background: #f5f0e8;
+		border-radius: 8px;
 	}
 
 	.btn_subscribe {
