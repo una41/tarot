@@ -338,7 +338,7 @@
 
 	watch(() => store.user, fetchSubData, { immediate: true });
 
-	// 앱 로그인 완료 시 WebView 브릿지로 전송 (구독 정보 포함)
+	// 인증 확인 완료 후 앱(WebView)으로 로그인 상태 전송
 	watch(() => store.authChecked, async (checked) => {
 		if (!checked) return
 		if (store.isLoggedIn) {
@@ -351,6 +351,9 @@
 				subscriptionCancelled: popSubData.value.subscriptionCancelled,
 				isTrial: popSubData.value.isTrial,
 			}))
+		} else {
+			// 비로그인 상태 → 앱에 로그인 안 된 상태 전달
+			window.ReactNativeWebView?.postMessage(JSON.stringify({ login: false }))
 		}
 	}, { immediate: true });
 
