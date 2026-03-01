@@ -250,8 +250,6 @@
 	}
 
 	onMounted(() => {
-		// 앱이 로드될 때 쿠키를 다시 확인
-		store.checkAuth();
 		// 바깥 클릭 이벤트 등록
 		document.addEventListener('click', closeUserMenu);
 		// 앱 → 웹뷰 메시지 수신
