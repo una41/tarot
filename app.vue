@@ -31,13 +31,20 @@
 </template>
 
 <script setup>
-	import { ref, computed } from 'vue';
+	import { ref, computed, watch } from 'vue';
 	import { useTarotStore } from '~/stores/tarot';
 	const store = useTarotStore();
 	const route = useRoute();
 	const publicPages = ['/terms', '/privacy', '/app/terms', '/app/privacy', '/payment/success', '/payment/fail'];
 	const isPublicPage = computed(() => publicPages.includes(route.path));
 	const showInitialLoader = ref(true);
+
+	// 비로그인 상태일 때 앱으로 { login: false } 전송
+	// index.vue는 비로그인 시 마운트되지 않으므로 여기서 처리
+	watch(() => store.authChecked, (checked) => {
+		if (!checked || store.isLoggedIn) return
+		window.ReactNativeWebView?.postMessage(JSON.stringify({ login: false }))
+	}, { immediate: true })
 
 	onMounted(() => {
 		// 앱이 켜질 때 쿠키에 토큰이 있는지 확인
