@@ -42,6 +42,17 @@
 	onMounted(() => {
 		// 앱이 켜질 때 쿠키에 토큰이 있는지 확인
 		store.checkAuth();
+		// 앱 웹뷰 감지 시 body에 클래스 추가
+		if (window.ReactNativeWebView) {
+			document.body.classList.add('is_app_view');
+			// 앱에서 JS 주입으로 Firebase signOut을 트리거하기 위한 전역 함수
+			// modular SDK는 window.firebase가 없어서 앱에서 직접 호출 불가능하므로 웹에서 노출
+			window.__appSignOut = async () => {
+				await store.fnLogout();
+				window.ReactNativeWebView?.postMessage(JSON.stringify({ login: false }));
+				navigateTo('/');
+			};
+		}
 		// Vue 마운트 후 초기 로더 제거
 		showInitialLoader.value = false;
   		// 최소 0.6초는 보여줌

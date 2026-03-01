@@ -17,6 +17,11 @@
 								안드로이드 앱으로 더 빠르고 편리하게<br>
 								부자사관학교 타로를 경험해보세요
 							</p>
+							<p class="promo_sub_desc">
+								더 좋은 서비스 제공과 지속적인 성장을 위해 앱 구독제를 도입하였습니다.<br>
+								보내주시는 응원은 더 좋은 콘텐츠와 안정적인 서비스로 보답하겠습니다.<br>
+								최고의 파트너가 될 수 있도록 정성을 다해 관리하겠습니다.
+							</p>
 							<div class="promo_tags">
 								<span class="tag">📱 안드로이드</span>
 								<span class="tag"><img src="https://img.numerologytarot.uk/web/img/icon_ball.png?v=260219" class="ico_ball" alt="" /> 수비학 타로</span>

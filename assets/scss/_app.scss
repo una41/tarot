@@ -1,6 +1,11 @@
 @use 'variable' as *;
 @use 'mixin' as *;
 
+// 웹에서만 보이는 요소 (앱 웹뷰에서는 숨김)
+body.is_app_view .web_only {
+	display: none !important;
+}
+
 .app_down_wrap {
   min-height: 100vh;
   background-color: #fff;

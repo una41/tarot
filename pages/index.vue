@@ -3,7 +3,7 @@
 		<header class="header">
 			<div class="left">
 				<h1 class="l_logo">numerologyTarot</h1>
-				<p>부자사관학교</p>
+				<p>부자사관학교 타로</p>
 			</div>
 			<div class="right">
 				<div class="user_menu" :class="{ on: isUserMenuOpen }">
@@ -60,7 +60,7 @@
 	<div v-if="['마스터', '프로'].includes(store.userGrade)" class="wiki-floating-btn" @click="store.goToWikiMain">
 		<span>Wiki→</span>
 	</div>		
-	<!-- <div v-if="['마스터', '프로'].includes(store.userGrade)" class="floating_app" @click="appPop.open()">
+	<!-- <div v-if="['마스터', '프로'].includes(store.userGrade)" class="floating_app web_only" @click="appPop.open()">
 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="22" height="22">
 			<path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48C14.15 1.23 13.11 1 12 1c-1.11 0-2.15.23-3.09.63L7.43.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.3 1.3C6.55 3.07 5.55 4.51 5.55 6H18.45c0-1.49-1-2.93-2.92-3.84zM10 4H9V3h1v1zm5 0h-1V3h1v1z"/>
 		</svg>
@@ -68,7 +68,7 @@
 	</div> -->
 
 	<!-- 앱 출시 팝업 컴포넌트 -->
-	<!-- <AppLaunchPop ref="appPop" :sub-status="popSubStatus" @action="fnPopAction" /> -->
+	<AppLaunchPop ref="appPop" :sub-status="popSubStatus" @action="fnPopAction" />
 
 
 	<!-- 약관 레이어 팝업 -->
@@ -131,7 +131,7 @@
 						</div>
 					</template>
 					<!-- 구독 정보 -->
-					<!-- <div class="sub_info_bx">
+					<div class="sub_info_bx">
 						<template v-if="popSubStatus.isActive">
 							<strong class="sub_tit">{{ popSubStatus.isTrial ? '체험 정보' : '구독 정보' }}</strong>
 							<div class="sub_row">
@@ -145,7 +145,7 @@
 						<template v-else>
 							<button type="button" class="btn_sub_start" @click="fnPopSubscribe">{{ popSubStatus.trialUsed ? '앱 구독하기' : '1일 무료체험 후 앱 구독하기' }}</button>
 						</template>
-					</div> -->
+					</div>
 					<!-- 약관 링크 -->
 					<div class="legal_links">
 						<button type="button" class="link_legal" @click="openLegal('terms')">이용약관</button>
