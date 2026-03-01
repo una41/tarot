@@ -537,21 +537,12 @@ export const useTarotStore = defineStore('tarot', {
                             this.isLoggedIn = true;
                             // 하이브리드 앱으로 인증 정보 전달
                             if (window.ReactNativeWebView) {
-                            window.ReactNativeWebView.postMessage(JSON.stringify({
-                                type: 'auth',
-                                uid: user.uid,
-                                email: user.email || '',
-                                token: this.token
-                            }));
-                            }
-                            // 하이브리드 앱으로 인증 정보 전달
-                            if (window.ReactNativeWebView) {
-                            window.ReactNativeWebView.postMessage(JSON.stringify({
-                                type: 'auth',
-                                uid: user.uid,
-                                email: user.email || '',
-                                token: this.token
-                            }));
+                                window.ReactNativeWebView.postMessage(JSON.stringify({
+                                    type: 'auth',
+                                    uid: user.uid,
+                                    email: user.email || '',
+                                    token: this.token
+                                }));
                             }
                             // [변경] 쿠키 저장 (path: '/' 필수 설정)
                             const cookieOptions = { expires: 1, path: '/' };
@@ -578,12 +569,9 @@ export const useTarotStore = defineStore('tarot', {
                         this.subscriptionLoaded = true; // 에러 시에도 로드 완료 처리
                     }
                 } else {
-                    // console.log('📢 Firebase: 인증 세션 없음');
-                    
-                    // [방어 로직] 쿠키로 이미 복원된 상태라면 Firebase가 늦게 응답해도 유지
-                    if (!this.isLoggedIn) {
-                        this.resetAndClear();
-                    }
+                    // Firebase: 인증 세션 없음 → 쿠키 복원 상태와 무관하게 Firebase를 신뢰하고 초기화
+                    // (쿠키가 남아있어도 Firebase가 null이면 로그아웃 처리)
+                    this.resetAndClear();
                 }
                 
                 // 최종적으로 체크 완료 처리
