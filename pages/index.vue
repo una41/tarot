@@ -300,7 +300,6 @@
 	};
 	// ── 앱 출시 팝업 & 구독 ──────────────────────────────────
 	const appPop = ref(null);
-	const showAppPop = ref(false);
 	const popSubscribing = ref(false);
 	const popCancelling = ref(false);
 	const popSubData = ref({ isSubscribed: false, subscriptionExpiry: null, subscriptionCancelled: false, isTrial: false, trialUsed: false });
@@ -344,7 +343,11 @@
 		if (store.isLoggedIn) {
 			await fetchSubData()
 			window.ReactNativeWebView?.postMessage(JSON.stringify({
+				type: 'auth',
 				login: true,
+				uid: store.user?.uid || '',
+				email: store.user?.email || '',
+				token: store.token || '',
 				name: store.user?.name || '',
 				isSubscribed: popSubData.value.isSubscribed,
 				subscriptionExpiry: popSubData.value.subscriptionExpiry,
