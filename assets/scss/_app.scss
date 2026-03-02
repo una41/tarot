@@ -94,3 +94,92 @@ body.is_app_view .web_only {
 .btn_down .ico {
   font-size: 18px;
 }
+
+// ── 페이월 페이지 (/app/paywall) ──────────────────────────────
+.page_paywall {
+  width: 100%;
+  min-height: 100vh;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+
+  .bx_paywall {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .paywall_header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .paywall_logo {
+    margin-bottom: 16px;
+
+    .ico_ball {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+    }
+  }
+
+  .tit_paywall {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #674626;
+  }
+
+  .bx_paywall_desc {
+    width: 100%;
+    background: #faf7ee;
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin-bottom: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .txt_paywall_desc {
+      font-size: 0.95rem;
+      color: #4a4a4a;
+      line-height: 1.7;
+      text-align: center;
+    }
+  }
+
+  .btn_paywall_subscribe {
+    width: 100%;
+    padding: 18px 0;
+    background: #fbdf70;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 200ms;
+    margin-bottom: 20px;
+
+    &:active {
+      opacity: 0.8;
+    }
+  }
+
+  .btn_paywall_logout {
+    background: none;
+    border: none;
+    font-size: 0.9rem;
+    color: #aaa;
+    cursor: pointer;
+    padding: 8px 16px;
+
+    &:active {
+      color: #777;
+    }
+  }
+}
