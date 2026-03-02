@@ -335,33 +335,39 @@
 
 	watch(() => store.user, fetchSubData, { immediate: true });
 
-	// 인증 확인 완료 후 앱(WebView)으로 로그인 상태 전송
-	watch(() => store.authChecked, async (checked) => {
-		if (!checked) return
-		if (store.isLoggedIn) {
-			await fetchSubData()
-			window.ReactNativeWebView?.postMessage(JSON.stringify({
-				type: 'auth',
-				login: true,
-				uid: store.user?.uid || '',
-				email: store.user?.email || '',
-				token: store.token || '',
-				name: store.user?.name || '',
-				isSubscribed: popSubData.value.isSubscribed,
-				subscriptionExpiry: popSubData.value.subscriptionExpiry,
-				subscriptionCancelled: popSubData.value.subscriptionCancelled,
-				isTrial: popSubData.value.isTrial,
-			}))
-			// 앱 웹뷰에서 비구독자 → 메인 페이지 노출 없이 바로 페이월로 이동
-			// 단, 페이월에서 '서비스 이용하기'를 눌러 돌아온 경우는 재진입 방지
-			// 초기 로더(600ms)가 화면을 가리는 동안 처리되므로 플래시 없음
-			if (window.ReactNativeWebView && !store.paywallAccepted) {
-				const expiry = popSubData.value.subscriptionExpiry ? new Date(popSubData.value.subscriptionExpiry) : null
-				const isActive = popSubData.value.isSubscribed && expiry && expiry > new Date()
-				if (!isActive) navigateTo('/app/paywall')
-			}
+	// [앱 → 웹뷰] auth 정보 전송: 인증 확인 완료 시 (쿠키 복원 or Firebase 인증)
+	watch(() => store.authChecked, (checked) => {
+		if (!checked || !store.isLoggedIn) return
+		window.ReactNativeWebView?.postMessage(JSON.stringify({
+			type: 'auth',
+			login: true,
+			uid: store.user?.uid || '',
+			email: store.user?.email || '',
+			token: store.token || '',
+			name: store.user?.name || '',
+		}))
+	}, { immediate: true })
+
+	// [앱 → 웹뷰] db 정보 전송: Firestore 구독 정보 로드 완료 시 (onAuthStateChanged 콜백 완료 이후)
+	watch(() => store.subscriptionLoaded, (loaded) => {
+		if (!loaded || !store.isLoggedIn) return
+		const sub = store.subscription
+		window.ReactNativeWebView?.postMessage(JSON.stringify({
+			type: 'db',
+			isSubscribed: sub.isSubscribed,
+			subscriptionExpiry: sub.subscriptionExpiry,
+			subscriptionCancelled: sub.subscriptionCancelled,
+			isTrial: sub.isTrial,
+			trialUsed: sub.trialUsed,
+		}))
+		// 앱 웹뷰에서 비구독자 → 메인 페이지 노출 없이 바로 페이월로 이동
+		// 단, 페이월에서 '서비스 이용하기'를 눌러 돌아온 경우는 재진입 방지
+		if (window.ReactNativeWebView && !store.paywallAccepted) {
+			const expiry = sub.subscriptionExpiry ? new Date(sub.subscriptionExpiry) : null
+			const isActive = sub.isSubscribed && expiry && expiry > new Date()
+			if (!isActive) navigateTo('/app/paywall')
 		}
-	}, { immediate: true });
+	}, { immediate: true })
 
 	const fnPopAction = () => {
 		if (popSubStatus.value.isActive) {

@@ -35,6 +35,6 @@ export default defineNuxtRouteMiddleware(async () => {
 	const isActive = store.subscription.isSubscribed && expiry && expiry > new Date();
 
 	if (!isActive) {
-		return navigateTo('/app/subscribe');
+		return navigateTo('/app/paywall');
 	}
 });
