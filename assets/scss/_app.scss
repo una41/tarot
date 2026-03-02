@@ -7,8 +7,9 @@ body.is_app_view .web_only {
 }
 
 .app_down_wrap {
+  width: 100%;
   min-height: 100vh;
-  background-color: #fff;
+  background: #fff !important;
   .gnb{
     display: none;
   }
@@ -129,7 +130,7 @@ body.is_app_view .web_only {
   }
 
   .tit_paywall {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: #674626;
   }
@@ -140,15 +141,16 @@ body.is_app_view .web_only {
     border-radius: 16px;
     padding: 28px 24px;
     margin-bottom: 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    display: block;
 
     .txt_paywall_desc {
       font-size: 0.95rem;
       color: #4a4a4a;
       line-height: 1.7;
       text-align: center;
+      &+.txt_paywall_desc{
+        margin-top: 5px;
+      }
     }
   }
 
@@ -156,7 +158,7 @@ body.is_app_view .web_only {
     width: 100%;
     padding: 18px 0;
     background: #fbdf70;
-    color: #1a1a1a;
+    color: #674626;
     border: none;
     border-radius: 50px;
     font-size: 1.1rem;

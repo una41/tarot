@@ -1,5 +1,5 @@
 <template>
-  <div class="app_down_wrap wrap">
+  <div class="wrap app_down_wrap">
     <ProBirthResult
       v-if="proBirthData && isValidCard"
       :data="proBirthData"

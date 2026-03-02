@@ -352,9 +352,14 @@
 				subscriptionCancelled: popSubData.value.subscriptionCancelled,
 				isTrial: popSubData.value.isTrial,
 			}))
-		} else {
-			// 비로그인 상태 → 앱에 로그인 안 된 상태 전달
-			window.ReactNativeWebView?.postMessage(JSON.stringify({ login: false }))
+			// 앱 웹뷰에서 비구독자 → 메인 페이지 노출 없이 바로 페이월로 이동
+			// 단, 페이월에서 '서비스 이용하기'를 눌러 돌아온 경우는 재진입 방지
+			// 초기 로더(600ms)가 화면을 가리는 동안 처리되므로 플래시 없음
+			if (window.ReactNativeWebView && !store.paywallAccepted) {
+				const expiry = popSubData.value.subscriptionExpiry ? new Date(popSubData.value.subscriptionExpiry) : null
+				const isActive = popSubData.value.isSubscribed && expiry && expiry > new Date()
+				if (!isActive) navigateTo('/app/paywall')
+			}
 		}
 	}, { immediate: true });
 

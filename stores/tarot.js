@@ -72,6 +72,8 @@ export const useTarotStore = defineStore('tarot', {
             subscriptionCancelled: false,
         },
         subscriptionLoaded: false,
+        // 페이월에서 '서비스 이용하기' 클릭 후 세션 내 재진입 여부
+        paywallAccepted: false,
 	}),
 	actions: {
         setReading(status) {
@@ -649,6 +651,7 @@ export const useTarotStore = defineStore('tarot', {
                 subscriptionCancelled: false,
             };
             this.subscriptionLoaded = false;
+            this.paywallAccepted = false;
             Cookies.remove('user_token');
             Cookies.remove('user_info');
             Cookies.remove('user_grade');
