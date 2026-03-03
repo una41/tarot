@@ -38,6 +38,7 @@ const store = useTarotStore()
 // 서비스 이용하기 클릭: 세션 내 재진입 방지 플래그 설정 후 메인으로 이동
 const fnNavigateToMain = async () => {
 	store.paywallAccepted = true
+	sessionStorage.setItem('paywallAccepted', '1')
 	store.setAppLoading(true)
 	await new Promise(resolve => setTimeout(resolve, 200))
 	store.setAppLoading(false)
