@@ -450,6 +450,19 @@ export const useTarotStore = defineStore('tarot', {
             const urlUser = urlParams.get('user');
             const urlGrade = urlParams.get('grade');
             const urlCorp = urlParams.get('corp');
+            // 구독 정보 (앱에서 새 WebView로 직접 열기 시 전달)
+            const urlIsSubscribed = urlParams.get('isSubscribed');
+            const urlSubscriptionExpiry = urlParams.get('subscriptionExpiry');
+            const urlSubscriptionCancelled = urlParams.get('subscriptionCancelled');
+            const urlIsTrial = urlParams.get('isTrial');
+            const urlTrialUsed = urlParams.get('trialUsed');
+
+            // 앱에서 URL 토큰으로 직접 열기 여부 (/app/birth, /app/year 하위에서만 적용)
+            const currentPath = window.location.pathname;
+            const isAppDirectOpen = !!urlToken && (
+                currentPath.startsWith('/app/birth/') ||
+                currentPath.startsWith('/app/year/')
+            );
 
             if (urlToken) {
                 // 쿼리 파라미터로 전달된 인증 정보를 쿠키에 저장
@@ -460,13 +473,25 @@ export const useTarotStore = defineStore('tarot', {
                 }
                 if (urlGrade) Cookies.set('user_grade', urlGrade, cookieOptions);
                 if (urlCorp) Cookies.set('user_corp', urlCorp, cookieOptions);
+                // 구독 정보 쿠키 저장
+                if (urlIsSubscribed !== null) {
+                    const subData = {
+                        isSubscribed: urlIsSubscribed === 'true',
+                        subscriptionExpiry: urlSubscriptionExpiry || null,
+                        subscriptionCancelled: urlSubscriptionCancelled === 'true',
+                        isTrial: urlIsTrial === 'true',
+                        trialUsed: urlTrialUsed === 'true',
+                    };
+                    Cookies.set('user_subscription', JSON.stringify(subData), cookieOptions);
+                }
             }
 
-            // [변경] 쿠키에서 데이터 가져오기
+            // 쿠키에서 데이터 가져오기
             const savedToken = Cookies.get('user_token');
             const savedUserInfo = Cookies.get('user_info');
             const savedGrade = Cookies.get('user_grade');
             const savedCorp = Cookies.get('user_corp');
+            const savedSub = Cookies.get('user_subscription');
 
             // 유효성 체크 헬퍼
             const isValid = (val) => val && val !== 'undefined' && val !== 'false' && val !== 'null';
@@ -484,15 +509,20 @@ export const useTarotStore = defineStore('tarot', {
                     this.userCorpName = isValid(savedCorp) ? savedCorp : '';
                     this.token = savedToken;
                     this.isLoggedIn = true;
-                    
+
                     // 핵심: 쿠키 데이터가 있다면 즉시 true로 설정하여 '검정 화면' 방지
-                    this.authChecked = true; 
-                    // console.log('✅ [Step 1] 쿠키 데이터로 즉시 복원 성공');
+                    this.authChecked = true;
+
+                    // 구독 정보 복원 (앱에서 URL로 전달된 경우 즉시 로드 완료 처리)
+                    if (savedSub) {
+                        try {
+                            this.subscription = JSON.parse(savedSub);
+                            this.subscriptionLoaded = true;
+                        } catch {}
+                    }
                 } catch (e) {
                     console.error('❌ 쿠키 데이터 파싱 실패:', e);
                 }
-            } else {
-                // console.log('ℹ️ 쿠키 데이터 없음: Firebase 인증 대기 중...');
             }
             console.groupEnd();
 
@@ -562,8 +592,13 @@ export const useTarotStore = defineStore('tarot', {
                         this.subscriptionLoaded = true; // 에러 시에도 로드 완료 처리
                     }
                 } else {
-                    // Firebase: 인증 세션 없음 → 쿠키 복원 상태와 무관하게 Firebase를 신뢰하고 초기화
-                    // (쿠키가 남아있어도 Firebase가 null이면 로그아웃 처리)
+                    // 앱에서 URL 토큰으로 직접 열기한 경우 → 새 WebView에는 Firebase 세션이 없으므로 null은 정상
+                    // URL 토큰을 신뢰하고 로그인 상태 유지 (쿠키 복원 상태 유지)
+                    if (isAppDirectOpen) {
+                        this.authChecked = true;
+                        return;
+                    }
+                    // 일반 웹: Firebase null = 세션 없음 → 로그아웃 처리
                     this.resetAndClear();
                 }
                 
@@ -656,6 +691,7 @@ export const useTarotStore = defineStore('tarot', {
             Cookies.remove('user_info');
             Cookies.remove('user_grade');
             Cookies.remove('user_corp');
+            Cookies.remove('user_subscription');
         },
 
         // 7. 로더 제어
