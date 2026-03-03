@@ -3,7 +3,7 @@
 		<div class="bx_paywall">
 			<div class="paywall_header">
 				<div class="paywall_logo">
-					<img src="/img/icon_ball.png" class="ico_ball" alt="" />
+					<img :src="'/img/icon_ball.png'" class="ico_ball" alt="" />
 				</div>
 				<h1 class="tit_paywall">앱 이용 안내</h1>
 			</div>

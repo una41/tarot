@@ -95,7 +95,7 @@
 										</template>
 									</ul>
 									<div class="bx_tip soul_tip pc_half" v-if="data.list[store.result].soul">
-										<h6><img src="/img/icon_ball.png" class="ico_ball" alt="" />소울카드 <span>- {{ data.list[store.result].soul.card }} </span></h6>
+										<h6><img :src="'/img/icon_ball.png'" class="ico_ball" alt="" />소울카드 <span>- {{ data.list[store.result].soul.card }} </span></h6>
 										<ul class="sl_cont">
 											<li v-for="(item, i) in data.list[store.result].soul.cont" :key="i" v-html="item"></li>
 										</ul>

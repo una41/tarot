@@ -2,7 +2,7 @@
 	<Transition name="ifade">
 		<div v-if="store.loader.isAppLoading || store.loader.isPdfLoading" class="global-loader" :class="{ 'pdf-mode': store.loader.isPdfLoading }">
 			<div class="loader-content">
-				<div class="mystic-icon"><img src="/img/icon_ball.png" class="ico_ball" alt="" /></div>
+				<div class="mystic-icon"><img :src="'/img/icon_ball.png'" class="ico_ball" alt="" /></div>
 				<h1 class="title">{{ loaderConfig.title }}</h1>
 				<div class="progress-bar">
 					<div class="progress-inner"></div>

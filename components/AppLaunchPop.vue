@@ -24,7 +24,7 @@
 							</p>
 							<div class="promo_tags">
 								<span class="tag">📱 안드로이드</span>
-								<span class="tag"><img src="/img/icon_ball.png" class="ico_ball" alt="" /> 수비학 타로</span>
+								<span class="tag"><img :src="'/img/icon_ball.png'" class="ico_ball" alt="" /> 수비학 타로</span>
 								<span class="tag">✨ 월 3,900원</span>
 							</div>
 						</div>

@@ -60,13 +60,13 @@
 				navigateTo('/');
 			};
 		}
-		// Vue 마운트 후 초기 로더 제거
-		showInitialLoader.value = false;
-  		// 최소 0.6초는 보여줌
+		// GlobalLoader가 먼저 브라우저에 그려진 후 초기 로더 제거 (깜박임 방지)
+		requestAnimationFrame(() => {
+			showInitialLoader.value = false;
+		});
+		// 최소 0.6초는 보여줌
 		setTimeout(() => {
-			// 브라우저에게 "다음 화면 그릴 준비가 되면 알려줘"라고 요청
 			requestAnimationFrame(() => {
-				// 한 번 더 요청하여 확실하게 프레임 준비를 마침 (더블 버퍼링 개념)
 				requestAnimationFrame(() => {
 					store.setAppLoading(false);
 				});

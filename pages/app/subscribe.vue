@@ -3,7 +3,7 @@
 		<div class="subscribe_wrap">
 			<!-- 헤더 -->
 			<div class="subscribe_header">
-				<div class="logo_icon"><img src="/img/icon_ball.png" class="ico_ball" alt="" /></div>
+				<div class="logo_icon"><img :src="'/img/icon_ball.png'" class="ico_ball" alt="" /></div>
 				<h1 class="subscribe_title">수비학타로 앱</h1>
 				<p class="subscribe_subtitle">부자사관학교 전용 타로 앱</p>
 			</div>
