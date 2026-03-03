@@ -32,13 +32,14 @@
 
 <script setup>
 import { useTarotStore } from '~/stores/tarot'
+import Cookies from 'js-cookie'
 
 const store = useTarotStore()
 
-// 서비스 이용하기 클릭: 세션 내 재진입 방지 플래그 설정 후 메인으로 이동
+// 서비스 이용하기 클릭: 로그아웃 전까지 페이월 재진입 방지
 const fnNavigateToMain = async () => {
 	store.paywallAccepted = true
-	sessionStorage.setItem('paywallAccepted', '1')
+	Cookies.set('paywall_accepted', '1', { expires: 30, path: '/' })
 	store.setAppLoading(true)
 	await new Promise(resolve => setTimeout(resolve, 200))
 	store.setAppLoading(false)

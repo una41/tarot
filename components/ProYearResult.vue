@@ -278,7 +278,7 @@
 	const openAppPdf = () => {
 		const params = new URLSearchParams();
 		if (store.token) params.set('token', store.token);
-		if (store.user) params.set('user', btoa(JSON.stringify(store.user)));
+		if (store.user) params.set('user', encodeURIComponent(JSON.stringify(store.user)));
 		if (store.userGrade) params.set('grade', store.userGrade);
 		if (store.userCorpName) params.set('corp', store.userCorpName);
 		const qs = params.toString();

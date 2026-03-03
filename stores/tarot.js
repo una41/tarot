@@ -444,8 +444,8 @@ export const useTarotStore = defineStore('tarot', {
             // 1. 서버 사이드 렌더링(SSR) 중에는 실행 방지
             if (!process.client) return;
 
-            // 페이지 리로드 시 sessionStorage에서 paywallAccepted 복원
-            if (sessionStorage.getItem('paywallAccepted')) {
+            // 쿠키에서 paywallAccepted 복원 (로그아웃 전까지 유지)
+            if (Cookies.get('paywall_accepted')) {
                 this.paywallAccepted = true;
             }
 
@@ -697,7 +697,7 @@ export const useTarotStore = defineStore('tarot', {
             };
             this.subscriptionLoaded = false;
             this.paywallAccepted = false;
-            sessionStorage.removeItem('paywallAccepted');
+            Cookies.remove('paywall_accepted');
             Cookies.remove('user_token');
             Cookies.remove('user_info');
             Cookies.remove('user_grade');
