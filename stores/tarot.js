@@ -378,6 +378,8 @@ export const useTarotStore = defineStore('tarot', {
         // 3. Firebase 로그아웃
         async fnLogout() {
             const { $auth } = useNuxtApp();
+            // 상태 초기화 전 로더 먼저 표시 (Login 컴포넌트 플래시 방지)
+            this.setAppLoading(true);
             try {
                 await signOut($auth);
             } catch (error) {
@@ -393,6 +395,8 @@ export const useTarotStore = defineStore('tarot', {
             Cookies.remove('user_info');
             Cookies.remove('user_grade');
             Cookies.remove('user_corp');
+            // 상태 초기화 완료 후 로더 해제 → Login 컴포넌트 표시
+            this.setAppLoading(false);
         },
 
         // 4. 회원 탈퇴 요청 (관리자 승인 후 처리)
@@ -513,8 +517,9 @@ export const useTarotStore = defineStore('tarot', {
                     // 핵심: 쿠키 데이터가 있다면 즉시 true로 설정하여 '검정 화면' 방지
                     this.authChecked = true;
 
-                    // 구독 정보 복원 (앱에서 URL로 전달된 경우 즉시 로드 완료 처리)
-                    if (savedSub) {
+                    // 구독 정보 복원: 오직 앱 직접 열기 (birth/year)일 때만 쿠키 사용
+                    // 메인 WebView에서는 쿠키 구독 정보 무시 → Firestore가 유일한 정보 출처
+                    if (savedSub && isAppDirectOpen) {
                         try {
                             this.subscription = JSON.parse(savedSub);
                             this.subscriptionLoaded = true;
