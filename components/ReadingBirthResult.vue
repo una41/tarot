@@ -36,7 +36,7 @@
                     <div class="col2">
                         <div class="left">
 							<div class="bx_img">
-								<img :src="'https://img.numerologytarot.uk/web/img/card/majors/' + store.result + '.jpg'" :alt="store.result + '번 ' + data.list[store.result].name" />
+								<img :src="'/img/card/majors/' + store.result + '.jpg'" :alt="store.result + '번 ' + data.list[store.result].name" />
 							</div>
 							<button v-if="['마스터', '프로'].includes(store.userGrade)" class="btn hidden_app" @click="store.goToWiki(store.result, 'majors')">고유 설명 보기</button>
                         </div>
@@ -94,7 +94,7 @@
 										<li v-for="(item, i) in data.list[store.result].summary" :key="i" v-html="item"></li>
 									</ul>
 									<div class="bx_tip soul_tip pc_half">
-										<h6><img src="https://img.numerologytarot.uk/web/img/icon_ball.png?v=260219" class="ico_ball" alt="" />소울카드 <span>- {{ data.list[store.result].soul.card }} </span></h6>
+										<h6><img src="/img/icon_ball.png" class="ico_ball" alt="" />소울카드 <span>- {{ data.list[store.result].soul.card }} </span></h6>
 										<ul class="sl_cont">
 											<li v-for="(item, i) in data.list[store.result].soul.cont" :key="i" v-html="item"></li>
 										</ul>

@@ -722,8 +722,9 @@ export const useTarotStore = defineStore('tarot', {
                 let bgUrl = img.src;
 
                 // 이미지를 data URL로 미리 변환 — html2canvas CORS 재요청 문제 해결
+                // cache: 'no-cache' : 브라우저가 non-CORS로 캐시한 응답 우회
                 try {
-                    const resp = await fetch(img.src, { mode: 'cors' });
+                    const resp = await fetch(img.src, { mode: 'cors', cache: 'no-cache' });
                     const blob = await resp.blob();
                     bgUrl = await new Promise(resolve => {
                         const reader = new FileReader();

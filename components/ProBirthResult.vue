@@ -37,7 +37,7 @@
 						<div class="col2">
 							<div class="left">
 								<div class="bx_img">
-									<img :src="'https://img.numerologytarot.uk/web/img/card/majors/' + store.result + '.jpg'" :alt="store.result + '번 ' + data.list[store.result].name" />
+									<img :src="'/img/card/majors/' + store.result + '.jpg'" :alt="store.result + '번 ' + data.list[store.result].name" />
 								</div>
 								<button v-if="['마스터', '프로'].includes(store.userGrade)" class="btn hidden_app" @click="store.goToWiki(store.result, 'majors')">고유 설명 보기</button>
 							</div>
@@ -81,7 +81,7 @@
 									<p class="d_desc" v-html="data.list[store.result].total.cont || data.list[store.result].total"></p>
 								</div>
 								<div class="bx_tip soul_tip" v-if="data.list[store.result].soul.cont">
-									<h6><img src="https://img.numerologytarot.uk/web/img/icon_ball.png?v=260219" class="ico_ball" alt="" />소울카드 <span>- {{ data.list[store.result].soul.card }} </span></h6>
+									<h6><img src="/img/icon_ball.png" class="ico_ball" alt="" />소울카드 <span>- {{ data.list[store.result].soul.card }} </span></h6>
 									<div class="sl_desc">소울카드는 메인 생일카드 해석만으로는 다 알 수 없는, 당신의 깊은 내면에 감수성 있게 감춰진 본질적인 욕구와 영혼이 가진 고유한 기질을 상징하는 카드입니다.</div>
 									<div class="sl_cont" v-html="data.list[store.result].soul.cont"></div>
 								</div>
