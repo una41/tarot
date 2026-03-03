@@ -708,11 +708,26 @@ export const useTarotStore = defineStore('tarot', {
         },
 
         // 8-1. PDF 캡처 전 이미지 처리 (img → background-image 임시 전환)
-        prepareImagesForPDF(element) {
+        async prepareImagesForPDF(element) {
             const imgElements = element.querySelectorAll('.bx_img img');
             const saved = [];
-            imgElements.forEach(img => {
+            for (const img of imgElements) {
                 const parent = img.parentElement;
+                let bgUrl = img.src;
+
+                // 이미지를 data URL로 미리 변환 — html2canvas CORS 재요청 문제 해결
+                try {
+                    const resp = await fetch(img.src, { mode: 'cors' });
+                    const blob = await resp.blob();
+                    bgUrl = await new Promise(resolve => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                } catch {
+                    // fetch 실패 시 원본 URL 유지
+                }
+
                 saved.push({
                     img,
                     parent,
@@ -721,11 +736,11 @@ export const useTarotStore = defineStore('tarot', {
                     parentBgPos: parent.style.backgroundPosition,
                     imgDisplay: img.style.display
                 });
-                parent.style.backgroundImage = `url(${img.src})`;
+                parent.style.backgroundImage = `url(${bgUrl})`;
                 parent.style.backgroundSize = 'cover';
                 parent.style.backgroundPosition = 'center';
                 img.style.display = 'none';
-            });
+            }
             return saved;
         },
 
@@ -746,7 +761,7 @@ export const useTarotStore = defineStore('tarot', {
             if (!pdfContent) return;
 
             const element = pdfContent;
-            const savedImgs = this.prepareImagesForPDF(element);
+            const savedImgs = await this.prepareImagesForPDF(element);
             try {
                 this.setPdfLoading(true);
                 element.classList.add('pdf_print');

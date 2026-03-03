@@ -34,7 +34,8 @@ export default defineNuxtRouteMiddleware(async () => {
 		: null;
 	const isActive = store.subscription.isSubscribed && expiry && expiry > new Date();
 
-	if (!isActive) {
+	// paywallAccepted: 이미 페이월을 확인한 경우 재노출 방지 (로그인 세션당 1회만 표시)
+	if (!isActive && !store.paywallAccepted) {
 		return navigateTo('/app/paywall');
 	}
 });
