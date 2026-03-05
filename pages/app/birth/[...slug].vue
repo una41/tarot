@@ -15,13 +15,19 @@
         <h3>생일카드 해석 다운 or 복사</h3>
       </div>
       <div class="app_contentr">
-        <!-- <button class="btn_down copy" @click="handleCopy">
-          <span class="ico">📋</span>
-          <span>복사</span>
-        </button> -->
         <button class="btn_down pdf" @click="handlePdf">
           <span class="ico">💾</span>
           <span>PDF</span>
+        </button>
+        <!-- PDF 미완료: 다운로드 + 파일 준비 시작 -->
+        <button v-if="!sharedPdfFile" class="btn_down btn_kakao_share" @click="handlePdfAndPrepare">
+          <span class="ico_kakao"></span>
+          <span>PDF 다운 후 공유</span>
+        </button>
+        <!-- PDF 완료: 파일 준비됨 → user gesture로 즉시 share -->
+        <button v-else class="btn_down btn_kakao_share" @click="handleShareFile">
+          <span class="ico_kakao"></span>
+          <span>카카오로 공유하기</span>
         </button>
       </div>
     </div>
@@ -30,11 +36,16 @@
 
 <script setup>
 definePageMeta({ middleware: 'subscription' })
-import { computed, watchEffect } from 'vue';
+import { ref, computed, watch, watchEffect } from 'vue';
 import { useTarotStore } from '~/stores/tarot';
+import { useKakaoShare } from '~/composables/useKakaoShare';
 
 const route = useRoute();
 const store = useTarotStore();
+const { fnSharePdfFile, fnShareKakao } = useKakaoShare();
+
+// PDF 완료 후 미리 준비해둔 File 객체 (user gesture 시점에 바로 share 호출용)
+const sharedPdfFile = ref(null);
 
 // pro_birth.json 데이터 가져오기 (해석 페이지용)
 const { data: proBirthData, pending } = await useFetch('/data/pro_birth.json');
@@ -63,17 +74,49 @@ watchEffect(() => {
   }
 });
 
-// 플로팅 버튼 → ProBirthResult 내부의 복사/PDF 모달 트리거
-const handleCopy = () => {
-  // ProBirthResult 내부의 복사 버튼 클릭을 시뮬레이션
-  const copyBtn = document.querySelector('.result .gnb .btn_copy');
-  if (copyBtn) copyBtn.click();
-};
-
-const handlePdf = () => {
-  // ProBirthResult 내부의 PDF 버튼 클릭을 시뮬레이션
+// PDF 버튼 클릭 시뮬레이션
+const triggerPdfBtn = () => {
   const pdfBtn = document.querySelector('.result .gnb .btn_pdf');
   if (pdfBtn) pdfBtn.click();
 };
-</script>
 
+// PDF 다운로드만
+const handlePdf = () => {
+  triggerPdfBtn();
+};
+
+// PDF 다운로드 + 공유용 File 미리 준비
+// (share는 user gesture 직접 호출이어야 하므로 여기선 파일만 준비)
+const handlePdfAndPrepare = () => {
+  sharedPdfFile.value = null;
+  triggerPdfBtn();
+
+  let pdfStarted = false;
+  const stopWatch = watch(() => store.loader.isPdfLoading, async (loading) => {
+    if (loading) {
+      pdfStarted = true;
+    } else if (pdfStarted) {
+      stopWatch();
+      if (!store.lastPdfDataUri) return;
+      // dataUri → Blob → File (watch 콜백에서 미리 변환해둠)
+      const res = await fetch(store.lastPdfDataUri);
+      const blob = await res.blob();
+      sharedPdfFile.value = new File(
+        [blob],
+        store.lastPdfFilename || '타로_생일카드.pdf',
+        { type: 'application/pdf' }
+      );
+    }
+  });
+};
+
+// user gesture 직접 호출 → navigator.share() 동기 실행
+const handleShareFile = () => {
+  if (!sharedPdfFile.value) return;
+  const cardName = document.querySelector('.result .main_card_tit')?.textContent?.trim() || '';
+  fnSharePdfFile(sharedPdfFile.value, {
+    title: '수비학 타로 - 생일카드 해석',
+    description: cardName || '나의 생일카드 타로 결과를 확인해보세요!',
+  });
+};
+</script>

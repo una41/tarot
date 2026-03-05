@@ -34,7 +34,7 @@ body.is_app_view .web_only {
     top: 50%;
     left: 50%;
     z-index: 10000;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) !important;
   }
 }
 
@@ -94,6 +94,27 @@ body.is_app_view .web_only {
 
 .btn_down .ico {
   font-size: 18px;
+}
+
+// ── 카카오톡 공유 버튼 ──────────────────────────────────────────
+.btn_kakao_share {
+  background: #FEE500;
+  color: #191600;
+
+  &:hover {
+    opacity: 0.85;
+  }
+
+  &:active {
+    background: #e6cf00;
+  }
+
+  .ico_kakao {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cellipse cx='12' cy='10.5' rx='10' ry='8' fill='%23191600'/%3E%3Cpath d='M12 18c-.4 0-.8-.1-1.1-.2L7 19.5l1-3.5C6.1 14.7 4 12.7 4 10.5 4 6.9 7.6 4 12 4s8 2.9 8 6.5-3.6 7.5-8 7.5z' fill='%23FEE500'/%3E%3C/svg%3E") no-repeat center / contain;
+  }
 }
 
 // ── 페이월 페이지 (/app/paywall) ──────────────────────────────

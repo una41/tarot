@@ -102,6 +102,7 @@ export default defineNuxtConfig({
 			tossClientKey: process.env.NUXT_PUBLIC_TOSS_CLIENT_KEY,
 			workerUrl: process.env.NUXT_PUBLIC_WORKER_URL,
 			cryptoKey: process.env.NUXT_PUBLIC_CRYPTO_KEY,
+			kakaoJsKey: process.env.NUXT_PUBLIC_KAKAO_JS_KEY,
 		}
 	},
 
@@ -129,7 +130,8 @@ export default defineNuxtConfig({
 				{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
 			],
 			script: [
-				{ src: 'https://js.tosspayments.com/v1/payment' }
+				{ src: 'https://js.tosspayments.com/v1/payment' },
+				{ src: 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js', defer: true },
 			],
 			style: [
 				{ innerHTML: `html,body{background:#121212}#initial-loader{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#121212;display:flex;justify-content:center;align-items:center;z-index:9999;color:#ddd6fe}#initial-loader .loader-content{text-align:center}#initial-loader .mystic-icon{font-size:4rem;margin-bottom:1.5rem;animation:float 2s ease-in-out infinite}#initial-loader .title{font-size:1.2rem;letter-spacing:.2rem;margin-bottom:2rem;font-weight:300}#initial-loader .progress-bar{width:200px;height:2px;background:rgba(255,255,255,.1);margin:0 auto 1rem;overflow:hidden}#initial-loader .progress-inner{width:100%;height:100%;background:linear-gradient(90deg,transparent,#c084fc,transparent);animation:loading-line 1.5s infinite}#initial-loader .subtitle{font-size:.9rem;opacity:.6}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px);filter:drop-shadow(0 0 15px #a78bfa)}}@keyframes loading-line{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}` }

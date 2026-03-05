@@ -63,6 +63,9 @@ export const useTarotStore = defineStore('tarot', {
             isAppLoading: true,    // 앱 초기 로딩
             isPdfLoading: false,   // PDF 생성 로딩
         },
+        // PDF 완료 후 공유용 dataUri (Web Share API 에서 사용)
+        lastPdfDataUri: null,
+        lastPdfFilename: null,
         // --- 구독 상태 ---
         subscription: {
             isSubscribed: false,
@@ -848,6 +851,9 @@ export const useTarotStore = defineStore('tarot', {
                     pageCount++;
                 }
 
+                // 공유용 dataUri 저장 (Web Share API 에서 사용)
+                this.lastPdfDataUri = pdf.output('datauristring');
+                this.lastPdfFilename = filename;
                 pdf.save(filename);
                 element.classList.remove('pdf_print');
                 this.restoreImagesAfterPDF(savedImgs);
