@@ -1,7 +1,6 @@
 <template>
 	<main :class="'wrap_wiki '+ (selectedItem?.category || '')">
-		<Transition name="fade" mode="out-in">
-			<div v-if="selectedItem" :key="selectedItem.id" class="container" ref="pdfContent">
+			<div v-if="selectedItem" class="container" ref="pdfContent">
 				<!-- PDF 전용 헤더 (화면에는 안보임) -->
 				<div class="pdf_only_header" style="display: none;">
 					<p class="corp">{{ (store.userCorpName || '').trim() || 'Numerology Tarot' }}</p>
@@ -29,7 +28,6 @@
 				<p class="icon">📖</p>
 				<p class="txt">왼쪽 목록에서 항목을 선택해주세요</p>
 			</div>
-		</Transition>
 
 		<!-- 복사/PDF 모달 -->
 		<CopyPdfModal v-model:show="showCopyModal" :mode="modalMode" :sections="copySections" @confirm="handleModalConfirm" />

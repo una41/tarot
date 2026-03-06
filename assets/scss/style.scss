@@ -255,10 +255,11 @@ h6{
 	min-height: 790px; // 화면 전체 높이
 	max-height: 100vh;
 	@include mobile{
+		@include bg("m_bg.jpg", no-repeat, 45% 50%, auto 100%, #121212);
 		min-width: 320px;
 		min-height: 500px; // 화면 전체 높이
-        background-position: 44% 93%;
-        background-size: auto 140%;
+        background-position: 42% 73%;
+        // background-size: auto 140%;
 	}
 	.main{
 		@include setCont(100%, 83%, block, absolute);

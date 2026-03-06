@@ -43,7 +43,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router'
 import { useTarotStore } from '~/stores/tarot';
 
 // 컴포넌트 임포트
@@ -108,62 +108,40 @@ const getItemFromUrl = () => {
 	// route.params.slug는 [...slug].vue를 통해 전달된 배열
 	// 예: /wiki/majors/0 -> ['majors', '0'] (card_num 사용)
 	// 예: /wiki/basic/1 -> ['basic', '1'] (id 사용)
-	const slug = route.params.slug;
-	
-	console.log('getItemFromUrl - slug:', slug);
-	
-	if (!slug || !Array.isArray(slug) || slug.length < 2) {
-		console.log('getItemFromUrl - slug 길이 부족 또는 없음');
-		return null;
-	}
-	
-	const category = slug[0];
-	const identifier = parseInt(slug[1], 10);
-	
-	console.log('getItemFromUrl - category:', category, 'identifier:', identifier);
-	
-	if (!category || isNaN(identifier)) {
-		console.log('getItemFromUrl - category 없거나 identifier NaN');
-		return null;
-	}
-	
-	// basic 카테고리는 id로 항목 찾기, 그 외 카테고리는 card_num으로 항목 찾기
-	let foundItem;
-	if (category.toLowerCase() === 'basic') {
-		foundItem = wikiList.value.find(item => 
-			item.category.toLowerCase() === category.toLowerCase() && 
-			item.id === identifier
-		);
-	} else {
-		foundItem = wikiList.value.find(item => 
-			item.category.toLowerCase() === category.toLowerCase() && 
-			item.card_num === identifier
-		);
-	}
-	
-	console.log('getItemFromUrl - foundItem:', foundItem);
-	return foundItem;
-};
+	const slug = route.params.slug
 
-// URL 업데이트
-const updateUrl = (item) => {
-	if (!item) return;
-	
-	console.log('updateUrl - item:', item);
-	
-	// basic 카테고리는 id를 사용, 다른 카테고리는 card_num을 사용
-	if (item.category.toLowerCase() === 'basic') {
-		// basic 카테고리는 항상 id로 라우팅
-		router.push(`/wiki/${item.category.toLowerCase()}/${item.id}`);
-	} else {
-		// 다른 카테고리: card_num이 -1이면 기본 URL, 아니면 card_num으로 라우팅
-		if (item.card_num === -1) {
-			router.push('/wiki');
-		} else {
-			router.push(`/wiki/${item.category.toLowerCase()}/${item.card_num}`);
-		}
+	if (!slug || !Array.isArray(slug) || slug.length < 2) return null
+
+	const category = slug[0]
+	const identifier = parseInt(slug[1], 10)
+
+	if (!category || isNaN(identifier)) return null
+
+	// basic 카테고리는 id로 항목 찾기, 그 외 카테고리는 card_num으로 항목 찾기
+	if (category.toLowerCase() === 'basic') {
+		return wikiList.value.find(item =>
+			item.category.toLowerCase() === category.toLowerCase() &&
+			item.id === identifier
+		) ?? null
 	}
-};
+	return wikiList.value.find(item =>
+		item.category.toLowerCase() === category.toLowerCase() &&
+		item.card_num === identifier
+	) ?? null
+}
+
+// URL 업데이트 (router.push 대신 replaceState로 페이지 리마운트 없이 URL만 변경)
+const updateUrl = (item) => {
+	if (!item) return
+
+	let url
+	if (item.category.toLowerCase() === 'basic') {
+		url = `/wiki/${item.category.toLowerCase()}/${item.id}`
+	} else {
+		url = item.card_num === -1 ? '/wiki' : `/wiki/${item.category.toLowerCase()}/${item.card_num}`
+	}
+	window.history.replaceState(null, '', url)
+}
 
 // 항목 선택
 const selectItem = (item) => {
