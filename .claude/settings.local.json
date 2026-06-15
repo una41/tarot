@@ -20,7 +20,8 @@
       "Bash(firebase deploy:*)",
       "Bash(curl:*)",
       "Bash(python3:*)",
-      "Bash(npx wrangler deploy:*)"
+      "Bash(npx wrangler deploy:*)",
+      "WebFetch(domain:developers.portone.io)"
     ]
   }
 }

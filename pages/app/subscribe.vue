@@ -83,10 +83,12 @@
 import { ref, computed, onMounted } from 'vue';
 import { useTarotStore } from '~/stores/tarot';
 import { doc, getDoc } from 'firebase/firestore';
+import { decryptPhone } from '~/utils/phoneEncrypt';
 
 const store = useTarotStore();
 
 const isLoading = ref(true);
+const decodedPhone = ref('');
 
 const userData = ref({
 	isSubscribed: false,
@@ -125,6 +127,9 @@ onMounted(async () => {
 					subscriptionExpiry: d.subscriptionExpiry || null,
 					trialUsed: d.trialUsed || false,
 				};
+				if (d.phone) {
+					decodedPhone.value = await decryptPhone(d.phone, config.public.cryptoKey);
+				}
 
 				// 이미 구독 중이면 앱으로 이동
 				const expiry = userData.value.subscriptionExpiry ? new Date(userData.value.subscriptionExpiry) : null;
@@ -149,18 +154,43 @@ const subscriptionStatus = computed(() => {
 	};
 });
 
-// 구독 버튼 클릭 → 안드로이드 앱에 구독 요청 전달
-const fnSubscribe = () => {
-	if (!window.ReactNativeWebView) return;
-	// const isTrial = !subscriptionStatus.value.trialUsed;
-	window.ReactNativeWebView.postMessage(JSON.stringify({
-		type: 'subscribe',
-		isTrial: false,
-		uid: store.user?.uid || '',
-		email: store.user?.email || '',
-		name: store.user?.name || '',
-	}));
-};
+const config = useRuntimeConfig()
+
+const fnSubscribe = async () => {
+	if (!store.user?.uid) return
+	isLoading.value = true
+	store.setPaymentLoading(true)
+	try {
+		const PortOne = await import('@portone/browser-sdk/v2')
+		const result = await PortOne.requestIssueBillingKey({
+			storeId: config.public.portoneStoreId,
+			channelKey: config.public.portoneChannelKey,
+			billingKeyMethod: 'CARD',
+			issueId: `BILL-${store.user.uid.slice(0, 8)}-${Date.now()}`,
+			issueName: '수비학타로 월 구독',
+			customer: {
+				customerId: store.user.uid,
+				fullName: store.user.name || '사용자',
+				email: store.user.email || '',
+				phoneNumber: decodedPhone.value || '',
+			},
+			redirectUrl: `${window.location.origin}/payment/success`,
+		})
+		store.setPaymentLoading(false)
+		if (result?.code) {
+			console.error('[결제오류] code:', result.code, '/ message:', result.message)
+			if (result.code !== 'PORTONE_USER_CANCEL') {
+				store.showAlert({ message: result.message || '결제 중 오류가 발생했습니다.', icon: '❌' })
+			}
+			isLoading.value = false
+		}
+	} catch (e) {
+		store.setPaymentLoading(false)
+		console.error('[결제오류] catch:', e)
+		store.showAlert({ message: '결제 요청 중 오류가 발생했습니다.', icon: '❌' })
+		isLoading.value = false
+	}
+}
 </script>
 
 <style lang="scss" scoped>

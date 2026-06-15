@@ -14,6 +14,6 @@ crons = ["0 9 * * *"]
 [vars]
 FIREBASE_PROJECT_ID = "numerology-tarot"
 # 아래 시크릿은 wrangler secret put 명령으로 설정하세요:
-# wrangler secret put TOSS_SECRET_KEY
+# wrangler secret put PORTONE_API_SECRET
 # wrangler secret put FIREBASE_CLIENT_EMAIL
 # wrangler secret put FIREBASE_PRIVATE_KEY

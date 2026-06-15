@@ -11,6 +11,15 @@
 			</div>
 		</div>
 	</Transition>
+
+	<Transition name="pfade">
+		<div v-if="store.loader.isPaymentLoading" class="payment-loader">
+			<div class="payment-loader-box">
+				<div class="payment-spinner"></div>
+				<p class="payment-loader-text">결제창을 불러오는 중입니다...</p>
+			</div>
+		</div>
+	</Transition>
 </template>
 
 <script setup>
@@ -114,5 +123,55 @@
 		opacity: 0;
 		filter: blur(20px);
 		transform: scale(1.1);
+	}
+
+	.payment-loader {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.6);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 99998;
+
+		.payment-loader-box {
+			background: #1e1e2e;
+			border: 1px solid rgba(192, 132, 252, 0.3);
+			border-radius: 16px;
+			padding: 32px 40px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 20px;
+		}
+
+		.payment-spinner {
+			width: 40px;
+			height: 40px;
+			border: 3px solid rgba(192, 132, 252, 0.2);
+			border-top-color: #c084fc;
+			border-radius: 50%;
+			animation: spin 0.8s linear infinite;
+		}
+
+		.payment-loader-text {
+			color: #ddd6fe;
+			font-size: 0.9rem;
+			letter-spacing: 0.05rem;
+		}
+	}
+
+	.pfade-enter-active,
+	.pfade-leave-active {
+		transition: opacity 0.2s ease;
+	}
+
+	.pfade-enter-from,
+	.pfade-leave-to {
+		opacity: 0;
+	}
+
+	@keyframes spin {
+		to { transform: rotate(360deg); }
 	}
 </style>

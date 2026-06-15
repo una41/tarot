@@ -99,7 +99,8 @@ export default defineNuxtConfig({
 			firebaseStorageBucket: process.env.NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
 			firebaseMessagingSenderId: process.env.NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
 			firebaseAppId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID,
-			tossClientKey: process.env.NUXT_PUBLIC_TOSS_CLIENT_KEY,
+			portoneStoreId: process.env.NUXT_PUBLIC_PORTONE_STORE_ID,
+			portoneChannelKey: process.env.NUXT_PUBLIC_PORTONE_CHANNEL_KEY,
 			workerUrl: process.env.NUXT_PUBLIC_WORKER_URL,
 			cryptoKey: process.env.NUXT_PUBLIC_CRYPTO_KEY,
 			kakaoJsKey: process.env.NUXT_PUBLIC_KAKAO_JS_KEY,
@@ -130,7 +131,6 @@ export default defineNuxtConfig({
 				{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
 			],
 			script: [
-				{ src: 'https://js.tosspayments.com/v1/payment' },
 				{ src: 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js', defer: true },
 			],
 			style: [

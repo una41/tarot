@@ -196,7 +196,9 @@
 <script setup>
 	//Store
 	import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
-	import { useTarotStore } from '~/stores/tarot';	import { doc, getDoc } from 'firebase/firestore';
+	import { useTarotStore } from '~/stores/tarot';
+	import { doc, getDoc } from 'firebase/firestore';
+	import { decryptPhone } from '~/utils/phoneEncrypt';
 
 	const store = useTarotStore();
 	// 데이터 가져오기 (GET)
@@ -300,6 +302,7 @@
 	const appPop = ref(null);
 	const popSubscribing = ref(false);
 	const popCancelling = ref(false);
+	const popDecodedPhone = ref('');
 	const popSubData = ref({ isSubscribed: false, subscriptionExpiry: null, subscriptionCancelled: false, isTrial: false, trialUsed: false });
 
 	const popSubStatus = computed(() => {
@@ -314,6 +317,7 @@
 		if (store.user?.uid) {
 			try {
 				const { $db } = useNuxtApp();
+				const config = useRuntimeConfig();
 				const snap = await getDoc(doc($db, 'users', store.user.uid));
 				if (snap.exists()) {
 					const d = snap.data();
@@ -324,6 +328,9 @@
 						isTrial: d.isTrial || false,
 						trialUsed: d.trialUsed || false,
 					};
+					if (d.phone) {
+						popDecodedPhone.value = await decryptPhone(d.phone, config.public.cryptoKey);
+					}
 				}
 			} catch (e) {
 				console.error('구독 정보 조회 실패:', e);
@@ -378,33 +385,39 @@
 	};
 
 	const fnPopSubscribe = async () => {
-		if (popSubscribing.value) return;
-		popSubscribing.value = true;
+		if (popSubscribing.value) return
+		popSubscribing.value = true
+		store.setPaymentLoading(true)
 		try {
-			const cfg = useRuntimeConfig();
-			const clientKey = cfg.public.tossClientKey;
-			if (!window.TossPayments) {
-				store.showAlert({ message: '결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.', icon: '⏳' });
-				return;
+			const cfg = useRuntimeConfig()
+			const PortOne = await import('@portone/browser-sdk/v2')
+			const result = await PortOne.requestIssueBillingKey({
+				storeId: cfg.public.portoneStoreId,
+				channelKey: cfg.public.portoneChannelKey,
+				billingKeyMethod: 'CARD',
+				issueId: `BILL-${store.user.uid.slice(0, 8)}-${Date.now()}`,
+				issueName: '수비학타로 월 구독',
+				customer: {
+					customerId: store.user.uid,
+					fullName: store.user.name || '사용자',
+					email: store.user.email || '',
+					phoneNumber: popDecodedPhone.value || '',
+				},
+				redirectUrl: `${window.location.origin}/payment/success`,
+			})
+			store.setPaymentLoading(false)
+			if (result?.code) {
+				console.error('[결제오류] code:', result.code, '/ message:', result.message)
+				if (result.code !== 'PORTONE_USER_CANCEL') {
+					store.showAlert({ message: result.message || '결제 중 오류가 발생했습니다.', icon: '❌' })
+				}
+				popSubscribing.value = false
 			}
-			const tossPayments = window.TossPayments(clientKey);
-			const isTrial = !popSubStatus.value.trialUsed;
-			const successUrl = isTrial
-				? `${window.location.origin}/payment/success?trial=true`
-				: `${window.location.origin}/payment/success`;
-
-			await tossPayments.requestBillingAuth('카드', {
-				customerKey: store.user.uid,
-				successUrl,
-				failUrl: `${window.location.origin}/payment/fail`,
-				customerEmail: store.user.email || '',
-				customerName: store.user.name || '사용자',
-			});
 		} catch (e) {
-			if (e.code !== 'USER_CANCEL') {
-				store.showAlert({ message: '결제 요청 중 오류가 발생했습니다.', icon: '❌' });
-			}
-			popSubscribing.value = false;
+			store.setPaymentLoading(false)
+			console.error('[결제오류] catch:', e)
+			store.showAlert({ message: '결제 요청 중 오류가 발생했습니다.', icon: '❌' })
+			popSubscribing.value = false
 		}
 	};
 

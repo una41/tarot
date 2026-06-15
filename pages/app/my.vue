@@ -163,9 +163,6 @@ import { useTarotStore } from '~/stores/tarot';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { encryptPhone, decryptPhone, decryptData } from '~/utils/phoneEncrypt';
 
-useHead({
-	script: [{ src: 'https://js.tosspayments.com/v1/payment', defer: false }]
-});
 
 const store = useTarotStore();
 
@@ -341,44 +338,42 @@ const fnSaveEdit = async () => {
 };
 
 const fnStartSubscription = async () => {
-	if (isSubscribing.value) return;
-	isSubscribing.value = true;
+	if (isSubscribing.value) return
+	isSubscribing.value = true
+	store.setPaymentLoading(true)
 
 	try {
-		const config = useRuntimeConfig();
-		const clientKey = config.public.tossClientKey;
-
-		if (!clientKey || clientKey.includes('여기에')) {
-			store.showAlert({ message: 'Toss 클라이언트 키가 설정되지 않았습니다.', icon: '⚠️' });
-			return;
+		const config = useRuntimeConfig()
+		const PortOne = await import('@portone/browser-sdk/v2')
+		const result = await PortOne.requestIssueBillingKey({
+			storeId: config.public.portoneStoreId,
+			channelKey: config.public.portoneChannelKey,
+			billingKeyMethod: 'CARD',
+			issueId: `BILL-${store.user.uid.slice(0, 8)}-${Date.now()}`,
+			issueName: '수비학타로 월 구독',
+			customer: {
+				customerId: store.user.uid,
+				fullName: store.user.name || '사용자',
+				email: store.user.email || '',
+				phoneNumber: decodedPhone.value || '',
+			},
+			redirectUrl: `${window.location.origin}/payment/success`,
+		})
+		store.setPaymentLoading(false)
+		if (result?.code) {
+			console.error('[결제오류] code:', result.code, '/ message:', result.message)
+			if (result.code !== 'PORTONE_USER_CANCEL') {
+				store.showAlert({ message: result.message || '결제 중 오류가 발생했습니다.', icon: '❌' })
+			}
+			isSubscribing.value = false
 		}
-
-		if (!window.TossPayments) {
-			store.showAlert({ message: '결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.', icon: '⏳' });
-			return;
-		}
-
-		const tossPayments = window.TossPayments(clientKey);
-
-		// 체험 미사용 사용자는 trial=true 파라미터 포함한 URL로 이동
-		const isTrial = !subscriptionStatus.value.trialUsed;
-		const successUrl = isTrial
-			? `${window.location.origin}/payment/success?trial=true`
-			: `${window.location.origin}/payment/success`;
-		await tossPayments.requestBillingAuth('카드', {
-			customerKey: store.user.uid,
-			successUrl,
-			failUrl: `${window.location.origin}/payment/fail`,
-			customerEmail: store.user.email || '',
-			customerName: store.user.name || '사용자',
-		});
 	} catch (e) {
-		if (e.code !== 'USER_CANCEL') {
-			store.showAlert({ message: '결제 요청 중 오류가 발생했습니다.', icon: '❌' });
-		}
-		isSubscribing.value = false;
+		store.setPaymentLoading(false)
+		console.error('[결제오류] catch:', e)
+		store.showAlert({ message: '결제 요청 중 오류가 발생했습니다.', icon: '❌' })
+		isSubscribing.value = false
 	}
-};
+}
 
 const fnCancelSubscription = () => {
 	const isTrial = subscriptionStatus.value.isTrial;
@@ -399,11 +394,8 @@ const fnCancelSubscription = () => {
 				const res = await fetch(`${workerUrl}/api/billing/cancel`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						uid: store.user.uid,
-						customerKey: store.user.uid,
-					}),
-				});
+					body: JSON.stringify({ uid: store.user.uid }),
+				})
 
 				if (res.ok) {
 					userData.value.subscriptionCancelled = true;

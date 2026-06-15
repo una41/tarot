@@ -62,6 +62,7 @@ export const useTarotStore = defineStore('tarot', {
         loader: {
             isAppLoading: true,    // 앱 초기 로딩
             isPdfLoading: false,   // PDF 생성 로딩
+            isPaymentLoading: false, // 결제 팝업 로딩
         },
         // PDF 완료 후 공유용 dataUri (Web Share API 에서 사용)
         lastPdfDataUri: null,
@@ -714,6 +715,9 @@ export const useTarotStore = defineStore('tarot', {
         },
         setPdfLoading(status) {
             this.loader.isPdfLoading = status;
+        },
+        setPaymentLoading(status) {
+            this.loader.isPaymentLoading = status;
         },
 
         // 8-1. PDF 캡처 전 이미지 처리 (img → background-image 임시 전환)

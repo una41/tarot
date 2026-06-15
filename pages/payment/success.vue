@@ -9,16 +9,9 @@
 
 			<template v-else-if="state === 'success'">
 				<div class="icon">✅</div>
-				<template v-if="isTrial">
-					<h1 class="result_title">1일 무료 체험이 시작되었습니다!</h1>
-					<p class="result_desc">체험 종료 후 월 3,900원이 자동 결제됩니다.</p>
-					<p class="result_expiry">체험 종료일: ~ {{ expiryText }}</p>
-				</template>
-				<template v-else>
-					<h1 class="result_title">구독이 완료되었습니다!</h1>
-					<p class="result_desc">월 3,900원 구독이 시작되었습니다.</p>
-					<p class="result_expiry">이용 가능 기간: ~ {{ expiryText }}</p>
-				</template>
+				<h1 class="result_title">구독이 완료되었습니다!</h1>
+				<p class="result_desc">월 3,900원 구독이 시작되었습니다.</p>
+				<p class="result_expiry">이용 가능 기간: ~ {{ expiryText }}</p>
 				<button class="btn_go" @click="navigateTo('/app/my', { replace: true })">마이페이지로 이동</button>
 			</template>
 
@@ -40,10 +33,9 @@ const store = useTarotStore();
 const route = useRoute();
 const config = useRuntimeConfig();
 
-const state = ref('loading');
-const isTrial = ref(false);
-const expiryText = ref('');
-const errorMessage = ref('결제 처리 중 문제가 발생했습니다. 고객센터에 문의해주세요.');
+const state = ref('loading')
+const expiryText = ref('')
+const errorMessage = ref('결제 처리 중 문제가 발생했습니다. 고객센터에 문의해주세요.')
 
 const formatExpiry = (isoString) => {
 	const d = new Date(isoString);
@@ -68,55 +60,57 @@ const waitForAuth = () => {
 };
 
 onMounted(async () => {
-	const authKey = route.query.authKey;
-	const customerKey = route.query.customerKey;
+	const billingKey = route.query.billingKey
+	const code = route.query.code
+	const message = route.query.message
 
-	if (!authKey || !customerKey) {
-		errorMessage.value = '결제 정보가 올바르지 않습니다.';
-		state.value = 'error';
-		return;
+	if (code) {
+		errorMessage.value = String(message || '결제 처리 중 문제가 발생했습니다.')
+		state.value = 'error'
+		return
 	}
 
-	// 인증 상태 복원 대기
-	await waitForAuth();
+	if (!billingKey) {
+		errorMessage.value = '결제 정보가 올바르지 않습니다.'
+		state.value = 'error'
+		return
+	}
+
+	await waitForAuth()
 
 	if (!store.isLoggedIn || !store.user?.uid) {
-		errorMessage.value = '로그인 정보를 확인할 수 없습니다. 다시 로그인 후 시도해주세요.';
-		state.value = 'error';
-		return;
+		errorMessage.value = '로그인 정보를 확인할 수 없습니다. 다시 로그인 후 시도해주세요.'
+		state.value = 'error'
+		return
 	}
 
 	try {
-		const workerUrl = config.public.workerUrl;
-		const trial = route.query.trial === 'true';
+		const workerUrl = config.public.workerUrl
 		const res = await fetch(`${workerUrl}/api/billing/issue`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				authKey,
-				customerKey,
+				billingKey,
 				uid: store.user.uid,
 				customerEmail: store.user.email,
 				customerName: store.user.name,
-				trial,
 			}),
-		});
+		})
 
-		const data = await res.json();
+		const data = await res.json()
 
 		if (res.ok && data.success) {
-			isTrial.value = data.trial || false;
-			expiryText.value = formatExpiry(data.trial ? data.trialExpiry : data.expiry);
-			state.value = 'success';
+			expiryText.value = formatExpiry(data.expiry)
+			state.value = 'success'
 		} else {
-			errorMessage.value = data.error || '결제 처리 중 문제가 발생했습니다.';
-			state.value = 'error';
+			errorMessage.value = data.error || '결제 처리 중 문제가 발생했습니다.'
+			state.value = 'error'
 		}
 	} catch (e) {
-		errorMessage.value = '서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.';
-		state.value = 'error';
+		errorMessage.value = '서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.'
+		state.value = 'error'
 	}
-});
+})
 </script>
 
 <style lang="scss" scoped>
