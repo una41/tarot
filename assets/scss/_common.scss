@@ -403,12 +403,12 @@ $com_primary_light: #a78bfa;
 	bottom: 0;
 	left: 0;
 	right: 0;
-	padding: 10px 20px;
+	padding: 5px 20px;
 	text-align: center;
 	z-index: 1;
 	background: rgba(0, 0, 0, 0.4);
 	.copy {
-		@include font(11, 18, #999);
+		@include font(9, 11, #999);
 		display: block;
 	}
 }
