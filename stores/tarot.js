@@ -67,16 +67,16 @@ export const useTarotStore = defineStore('tarot', {
         lastPdfDataUri: null,
         lastPdfFilename: null,
         // --- 구독 상태 ---
-        subscription: {
-            isSubscribed: false,
-            subscriptionExpiry: null,
-            isTrial: false,
-            trialUsed: false,
-            subscriptionCancelled: false,
-        },
-        subscriptionLoaded: false,
-        // 페이월에서 '서비스 이용하기' 클릭 후 세션 내 재진입 여부
-        paywallAccepted: false,
+        // subscription: {
+        //     isSubscribed: false,
+        //     subscriptionExpiry: null,
+        //     isTrial: false,
+        //     trialUsed: false,
+        //     subscriptionCancelled: false,
+        // },
+        // subscriptionLoaded: false,
+        // // 페이월에서 '서비스 이용하기' 클릭 후 세션 내 재진입 여부
+        // paywallAccepted: false,
 	}),
 	actions: {
         setReading(status) {
@@ -447,10 +447,10 @@ export const useTarotStore = defineStore('tarot', {
             // 1. 서버 사이드 렌더링(SSR) 중에는 실행 방지
             if (!process.client) return;
 
-            // 쿠키에서 paywallAccepted 복원 (로그아웃 전까지 유지)
-            if (Cookies.get('paywall_accepted')) {
-                this.paywallAccepted = true;
-            }
+            // // 쿠키에서 paywallAccepted 복원 (로그아웃 전까지 유지)
+            // if (Cookies.get('paywall_accepted')) {
+            //     this.paywallAccepted = true;
+            // }
 
             const { $auth, $db } = useNuxtApp();
             const config = useRuntimeConfig();
@@ -462,12 +462,12 @@ export const useTarotStore = defineStore('tarot', {
             const urlUser = urlParams.get('user');
             const urlGrade = urlParams.get('grade');
             const urlCorp = urlParams.get('corp');
-            // 구독 정보 (앱에서 새 WebView로 직접 열기 시 전달)
-            const urlIsSubscribed = urlParams.get('isSubscribed');
-            const urlSubscriptionExpiry = urlParams.get('subscriptionExpiry');
-            const urlSubscriptionCancelled = urlParams.get('subscriptionCancelled');
-            const urlIsTrial = urlParams.get('isTrial');
-            const urlTrialUsed = urlParams.get('trialUsed');
+            // // 구독 정보 (앱에서 새 WebView로 직접 열기 시 전달)
+            // const urlIsSubscribed = urlParams.get('isSubscribed');
+            // const urlSubscriptionExpiry = urlParams.get('subscriptionExpiry');
+            // const urlSubscriptionCancelled = urlParams.get('subscriptionCancelled');
+            // const urlIsTrial = urlParams.get('isTrial');
+            // const urlTrialUsed = urlParams.get('trialUsed');
 
             // 앱에서 URL 토큰으로 직접 열기 여부 (/app/birth, /app/year 하위에서만 적용)
             const currentPath = window.location.pathname;
@@ -485,17 +485,17 @@ export const useTarotStore = defineStore('tarot', {
                 }
                 if (urlGrade) Cookies.set('user_grade', urlGrade, cookieOptions);
                 if (urlCorp) Cookies.set('user_corp', urlCorp, cookieOptions);
-                // 구독 정보 쿠키 저장
-                if (urlIsSubscribed !== null) {
-                    const subData = {
-                        isSubscribed: urlIsSubscribed === 'true',
-                        subscriptionExpiry: urlSubscriptionExpiry || null,
-                        subscriptionCancelled: urlSubscriptionCancelled === 'true',
-                        isTrial: urlIsTrial === 'true',
-                        trialUsed: urlTrialUsed === 'true',
-                    };
-                    Cookies.set('user_subscription', JSON.stringify(subData), cookieOptions);
-                }
+                // // 구독 정보 쿠키 저장
+                // if (urlIsSubscribed !== null) {
+                //     const subData = {
+                //         isSubscribed: urlIsSubscribed === 'true',
+                //         subscriptionExpiry: urlSubscriptionExpiry || null,
+                //         subscriptionCancelled: urlSubscriptionCancelled === 'true',
+                //         isTrial: urlIsTrial === 'true',
+                //         trialUsed: urlTrialUsed === 'true',
+                //     };
+                //     Cookies.set('user_subscription', JSON.stringify(subData), cookieOptions);
+                // }
             }
 
             // 쿠키에서 데이터 가져오기
@@ -503,7 +503,7 @@ export const useTarotStore = defineStore('tarot', {
             const savedUserInfo = Cookies.get('user_info');
             const savedGrade = Cookies.get('user_grade');
             const savedCorp = Cookies.get('user_corp');
-            const savedSub = Cookies.get('user_subscription');
+            // const savedSub = Cookies.get('user_subscription');
 
             // 유효성 체크 헬퍼
             const isValid = (val) => val && val !== 'undefined' && val !== 'false' && val !== 'null';
@@ -525,14 +525,14 @@ export const useTarotStore = defineStore('tarot', {
                     // 핵심: 쿠키 데이터가 있다면 즉시 true로 설정하여 '검정 화면' 방지
                     this.authChecked = true;
 
-                    // 구독 정보 복원: 오직 앱 직접 열기 (birth/year)일 때만 쿠키 사용
-                    // 메인 WebView에서는 쿠키 구독 정보 무시 → Firestore가 유일한 정보 출처
-                    if (savedSub && isAppDirectOpen) {
-                        try {
-                            this.subscription = JSON.parse(savedSub);
-                            this.subscriptionLoaded = true;
-                        } catch {}
-                    }
+                    // // 구독 정보 복원: 오직 앱 직접 열기 (birth/year)일 때만 쿠키 사용
+                    // // 메인 WebView에서는 쿠키 구독 정보 무시 → Firestore가 유일한 정보 출처
+                    // if (savedSub && isAppDirectOpen) {
+                    //     try {
+                    //         this.subscription = JSON.parse(savedSub);
+                    //         this.subscriptionLoaded = true;
+                    //     } catch {}
+                    // }
                 } catch (e) {
                     console.error('❌ 쿠키 데이터 파싱 실패:', e);
                 }
@@ -587,22 +587,22 @@ export const useTarotStore = defineStore('tarot', {
                             Cookies.set('user_grade', this.userGrade, cookieOptions);
                             Cookies.set('user_corp', this.userCorpName, cookieOptions);
 
-                            // 구독 상태 저장
-                            this.subscription = {
-                                isSubscribed: userData.isSubscribed || false,
-                                subscriptionExpiry: userData.subscriptionExpiry || null,
-                                isTrial: userData.isTrial || false,
-                                trialUsed: userData.trialUsed || false,
-                                subscriptionCancelled: userData.subscriptionCancelled || false,
-                            };
-                            this.subscriptionLoaded = true;
+                            // // 구독 상태 저장
+                            // this.subscription = {
+                            //     isSubscribed: userData.isSubscribed || false,
+                            //     subscriptionExpiry: userData.subscriptionExpiry || null,
+                            //     isTrial: userData.isTrial || false,
+                            //     trialUsed: userData.trialUsed || false,
+                            //     subscriptionCancelled: userData.subscriptionCancelled || false,
+                            // };
+                            // this.subscriptionLoaded = true;
 
                             // leading 컬렉션 체크
                             this.checkLeading(user.email);
                         }
                     } catch (error) {
                         console.error('Firestore 확인 오류:', error);
-                        this.subscriptionLoaded = true; // 에러 시에도 로드 완료 처리
+                        // this.subscriptionLoaded = true; // 에러 시에도 로드 완료 처리
                     }
                 } else {
                     // 앱에서 URL 토큰으로 직접 열기한 경우 → 새 WebView에는 Firebase 세션이 없으므로 null은 정상
@@ -691,21 +691,21 @@ export const useTarotStore = defineStore('tarot', {
             this.isLeading = false;
             this.token = null;
             this.isLoggedIn = false;
-            this.subscription = {
-                isSubscribed: false,
-                subscriptionExpiry: null,
-                isTrial: false,
-                trialUsed: false,
-                subscriptionCancelled: false,
-            };
-            this.subscriptionLoaded = false;
-            this.paywallAccepted = false;
-            Cookies.remove('paywall_accepted');
+            // this.subscription = {
+            //     isSubscribed: false,
+            //     subscriptionExpiry: null,
+            //     isTrial: false,
+            //     trialUsed: false,
+            //     subscriptionCancelled: false,
+            // };
+            // this.subscriptionLoaded = false;
+            // this.paywallAccepted = false;
+            // Cookies.remove('paywall_accepted');
             Cookies.remove('user_token');
             Cookies.remove('user_info');
             Cookies.remove('user_grade');
             Cookies.remove('user_corp');
-            Cookies.remove('user_subscription');
+            // Cookies.remove('user_subscription');
         },
 
         // 7. 로더 제어

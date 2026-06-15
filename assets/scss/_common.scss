@@ -378,3 +378,37 @@ $com_primary_light: #a78bfa;
 	object-fit: contain;
 	vertical-align: middle;
 }
+
+// ========== 공통 푸터 ==========
+.bx_footer {
+	padding: 16px 20px;
+	text-align: center;
+	.copy {
+		@include font(11, 18, rgba(255, 255, 255, 0.25));
+		display: block;
+	}
+}
+
+// 로그인 푸터
+.login .bx_footer {
+	padding: 20px 20px 28px;
+	.copy {
+		color: rgba(221, 214, 254, 0.3);
+	}
+}
+
+// 메인 페이지 푸터
+.wrap > .footer {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 10px 20px;
+	text-align: center;
+	z-index: 1;
+	background: rgba(0, 0, 0, 0.4);
+	.copy {
+		@include font(11, 18, #999);
+		display: block;
+	}
+}

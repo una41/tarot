@@ -60,8 +60,14 @@
 						<span class="divider">|</span>
 						<button class="link_member" @click="goToForgotPassword">비밀번호 찾기</button>
 					</div>
+					<div v-if="!isSignUp" class="bx_terms">
+						<p><button type="button" class="link_terms" @click="openLegal('terms')">이용약관</button> 및 <button type="button" class="link_terms" @click="openLegal('privacy')">개인정보 처리방침</button></p>
+					</div>
 				</div>
 			</Transition>
+		</div>
+		<div class="bx_footer">
+			<span class="copy">나나유유스토어 · 사업자등록번호 637-45-01059</span>
 		</div>
 	</div>
 	<LegalModal :show="legalModal.show" :type="legalModal.type" @close="closeLegal" />
