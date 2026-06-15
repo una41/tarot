@@ -155,6 +155,8 @@
 						<button type="button" class="link_legal" @click="openLegal('terms')">이용약관</button>
 						<span class="divider">·</span>
 						<button type="button" class="link_legal" @click="openLegal('privacy')">개인정보처리방침</button>
+						<span class="divider">·</span>
+						<button type="button" class="link_legal" @click="openLegal('refund')">환불정책</button>
 					</div>
 					<!-- 회원 탈퇴 -->
 					<div class="withdraw_area">

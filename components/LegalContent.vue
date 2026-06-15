@@ -149,6 +149,44 @@
 				<p>본 방침은 시행일로부터 적용되며, 법령 및 방침에 따른 변경 내용의 추가, 삭제 및 정정이 있는 경우 변경사항의 시행 7일 전부터 공지사항을 통해 고지합니다.</p>
 			</section>
 		</template>
+
+		<!-- 환불정책 -->
+		<template v-else-if="type === 'refund'">
+			<section>
+				<h2>제1조 (환불 기본 원칙)</h2>
+				<p>numerologyTarot(이하 "서비스")는 전자상거래 등에서의 소비자 보호에 관한 법률에 따라 다음과 같이 환불 정책을 운영합니다.</p>
+			</section>
+			<section>
+				<h2>제2조 (월 구독 서비스 환불)</h2>
+				<ul>
+					<li>결제일로부터 <strong>7일 이내</strong>, 서비스를 이용하지 않은 경우 전액 환불이 가능합니다.</li>
+					<li>서비스 이용 이력이 있는 경우, 이용 기간에 해당하는 요금을 공제 후 환불합니다.</li>
+					<li>구독 취소 시 즉시 자동결제가 중단되며, 현재 구독 만료일까지 서비스를 계속 이용하실 수 있습니다.</li>
+					<li>만료일 이후에는 요금이 청구되지 않습니다.</li>
+				</ul>
+			</section>
+			<section>
+				<h2>제3조 (환불 불가 사유)</h2>
+				<ul>
+					<li>구독 기간 중 서비스를 충분히 이용한 경우</li>
+					<li>이용자의 귀책사유로 서비스 이용이 불가능해진 경우</li>
+					<li>디지털 콘텐츠의 특성상 이미 제공이 완료된 서비스</li>
+				</ul>
+			</section>
+			<section>
+				<h2>제4조 (환불 신청 방법)</h2>
+				<p>환불을 원하시는 경우 아래 방법으로 문의해 주세요.</p>
+				<ul>
+					<li>이메일: <a href="mailto:runanumerologytarot@gmail.com">runanumerologytarot@gmail.com</a></li>
+					<li>전화: 010-5931-1164</li>
+				</ul>
+				<p>환불 신청 후 영업일 기준 3~5일 이내에 처리됩니다.</p>
+			</section>
+			<section>
+				<h2>제5조 (환불 처리)</h2>
+				<p>환불은 결제 시 사용한 수단으로 원칙적으로 처리됩니다. 카드 결제의 경우 카드사 정책에 따라 처리 기간이 상이할 수 있습니다.</p>
+			</section>
+		</template>
 	</div>
 </template>
 
@@ -157,7 +195,7 @@ defineProps({
 	type: {
 		type: String,
 		required: true,
-		validator: (v) => ['terms', 'privacy'].includes(v)
+		validator: (v) => ['terms', 'privacy', 'refund'].includes(v)
 	}
 });
 </script>

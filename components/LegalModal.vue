@@ -4,7 +4,7 @@
 			<div class="bg" @click="$emit('close')"></div>
 			<div class="lm_wrap">
 				<div class="lm_top">
-					<h2>{{ type === 'terms' ? '이용약관' : '개인정보 처리방침' }}</h2>
+					<h2>{{ type === 'terms' ? '이용약관' : type === 'privacy' ? '개인정보 처리방침' : '환불정책' }}</h2>
 					<button class="btn_close" @click="$emit('close')"><span>닫기</span></button>
 				</div>
 				<div class="lm_cont">
