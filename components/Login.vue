@@ -67,7 +67,8 @@
 			</Transition>
 		</div>
 		<div class="bx_footer">
-			<span class="copy">나나유유스토어 · 사업자등록번호 637-45-01059</span>
+			<span class="copy">나나유유스토어 · 사업자등록번호 · 637-45-01059 대표자 이나은 · 010-5931-1164</span>
+			<span class="copy">경기도 용인시 기흥구 금화로82번길 17</span>
 		</div>
 	</div>
 	<LegalModal :show="legalModal.show" :type="legalModal.type" @close="closeLegal" />
