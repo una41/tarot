@@ -50,7 +50,7 @@
 						</button>
 					</div>
 					<div v-if="isSignUp" class="bx_terms">
-						<p>가입하면 <button type="button" class="link_terms" @click="openLegal('terms')">이용약관</button> 및 <button type="button" class="link_terms" @click="openLegal('privacy')">개인정보 처리방침</button>에 동의하는 것으로 간주됩니다.</p>
+						<p>가입하면 <button type="button" class="link_terms" @click="openLegal('terms')">이용약관</button>, <button type="button" class="link_terms" @click="openLegal('privacy')">개인정보 처리방침</button> 및 <button type="button" class="link_terms" @click="openLegal('refund')">환불정책</button>에 동의하는 것으로 간주됩니다.</p>
 					</div>
 					<div v-if="isSignUp" class="bx_member">
 						<span>이미 계정이 있으신가요?</span> <button class="link_member" @click="toggleMode">로그인</button>
@@ -60,8 +60,15 @@
 						<span class="divider">|</span>
 						<button class="link_member" @click="goToForgotPassword">비밀번호 찾기</button>
 					</div>
+					<div v-if="!isSignUp" class="bx_terms">
+						<p><button type="button" class="link_terms" @click="openLegal('terms')">이용약관</button> · <button type="button" class="link_terms" @click="openLegal('privacy')">개인정보 처리방침</button> · <button type="button" class="link_terms" @click="openLegal('refund')">환불정책</button></p>
+					</div>
 				</div>
 			</Transition>
+		</div>
+		<div class="bx_footer">
+			<span class="copy">나나유유스토어 · 사업자등록번호 · 637-45-01059 대표자 이나은 · 010-5931-1164</span>
+			<span class="copy">경기도 용인시 기흥구 금화로82번길 17</span>
 		</div>
 	</div>
 	<LegalModal :show="legalModal.show" :type="legalModal.type" @close="closeLegal" />

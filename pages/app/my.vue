@@ -74,7 +74,7 @@
 				</div>
 			</div>
 			<!-- 구독 카드 -->
-			<div class="subscription_card" v-if="subscriptionStatus.isActive">
+			<!-- <div class="subscription_card" v-if="subscriptionStatus.isActive">
 				<div class="sub_header">
 					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#8b7355" viewBox="0 0 16 16">
 						<path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>
@@ -84,22 +84,12 @@
 						{{ subscriptionStatus.isActive ? '정기 구독 중' : '미구독' }}
 					</span>
 				</div>
-				<!-- 체험 중 (비활성화)
-				<div class="sub_info" v-if="subscriptionStatus.isActive && subscriptionStatus.isTrial">
-					<p class="sub_desc">1일 무료 체험 기간</p>
-					<p class="sub_expiry">~ {{ subscriptionStatus.expiryText }}</p>
-					<p v-if="subscriptionStatus.isCancelled" class="sub_cancelled_note">체험이 취소되었습니다. 만료일까지 이용 가능합니다.</p>
-					<p v-else class="sub_trial_note">체험 종료 후 월 3,900원 자동 결제</p>
-				</div> -->
-				<!-- 구독 중 -->
 				<div class="sub_info" v-if="subscriptionStatus.isActive">
 					<p class="sub_desc">{{ subscriptionStatus.isCancelled ? '이용 가능 기간' : '다음 결제일' }}</p>
 					<p class="sub_expiry">~ {{ subscriptionStatus.expiryText }}</p>
 					<p v-if="subscriptionStatus.isCancelled" class="sub_cancelled_note">구독이 취소되었습니다. 만료일까지 이용 가능합니다.</p>
 				</div>
-				<!-- 미구독 -->
 				<div class="sub_info" v-else>
-					<!-- <p class="sub_desc" v-if="!subscriptionStatus.trialUsed">1일 무료 체험 후 월 3,900원 · 언제든 취소 가능</p> -->
 					<p class="sub_desc">월 3,900원 · 자동결제 · 언제든 취소 가능</p>
 				</div>
 				<button v-if="!subscriptionStatus.isActive" class="btn_subscribe" @click="fnStartSubscription" :disabled="isSubscribing">
@@ -108,7 +98,7 @@
 				<button v-else-if="!subscriptionStatus.isCancelled" class="btn_cancel_sub" @click="fnCancelSubscription" :disabled="isCancelling">
 					{{ isCancelling ? '처리 중...' : '구독 취소' }}
 				</button>
-			</div>
+			</div> -->
 
 			<button class="btn_logout" @click="fnLogout">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#c53030" viewBox="0 0 16 16">
@@ -168,8 +158,8 @@ const store = useTarotStore();
 
 const isEditing = ref(false);
 const isSaving = ref(false);
-const isSubscribing = ref(false);
-const isCancelling = ref(false);
+// const isSubscribing = ref(false);
+// const isCancelling = ref(false);
 
 const userData = ref({
 	name: store.user?.name || '',
@@ -177,11 +167,11 @@ const userData = ref({
 	phone: '',
 	corpName: '',
 	class: '',
-	isSubscribed: false,
-	subscriptionExpiry: null,
-	subscriptionCancelled: false,
-	isTrial: false,
-	trialUsed: false,
+	// isSubscribed: false,
+	// subscriptionExpiry: null,
+	// subscriptionCancelled: false,
+	// isTrial: false,
+	// trialUsed: false,
 });
 
 const editForm = ref({
@@ -239,11 +229,11 @@ const loadUserData = async () => {
 				phone: data.phone || '',
 				corpName: data.corpName || '',
 				class: data.class || '',
-				isSubscribed: data.isSubscribed || false,
-				subscriptionExpiry: data.subscriptionExpiry || null,
-				subscriptionCancelled: data.subscriptionCancelled || false,
-				isTrial: data.isTrial || false,
-				trialUsed: data.trialUsed || false,
+				// isSubscribed: data.isSubscribed || false,
+				// subscriptionExpiry: data.subscriptionExpiry || null,
+				// subscriptionCancelled: data.subscriptionCancelled || false,
+				// isTrial: data.isTrial || false,
+				// trialUsed: data.trialUsed || false,
 			};
 		}
 	} catch (e) {
@@ -264,19 +254,19 @@ onMounted(async () => {
 	await loadUserData();
 });
 
-const subscriptionStatus = computed(() => {
-	const now = new Date();
-	const expiry = userData.value.subscriptionExpiry ? new Date(userData.value.subscriptionExpiry) : null;
-	const isActive = userData.value.isSubscribed && expiry && expiry > now;
-	const expiryText = expiry ? `${expiry.getFullYear()}년 ${expiry.getMonth() + 1}월 ${expiry.getDate()}일` : '';
-	return {
-		isActive,
-		expiryText,
-		isCancelled: userData.value.subscriptionCancelled || false,
-		isTrial: userData.value.isTrial || false,
-		trialUsed: userData.value.trialUsed || false,
-	};
-});
+// const subscriptionStatus = computed(() => {
+// 	const now = new Date();
+// 	const expiry = userData.value.subscriptionExpiry ? new Date(userData.value.subscriptionExpiry) : null;
+// 	const isActive = userData.value.isSubscribed && expiry && expiry > now;
+// 	const expiryText = expiry ? `${expiry.getFullYear()}년 ${expiry.getMonth() + 1}월 ${expiry.getDate()}일` : '';
+// 	return {
+// 		isActive,
+// 		expiryText,
+// 		isCancelled: userData.value.subscriptionCancelled || false,
+// 		isTrial: userData.value.isTrial || false,
+// 		trialUsed: userData.value.trialUsed || false,
+// 	};
+// });
 
 const gradeClass = computed(() => {
 	const grade = store.userGrade;
@@ -375,21 +365,21 @@ const fnStartSubscription = async () => {
 	}
 }
 
-const fnCancelSubscription = () => {
-	const isTrial = subscriptionStatus.value.isTrial;
-	store.showConfirm({
-		title: isTrial ? '체험 취소' : '구독 취소',
-		message: isTrial
-			? '무료 체험을 취소하시겠습니까?\n만료일까지는 계속 이용 가능합니다.'
-			: '구독을 취소하시겠습니까?\n만료일까지는 계속 이용 가능합니다.',
-		icon: '📋',
-		confirmText: '취소하기',
-		cancelText: '닫기',
-		onConfirm: async () => {
-			isCancelling.value = true;
-			try {
-				const config = useRuntimeConfig();
-				const workerUrl = config.public.workerUrl;
+// const fnCancelSubscription = () => {
+// 	const isTrial = subscriptionStatus.value.isTrial;
+// 	store.showConfirm({
+// 		title: isTrial ? '체험 취소' : '구독 취소',
+// 		message: isTrial
+// 			? '무료 체험을 취소하시겠습니까?\n만료일까지는 계속 이용 가능합니다.'
+// 			: '구독을 취소하시겠습니까?\n만료일까지는 계속 이용 가능합니다.',
+// 		icon: '📋',
+// 		confirmText: '취소하기',
+// 		cancelText: '닫기',
+// 		onConfirm: async () => {
+// 			isCancelling.value = true;
+// 			try {
+// 				const config = useRuntimeConfig();
+// 				const workerUrl = config.public.workerUrl;
 
 				const res = await fetch(`${workerUrl}/api/billing/cancel`, {
 					method: 'POST',
@@ -397,25 +387,25 @@ const fnCancelSubscription = () => {
 					body: JSON.stringify({ uid: store.user.uid }),
 				})
 
-				if (res.ok) {
-					userData.value.subscriptionCancelled = true;
-					store.showAlert({
-						message: isTrial
-							? '체험이 취소되었습니다.\n만료일까지 이용 가능합니다.'
-							: '구독이 취소되었습니다.\n만료일까지 이용 가능합니다.',
-						icon: '✅',
-					});
-				} else {
-					store.showAlert({ message: '취소 처리 중 오류가 발생했습니다.', icon: '❌' });
-				}
-			} catch (e) {
-				store.showAlert({ message: '취소 처리 중 오류가 발생했습니다.', icon: '❌' });
-			} finally {
-				isCancelling.value = false;
-			}
-		}
-	});
-};
+// 				if (res.ok) {
+// 					userData.value.subscriptionCancelled = true;
+// 					store.showAlert({
+// 						message: isTrial
+// 							? '체험이 취소되었습니다.\n만료일까지 이용 가능합니다.'
+// 							: '구독이 취소되었습니다.\n만료일까지 이용 가능합니다.',
+// 						icon: '✅',
+// 					});
+// 				} else {
+// 					store.showAlert({ message: '취소 처리 중 오류가 발생했습니다.', icon: '❌' });
+// 				}
+// 			} catch (e) {
+// 				store.showAlert({ message: '취소 처리 중 오류가 발생했습니다.', icon: '❌' });
+// 			} finally {
+// 				isCancelling.value = false;
+// 			}
+// 		}
+// 	});
+// };
 
 const fnLogout = () => {
 	store.showConfirm({

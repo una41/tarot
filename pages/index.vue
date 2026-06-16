@@ -55,6 +55,10 @@
 			/>
 		</transition>
 
+		<footer class="footer">
+			<span class="copy">나나유유스토어 · 사업자등록번호 · 637-45-01059 대표자 이나은 · 010-5931-1164</span>
+			<span class="copy">경기도 용인시 기흥구 금화로82번길 17</span>
+		</footer>
 	</div>
 	<!-- 마스터/프로 전용 위키 플로팅 버튼 -->
 	<div v-if="['마스터', '프로'].includes(store.userGrade)" class="wiki-floating-btn" @click="store.goToWikiMain">
@@ -68,7 +72,7 @@
 	</div> -->
 
 	<!-- 앱 출시 팝업 컴포넌트 -->
-	<AppLaunchPop ref="appPop" :sub-status="popSubStatus" @action="fnPopAction" />
+	<!-- <AppLaunchPop ref="appPop" :sub-status="popSubStatus" @action="fnPopAction" /> -->
 
 
 	<!-- 약관 레이어 팝업 -->
@@ -131,7 +135,7 @@
 						</div>
 					</template>
 					<!-- 구독 정보 -->
-					<div class="sub_info_bx">
+					<!-- <div class="sub_info_bx">
 						<template v-if="popSubStatus.isActive">
 							<strong class="sub_tit">{{ popSubStatus.isTrial ? '체험 정보' : '구독 정보' }}</strong>
 							<div class="sub_row">
@@ -145,12 +149,14 @@
 						<template v-else>
 							<button type="button" class="btn_sub_start" @click="fnPopSubscribe">{{ popSubStatus.trialUsed ? '앱 구독하기' : '1일 무료체험 후 앱 구독하기' }}</button>
 						</template>
-					</div>
+					</div> -->
 					<!-- 약관 링크 -->
 					<div class="legal_links">
 						<button type="button" class="link_legal" @click="openLegal('terms')">이용약관</button>
 						<span class="divider">·</span>
 						<button type="button" class="link_legal" @click="openLegal('privacy')">개인정보처리방침</button>
+						<span class="divider">·</span>
+						<button type="button" class="link_legal" @click="openLegal('refund')">환불정책</button>
 					</div>
 					<!-- 회원 탈퇴 -->
 					<div class="withdraw_area">
@@ -305,13 +311,13 @@
 	const popDecodedPhone = ref('');
 	const popSubData = ref({ isSubscribed: false, subscriptionExpiry: null, subscriptionCancelled: false, isTrial: false, trialUsed: false });
 
-	const popSubStatus = computed(() => {
-		const now = new Date();
-		const expiry = popSubData.value.subscriptionExpiry ? new Date(popSubData.value.subscriptionExpiry) : null;
-		const isActive = popSubData.value.isSubscribed && expiry && expiry > now;
-		const expiryText = expiry ? `${expiry.getFullYear()}년 ${expiry.getMonth() + 1}월 ${expiry.getDate()}일` : '';
-		return { isActive, expiryText, isCancelled: popSubData.value.subscriptionCancelled || false, isTrial: popSubData.value.isTrial || false, trialUsed: popSubData.value.trialUsed || false };
-	});
+	// const popSubStatus = computed(() => {
+	// 	const now = new Date();
+	// 	const expiry = popSubData.value.subscriptionExpiry ? new Date(popSubData.value.subscriptionExpiry) : null;
+	// 	const isActive = popSubData.value.isSubscribed && expiry && expiry > now;
+	// 	const expiryText = expiry ? `${expiry.getFullYear()}년 ${expiry.getMonth() + 1}월 ${expiry.getDate()}일` : '';
+	// 	return { isActive, expiryText, isCancelled: popSubData.value.subscriptionCancelled || false, isTrial: popSubData.value.isTrial || false, trialUsed: popSubData.value.trialUsed || false };
+	// });
 
 	const fetchSubData = async () => {
 		if (store.user?.uid) {
@@ -340,7 +346,7 @@
 		}
 	};
 
-	watch(() => store.user, fetchSubData, { immediate: true });
+	// watch(() => store.user, fetchSubData, { immediate: true });
 
 	// [앱 → 웹뷰] auth 정보 전송: 인증 확인 완료 시 (쿠키 복원 or Firebase 인증)
 	watch(() => store.authChecked, (checked) => {
@@ -356,33 +362,33 @@
 	}, { immediate: true })
 
 	// [앱 → 웹뷰] db 정보 전송: Firestore 구독 정보 로드 완료 시 (onAuthStateChanged 콜백 완료 이후)
-	watch(() => store.subscriptionLoaded, (loaded) => {
-		if (!loaded || !store.isLoggedIn) return
-		const sub = store.subscription
-		window.ReactNativeWebView?.postMessage(JSON.stringify({
-			type: 'db',
-			isSubscribed: sub.isSubscribed,
-			subscriptionExpiry: sub.subscriptionExpiry,
-			subscriptionCancelled: sub.subscriptionCancelled,
-			isTrial: sub.isTrial,
-			trialUsed: sub.trialUsed,
-		}))
-		// 앱 웹뷰에서 비구독자 → 메인 페이지 노출 없이 바로 페이월로 이동
-		// 단, 페이월에서 '서비스 이용하기'를 눌러 돌아온 경우는 재진입 방지
-		if (window.ReactNativeWebView && !store.paywallAccepted) {
-			const expiry = sub.subscriptionExpiry ? new Date(sub.subscriptionExpiry) : null
-			const isActive = sub.isSubscribed && expiry && expiry > new Date()
-			if (!isActive) navigateTo('/app/paywall')
-		}
-	}, { immediate: true })
+	// watch(() => store.subscriptionLoaded, (loaded) => {
+	// 	if (!loaded || !store.isLoggedIn) return
+	// 	const sub = store.subscription
+	// 	window.ReactNativeWebView?.postMessage(JSON.stringify({
+	// 		type: 'db',
+	// 		isSubscribed: sub.isSubscribed,
+	// 		subscriptionExpiry: sub.subscriptionExpiry,
+	// 		subscriptionCancelled: sub.subscriptionCancelled,
+	// 		isTrial: sub.isTrial,
+	// 		trialUsed: sub.trialUsed,
+	// 	}))
+	// 	// 앱 웹뷰에서 비구독자 → 메인 페이지 노출 없이 바로 페이월로 이동
+	// 	// 단, 페이월에서 '서비스 이용하기'를 눌러 돌아온 경우는 재진입 방지
+	// 	if (window.ReactNativeWebView && !store.paywallAccepted) {
+	// 		const expiry = sub.subscriptionExpiry ? new Date(sub.subscriptionExpiry) : null
+	// 		const isActive = sub.isSubscribed && expiry && expiry > new Date()
+	// 		if (!isActive) navigateTo('/app/paywall')
+	// 	}
+	// }, { immediate: true })
 
-	const fnPopAction = () => {
-		if (popSubStatus.value.isActive) {
-			navigateTo('/app/my');
-		} else {
-			fnPopSubscribe();
-		}
-	};
+	// const fnPopAction = () => {
+	// 	if (popSubStatus.value.isActive) {
+	// 		navigateTo('/app/my');
+	// 	} else {
+	// 		fnPopSubscribe();
+	// 	}
+	// };
 
 	const fnPopSubscribe = async () => {
 		if (popSubscribing.value) return
@@ -421,39 +427,39 @@
 		}
 	};
 
-	const fnPopCancelSub = () => {
-		const isTrial = popSubStatus.value.isTrial;
-		store.showConfirm({
-			title: isTrial ? '체험 취소' : '구독 해지',
-			message: isTrial
-				? '무료 체험을 취소하시겠습니까?\n만료일까지는 계속 이용 가능합니다.'
-				: '정말 구독을 해지하시겠습니까?\n\n해지 즉시 자동 결제가 중단되며,\n현재 만료일까지는 앱을 계속 이용하실 수 있습니다.\n만료일 이후에는 앱 기능이 제한됩니다.',
-			icon: '⚠️',
-			confirmText: isTrial ? '취소하기' : '해지하기',
-			cancelText: '닫기',
-			onConfirm: async () => {
-				popCancelling.value = true;
-				try {
-					const cfg = useRuntimeConfig();
-					const res = await fetch(`${cfg.public.workerUrl}/api/billing/cancel`, {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ uid: store.user.uid, customerKey: store.user.uid }),
-					});
-					if (res.ok) {
-						popSubData.value.subscriptionCancelled = true;
-						store.showAlert({ message: isTrial ? '체험이 취소되었습니다.\n만료일까지 이용 가능합니다.' : '구독이 취소되었습니다.\n만료일까지 이용 가능합니다.', icon: '✅' });
-					} else {
-						store.showAlert({ message: '취소 처리 중 오류가 발생했습니다.', icon: '❌' });
-					}
-				} catch {
-					store.showAlert({ message: '취소 처리 중 오류가 발생했습니다.', icon: '❌' });
-				} finally {
-					popCancelling.value = false;
-				}
-			}
-		});
-	};
+	// const fnPopCancelSub = () => {
+	// 	const isTrial = popSubStatus.value.isTrial;
+	// 	store.showConfirm({
+	// 		title: isTrial ? '체험 취소' : '구독 해지',
+	// 		message: isTrial
+	// 			? '무료 체험을 취소하시겠습니까?\n만료일까지는 계속 이용 가능합니다.'
+	// 			: '정말 구독을 해지하시겠습니까?\n\n해지 즉시 자동 결제가 중단되며,\n현재 만료일까지는 앱을 계속 이용하실 수 있습니다.\n만료일 이후에는 앱 기능이 제한됩니다.',
+	// 		icon: '⚠️',
+	// 		confirmText: isTrial ? '취소하기' : '해지하기',
+	// 		cancelText: '닫기',
+	// 		onConfirm: async () => {
+	// 			popCancelling.value = true;
+	// 			try {
+	// 				const cfg = useRuntimeConfig();
+	// 				const res = await fetch(`${cfg.public.workerUrl}/api/billing/cancel`, {
+	// 					method: 'POST',
+	// 					headers: { 'Content-Type': 'application/json' },
+	// 					body: JSON.stringify({ uid: store.user.uid, customerKey: store.user.uid }),
+	// 				});
+	// 				if (res.ok) {
+	// 					popSubData.value.subscriptionCancelled = true;
+	// 					store.showAlert({ message: isTrial ? '체험이 취소되었습니다.\n만료일까지 이용 가능합니다.' : '구독이 취소되었습니다.\n만료일까지 이용 가능합니다.', icon: '✅' });
+	// 				} else {
+	// 					store.showAlert({ message: '취소 처리 중 오류가 발생했습니다.', icon: '❌' });
+	// 				}
+	// 			} catch {
+	// 				store.showAlert({ message: '취소 처리 중 오류가 발생했습니다.', icon: '❌' });
+	// 			} finally {
+	// 				popCancelling.value = false;
+	// 			}
+	// 		}
+	// 	});
+	// };
 
 
 	// 회원 탈퇴 모달
